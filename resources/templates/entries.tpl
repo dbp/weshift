@@ -1,6 +1,5 @@
 <apply template="base">
 
-    <a href="/logout">logout</a><br>
     <result>
       <a href="/people/edit/$(personLetter)">edit</a>: Name: <personName/>, Letter: <personLetter/>, Spent: <personSpent/>, Owes: <personOwes/><br>
     </result>

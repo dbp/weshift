@@ -1,10 +1,10 @@
-Name:                housetab
+Name:                weshift-snap
 Version:             0.1
-Synopsis:            Project Synopsis Here
-Description:         Project Description Here
-License:             AllRightsReserved
-Author:              Author
-Maintainer:          maintainer@example.com
+Synopsis:            Tool for organizing time at workplaces
+Description:         A rewrite of an ocsigen application
+License:             BSD3
+Author:              Daniel Patterson
+Maintainer:          dbp@riseup.net
 Stability:           Experimental
 Category:            Web
 Build-type:          Simple
@@ -14,7 +14,7 @@ Flag development
   Description: Whether to build the server in development (interpreted) mode
   Default: False
 
-Executable housetab
+Executable weshift-snap
   hs-source-dirs: src
   main-is: Main.hs
 
@@ -32,20 +32,24 @@ Executable housetab
     xmlhtml == 0.1.*,
     snap-auth,
     blaze-html,
-    snap-extension-mongodb,
+    HDBC >= 2.2 && < 2.3,
+    HDBC-postgresql >= 2.2 && < 2.3,
     containers,
     bson,
     digestive-functors,
     digestive-functors-blaze,
     digestive-functors-snap,
-    QuickCheck,
+    QuickCheck >= 2 && < 3,
     split,
     random,
     aeson,
     network,
     HTTP,
     attoparsec,
-    aeson
+    aeson,
+    heist-async,
+    email-postmark,
+    resource-pool >= 0.1 && < 0.2
 
   extensions: TypeSynonymInstances MultiParamTypeClasses
 
