@@ -2,6 +2,7 @@ module Utils where
 
 import Data.List (null, elemIndex)
 import Test.QuickCheck
+import Control.Monad
 
 eitherToMaybe = either (const Nothing) Just
 
@@ -19,5 +20,16 @@ prop_findreplace_index l = if null l then True else elemIndex fl newL >= elemInd
         newL = rotate l
         rotate l = (drop half l) ++ (take half l)
         half = (length l `div` 2)
+
+
+bind2 :: Monad m => (a -> b -> m c) -> m a -> m b -> m c
+bind2 = ((join .) .) . liftM2
+
+bind3 :: Monad m => (a -> b -> c -> m d) -> m a -> m b -> m c -> m d
+bind3 = (((join .) .) .) . liftM3
+
+listToMaybeMany l@(_:_) = Just l
+listToMaybeMany _       = Nothing
+
         
 test = sequence (map quickCheck [prop_findreplace_first, prop_findreplace_last, prop_findreplace_index])

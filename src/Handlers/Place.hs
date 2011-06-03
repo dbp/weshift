@@ -5,6 +5,7 @@ module Handlers.Place where
 import Snap.Types
 import Application
 import Auth (checkPlaceLogin)
+import Common
 
 import Handlers.Coworkers
 import Handlers.Help
@@ -17,7 +18,8 @@ placeSite = do
   org <- getParam "organization"
   place <- getParam "place"
   checkPlaceLogin org place
-  route [ ("/month/:year/:month",     monthH)
+  route [ ("/",                       placeHomeH)
+        , ("/month/:year/:month",     monthH)
         , ("/day/:year/:month/:day",  dayH)  
         , ("/timesheet",              timesheetH)  
         , ("/bulk",                   bulkInputH)          
@@ -28,6 +30,7 @@ placeSite = do
         , ("/messages",               messagesH)
         ]
 
+placeHomeH = renderWS "place"
 monthH = undefined
 dayH = undefined 
 timesheetH = undefined
