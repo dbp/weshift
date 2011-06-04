@@ -31,7 +31,7 @@ placeSite = do
         ]
 
 placeHomeH = renderWS "place"
-monthH = undefined
-dayH = undefined 
-timesheetH = undefined
-bulkInputH = undefined
+monthH = renderWS "work/month_calendar"
+dayH = renderWS "work/day_calendar"
+timesheetH = renderWS "work/timesheet"
+bulkInputH = renderWS "work/bulk"

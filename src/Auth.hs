@@ -30,6 +30,10 @@ import            State
 import            Mail (mailActivation)
 import qualified  Utils as U
 
+repSpaces = B8.map (\c -> if c == '_' then ' ' else c)
+repUnders = B8.map (\c -> if c == ' ' then '_' else c)
+
+
 requireUserBounce :: Application () -> Application ()
 requireUserBounce good = do
     uri <- liftM rqURI getRequest
@@ -53,7 +57,6 @@ checkPlaceLogin (Just org) (Just place) = do u <- currentUser
                                              unless (userHasPlace org place u) loginPage
   where userHasPlace org place (Just (User _ _ _ super places)) = super || any (\p -> pName p == place && pOrg p == org) places
         userHasPlace _ _ Nothing = False
-        repSpaces = B8.map (\c -> if c == '_' then ' ' else c)
 checkPlaceLogin _ _ = mzero
         
 --- the following two taken from https://github.com/mightybyte/snap-heist-splices which depends on unreleased version of snap
@@ -81,6 +84,7 @@ performLogin euid = do
   where 
     login x@(user, _) = do
       setSessionUserId (userId user) 
+      maybe (return ()) (setInSession "place" . BS.concat) $ M.lookup "pl" euid
       return (Right x)
 
 currentUser = do au <- currentAuthUser

@@ -54,113 +54,18 @@
        </div> <!-- .heading -->
        
        <div class="subheading">
-         <div class="icon sel" id="month" title="Month View"></div>
+         <a-async href="$(placeRoot)/month/2011/5" class="icon sel" id="month" title="Month View"></a-async>
          <div class="icon-separator"></div>
-         <div class="icon" id="day" title="Day View"></div>
+         <a-async href="$(placeRoot)/day/2011/5/1" class="icon" id="day" title="Day View"></a-async>
          <div class="icon-separator"></div>
-         <div class="icon" id="timesheet" title="Timesheet"></div>
+         <a-async href="$(placeRoot)/timesheet" class="icon" id="timesheet" title="Timesheet"></a-async>
          <div class="icon-separator"></div>
-         <div class="icon" id="bulk" title="Input Shifts From Spreadsheet"></div>
+         <a-async href="$(placeRoot)/bulk" class="icon" id="bulk" title="Input Shifts From Spreadsheet"></a-async>
        </div> <!-- .subheading -->
 
-       <div class="main" id="month">
-         <h2>Monthly Calendar</h2>
-         <div id="month-heading">
-           <h1><div id="prev"></div> May 2011  <div id="next"></div></h1>
-         </div> <!-- #month-heading -->
-         <div id="month-daynames">
-           <div class="dayname">Sun</div>
-           <div class="dayname">Mon</div>
-           <div class="dayname">Tue</div>
-           <div class="dayname">Wed</div>
-           <div class="dayname">Thu</div>
-           <div class="dayname">Fri</div>
-           <div class="dayname">Sat</div>
-         </div> <!-- #month-daynames -->
-         <div id="month-days">
-           <div class="daybox top start"><div class="day">1</div></div>
-           <div class="daybox top"><div class="day self">2</div></div>
-           <div class="daybox top"><div class="day other">3</div></div>
-           <div class="daybox top"><div class="day self">4</div></div>
-           <div class="daybox top"><div class="day self">5</div></div>
-           <div class="daybox top"><div class="day self">6</div></div>
-           <div class="daybox top end"><div class="day">7</div></div>
-           <div class="daybox start"><div class="day other">8</div></div>
-           <div class="daybox"><div class="day other">9</div></div>
-           <div class="daybox"><div class="day other">10</div></div>
-           <div class="daybox"><div class="day self">11</div></div>
-           <div class="daybox"><div class="day self">12</div></div>
-           <div class="daybox"><div class="day self">13</div></div>
-           <div class="daybox end"><div class="day">14</div></div>
-           <div class="daybox start"><div class="day other">15</div></div>
-           <div class="daybox"><div class="day self">16</div></div>
-           <div class="daybox"><div class="day self">17</div></div>
-           <div class="daybox"><div class="day self">18</div></div>
-           <div class="daybox"><div class="day other">19</div></div>
-           <div class="daybox"><div class="day">20</div></div>
-           <div class="daybox end"><div class="day">21</div></div>
-           <div class="daybox start"><div class="day other">22</div></div>
-           <div class="daybox"><div class="day other">23</div></div>
-           <div class="daybox"><div class="day other">24</div></div>
-           <div class="daybox"><div class="day other">25</div></div>
-           <div class="daybox"><div class="day other">26</div></div>
-           <div class="daybox"><div class="day other">27</div></div>
-           <div class="daybox end"><div class="day">28</div></div>
-           <div class="daybox bottom start"><div class="day self">29</div></div>
-           <div class="daybox bottom"><div class="day self">30</div></div>
-           <div class="daybox bottom"><div class="day self">31</div></div>
-           <div class="daybox bottom"><div class="day none">&nbsp;</div></div>
-           <div class="daybox bottom"><div class="day none">&nbsp;</div></div>
-           <div class="daybox bottom"><div class="day none">&nbsp;</div></div>
-           <div class="daybox bottom end"><div class="day none">&nbsp;</div></div>
-         </div> <!-- .days -->
+       <apply template="work/month_calendar"/>
 
-       </div> <!-- .main -->
        
-       <div class="main" id="day">
-         <h2>Daily Calendar</h2>
-         
-       </div>
-       <div class="main" id="timesheet">
-         <h2>Timesheet | Total Hours: 14.</h2>
-           <form><div id="timesheet"><input type="hidden" name="place" value="1">
-             <input type="text" name="start" value="2011-5-1"> 
-             to 
-             <input type="text" name="stop" value="2011-5-30">
-             for
-             <span><input type="hidden" name="user" value="1"><input disabled="disabled" value="Daniel Patterson" /></span>
-             <button type="submit" title="Get Timesheet" /></div></form>
-           <table id="entries"><tbody><tr class="heading">
-             <td id="hours"><h5>Hours Worked</h5></td>
-             <td id="shift"><h5>Original Shift</h5></td>
-             <td id="changes"><h5>History</h5></td>
-           </tr><tr>
-             <td class="entry-hours">7</td>
-             <td class="entry-shift">10:30AM-5:30PM<br>May 10, 2011</td>
-             <td class="entry-changes"><div class="change">To 5:00AM-11:00AM by<br>Daniel Patterson<br>(11:04PM, 5.30.2011)</div></td>
-           </tr><tr>
-             <td class="entry-hours">0</td>
-             <td class="entry-shift">5:00AM-10:00AM<br>May 11, 2011</td>
-             <td class="entry-changes"><div class="delete">Deleted by Daniel Patterson<br>(11:04PM, 5.30.2011)</div></td>
-           </tr><tr>
-             <td class="entry-hours">7</td>
-             <td class="entry-shift">6:45AM-1:45PM<br>May 13, 2011</td>
-             <td class="entry-changes"></td>
-           </tr></tbody></table>
-       </div>
-       <div class="main" id="bulk">
-         <h2>Bulk Input</h2>
-         <form>
-           <textarea></textarea>
-           <button type="submit" title="Load Data"></button>
-         </form>
-         <p><strong>Important:</strong> What you paste in should look like the following. It is a format called CSV, which most spreadsheet programs can save as / export to.</p>
-         <code>Name,5/2/2011,5/3/2011,5/4/2011,5/5/2011,5/6/2011<br>
-         Jane Doe,7-3pm,7-3pm,off,7-3pm,7-3pm<br>
-         Fishy Jones,11-7pm,10-4,11-7pm,11-7pm,11-7pm</code>
-         <p>WeShift will attempt to read all the shifts, and any that it cannot read it will ignore, which means you can put anything you like (or nothing at all) in days that are off.</p>  
-         <p>You will be able to see the shifts that it could read and confirm before they are actually added.</p>        
-       </div>
     </bind>
     
     <bind tag="right">
