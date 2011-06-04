@@ -51,8 +51,8 @@ site :: Application ()
 site = route [ ("/",                      ifTop $ renderWS "index")
              , ("/:organization/:place",  placeSite)
              , ("/signup",                signupH)
-             , ("/login",                 method GET $ newSessionH ())
-             , ("/login",                 method POST $ loginH newSessionH redirTo)
+             , ("/login",                 method GET $ loginGetH ())
+             , ("/login",                 method POST $ loginPostH loginGetH redirTo)
              , ("/logout",                method GET $ logoutHandler redirTo)
              ]
        <|> serveDirectory "resources/static"

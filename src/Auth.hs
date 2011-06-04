@@ -46,7 +46,11 @@ requireUserBounce' good = do
       Just user -> good user
 
 checkPlaceLogin (Just org) (Just place) = do u <- currentUser
-                                             guard (userHasPlace org place u)
+                                             uri <- liftM rqURI getRequest
+                                             let loginPage = do p <- getPlace org place
+                                                                let pid = maybe "" pId p
+                                                                redirect (BS.concat ["/login?redirectTo=", uri, "&pl=", pid])
+                                             unless (userHasPlace org place u) loginPage
   where userHasPlace org place (Just (User _ _ _ super places)) = super || any (\p -> pName p == place && pOrg p == org) places
         userHasPlace _ _ Nothing = False
 checkPlaceLogin _ _ = mzero
@@ -70,41 +74,13 @@ ifGuest = do
     res <- lift $ requireUser (return $ childNodes node) (return [])
     return res
 
-loginH loginFailure loginSuccess = do
-    euid <- getParams >>= return . EUId 
-    password <- getParam "password"
-    mMatch <- case password of
-      Nothing -> return $ Left PasswordFailure
-      Just p  -> performLogin euid
-    either loginFailure (const loginSuccess) mMatch
-
 performLogin euid = do
     {-liftIO $ putStrLn $ show euid-}
-    getUserExternal euid >>= maybe (return $ Left ExternalIdFailure) login
+    getUserExternal (EUId euid) >>= maybe (return $ Left ExternalIdFailure) login
   where 
     login x@(user, _) = do
       setSessionUserId (userId user) 
       return (Right x)
-
-data User = User { uId :: BS.ByteString
-                 , uName :: BS.ByteString
-                 , uActive :: Bool
-                 , uSuper :: Bool
-                 , uPlaces :: [UserPlace]
-                 }
-              deriving (Eq, Show)
-              
-data UserPlace = UserPlace { pId    :: Int 
-                           , pName  :: BS.ByteString 
-                           , pOrg   :: BS.ByteString
-                           , pFac   :: Bool 
-                           , pToken :: BS.ByteString
-                           }
-      deriving (Eq, Show)
-
-data Attrs = Attrs Bool Bool [UserPlace]
-      deriving (Eq, Show)
-
 
 currentUser = do au <- currentAuthUser
                  let u = do (Attrs active super places) <- liftM snd au
@@ -128,8 +104,6 @@ buildUser (ui:un:ua:us:[]) places =
                 
 buildUser _ _ = Nothing
 
-getUserPlaces :: BS.ByteString -> Application [[SqlValue]]
-getUserPlaces uid = withPGDB "SELECT P.id, P.name, P.token, P.organization, PU.facilitator FROM places as P JOIN placeusers AS PU ON PU.place = P.id WHERE PU.user_id = ?;" [toSql uid]
 
 instance MonadAuthUser Application Attrs where
   getUserInternal (UserId uid) = do 
@@ -138,7 +112,7 @@ instance MonadAuthUser Application Attrs where
     return $ U.bind2 buildUser (listToMaybe user) (Just places)
 
   getUserExternal (EUId params) = do
-    let ps = fmap (map (toSql . B8.concat)) $ sequence [M.lookup "name" params, M.lookup "place" params, M.lookup "password" params]
+    let ps = fmap (map (toSql . B8.concat)) $ sequence [M.lookup "name" params, M.lookup "pl" params, M.lookup "password" params]
     resp <- maybe (return []) 
                   (withPGDB "SELECT id, name, active, super FROM users JOIN placeusers ON placeusers.user_id = users.id WHERE users.name = ? AND placeusers.place = ? AND password = crypt(?, password) LIMIT 1;") 
                   ps
