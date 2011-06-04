@@ -4,6 +4,7 @@ module Handlers.Help where
   
 import Snap.Types
 import Application
+import Common
 
 helpH :: Application ()
-helpH = route [undefined]
+helpH = renderWS "profile/help/blank"

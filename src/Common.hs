@@ -12,7 +12,7 @@ import Snap.Auth.Handlers
 import Snap.Auth
 import Snap.Extension.Session.CookieSession
 import Snap.Extension.Heist
-import Control.Monad.Trans (lift)
+import Control.Monad.Trans (lift, liftIO)
 import Heist.Splices.Async (heistAsyncSplices)
 import Data.Maybe (fromMaybe, maybeToList)
 import Data.List (find)
@@ -34,8 +34,8 @@ renderWS t = do mplaceId <- getFromSession "place"
                                                    return $ ("placeRoot", return [X.TextNode (placeRoot place)])
                 (heistLocal $ (bindSplices (splices ++ placeSplice))) $ render t
   where splices = [ ("ifLoggedIn", ifLoggedIn)
-                  , ("ifGuest", ifGuest)]
-                  ++ heistAsyncSplices
+                  , ("ifGuest", ifGuest)
+                  ] ++ heistAsyncSplices
                   
                   
 redirTo :: Application ()

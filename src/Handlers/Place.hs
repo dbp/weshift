@@ -6,6 +6,7 @@ import Snap.Types
 import Application
 import Auth (checkPlaceLogin)
 import Common
+import Control.Monad.Trans (liftIO)
 
 import Handlers.Coworkers
 import Handlers.Help
@@ -18,6 +19,8 @@ placeSite = do
   org <- getParam "organization"
   place <- getParam "place"
   checkPlaceLogin org place
+  {-h <- fmap (getHeader "X-Requested-With") $ getRequest
+  liftIO $ putStrLn $ show h-}
   route [ ("/",                       ifTop $ placeHomeH)
         , ("/month/:year/:month",     monthH)
         , ("/day/:year/:month/:day",  dayH)  

@@ -10,37 +10,9 @@
           </div> <!-- .content -->
         </div> <!-- .heading -->
         
-        <div class="subheading">
-          <div class="icon sel" id="usersettings" title="User Settings"></div>
-          <div class="icon-separator"></div>
-          <div class="icon" id="coworkers" title="Coworkers"></div>
-          <div class="icon-separator"></div>
-          <div class="icon" id="help" title="Help"></div>
-        </div> <!-- .subheading -->
+        <apply template="profile/blank"></apply>
         
         
-        <div class="main">
-          <h2>User Settings</h2>
-          <div class="subheading">
-            <div class="icon" id="name" title="Change Name"></div>
-            <div class="icon-separator"></div>
-            <div class="icon sel" id="password" title="Change Password"></div>
-            <div class="icon-separator"></div>
-            <div class="icon" id="delete" title="Remove Account"></div>
-            <div class="icon-separator"></div>
-            <div class="icon" id="email" title="Email Settings"></div>
-          </div> <!-- .subheading -->
-          <div class="content">
-            <h3>Change Password</h3>
-            <form>
-              <table>
-                <tr><td class="label"><label for="current">Current:</label></td> <td><input name="current" type="password" /></td></tr>
-                <tr><td class="label"><label for="password">New:</label></td> <td><input name="password" type="password" /></td></tr>
-                <tr><td class="label"><label for="confirm">Confirm:</label></td> <td><input name="confirm" type="password" /><button type="submit" title=""/></td></tr>
-              </table>
-            </form>
-          </div> <!-- .content -->
-        </div> <!-- #main -->
   
 </bind>
 
@@ -53,16 +25,6 @@
          </div>
        </div> <!-- .heading -->
        
-       <div class="subheading">
-         <a-async href="$(placeRoot)/month/2011/5" class="icon sel" id="month" title="Month View"></a-async>
-         <div class="icon-separator"></div>
-         <a-async href="$(placeRoot)/day/2011/5/1" class="icon" id="day" title="Day View"></a-async>
-         <div class="icon-separator"></div>
-         <a-async href="$(placeRoot)/timesheet" class="icon" id="timesheet" title="Timesheet"></a-async>
-         <div class="icon-separator"></div>
-         <a-async href="$(placeRoot)/bulk" class="icon" id="bulk" title="Input Shifts From Spreadsheet"></a-async>
-       </div> <!-- .subheading -->
-
        <apply template="work/month_calendar"/>
 
        

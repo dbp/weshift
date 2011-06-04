@@ -1,3 +1,7 @@
+<apply template="heading">
+  <bind tag="timesheet_sel">sel</bind>
+</apply>
+
 <div-async name="center-main" class="main" id="timesheet">
   <h2>Timesheet | Total Hours: 14.</h2>
     <form><div id="timesheet"><input type="hidden" name="place" value="1">

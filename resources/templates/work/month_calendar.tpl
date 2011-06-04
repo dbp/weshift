@@ -1,3 +1,7 @@
+<apply template="heading">
+  <bind tag="month_sel">sel</bind>
+</apply>
+
 <div-async name="center-main" class="main" id="month">
   <h2>Monthly Calendar</h2>
   <div id="month-heading">

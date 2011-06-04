@@ -4,15 +4,17 @@ module Handlers.Settings where
   
 import Snap.Types
 import Application
+import Common
 
 settingsH :: Application ()
-settingsH = route [ ("/name",     changeNameH)
+settingsH = route [ ("/",         ifTop $ renderWS "profile/usersettings/blank")
+                  , ("/name",     changeNameH)
                   , ("/password", changePasswordH)
                   , ("/remove",   removeAccountH)
                   , ("/email",    emailH)
                   ]
                   
 changeNameH = undefined
-changePasswordH = undefined
+changePasswordH = renderWS "profile/usersettings/password"
 removeAccountH = undefined
 emailH = undefined
