@@ -47,12 +47,13 @@ requireUserBounce' good = do
 
 checkPlaceLogin (Just org) (Just place) = do u <- currentUser
                                              uri <- liftM rqURI getRequest
-                                             let loginPage = do p <- getPlace org place
+                                             let loginPage = do p <- getPlace (repSpaces org) (repSpaces place)
                                                                 let pid = maybe "" pId p
                                                                 redirect (BS.concat ["/login?redirectTo=", uri, "&pl=", pid])
                                              unless (userHasPlace org place u) loginPage
   where userHasPlace org place (Just (User _ _ _ super places)) = super || any (\p -> pName p == place && pOrg p == org) places
         userHasPlace _ _ Nothing = False
+        repSpaces = B8.map (\c -> if c == '_' then ' ' else c)
 checkPlaceLogin _ _ = mzero
         
 --- the following two taken from https://github.com/mightybyte/snap-heist-splices which depends on unreleased version of snap
