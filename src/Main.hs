@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 {-|
 
@@ -48,6 +49,10 @@ import           Snap.Http.Server (quickHttpServe)
 import           Snap.Extension.Server
 #endif
 
+import           Snap.Less
+import           Snap.Types
+import           Control.Applicative
+
 import           Application
 import           Site
 
@@ -61,5 +66,9 @@ main = do
               in loadSnapTH 'applicationInitializer 'site extraWatcheDirs)
     quickHttpServe snap
 #else
-main = quickHttpServe applicationInitializer site
+main = do
+  ls <- getDirectoryLS =<< newLessDirectory'   "resources/lesscss"
+  quickHttpServe applicationInitializer 
+    (dir "css" (renderLess ls)
+    <|> site)
 #endif

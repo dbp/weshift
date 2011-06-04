@@ -48,7 +48,7 @@ formSplice :: FormHtml Html -> Splice Application
 formSplice = return . docContent . renderHtml . fst . renderFormHtml
 
 site :: Application ()                 
-site = route [ ("/",                      renderWS "index")
+site = route [ ("/",                      ifTop $ renderWS "index")
              , ("/:organization/:place",  placeSite)
              , ("/signup",                signupH)
              , ("/login",                 method GET $ newSessionH ())

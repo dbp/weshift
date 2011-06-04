@@ -18,7 +18,7 @@ placeSite = do
   org <- getParam "organization"
   place <- getParam "place"
   checkPlaceLogin org place
-  route [ ("/",                       placeHomeH)
+  route [ ("/",                       ifTop $ placeHomeH)
         , ("/month/:year/:month",     monthH)
         , ("/day/:year/:month/:day",  dayH)  
         , ("/timesheet",              timesheetH)  
