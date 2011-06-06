@@ -22,10 +22,6 @@ import qualified  Data.ByteString as BS
 import qualified  Data.ByteString.Char8 as B8
 import            Data.Time.Clock (getCurrentTime, diffUTCTime)
 
-import            Text.Digestive.Types
-import            Text.Digestive.Blaze.Html5
-import            Text.Digestive.Forms.Snap
-import            Text.Digestive.Validate
 
 import            Text.Blaze (Html)
 import            Text.XmlHtml (docContent)
@@ -36,16 +32,12 @@ import            Heist.Splices.Async
 
 import            Application
 import            State
-import            Form
 import qualified  Utils as U
 import            Common
 import            Auth
 
 import Handlers.Place (placeSite)
 import Handlers.Account
-
-formSplice :: FormHtml Html -> Splice Application
-formSplice = return . docContent . renderHtml . fst . renderFormHtml
 
 site :: Application ()                 
 site = route [ ("/",                      ifTop $ renderWS "index")

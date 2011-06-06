@@ -6,6 +6,7 @@ import Text.Templating.Heist
 import qualified Text.XmlHtml as X
 import qualified Data.ByteString as BS
 import qualified Data.Text.Encoding as TE
+import qualified Data.Text as T
 import Snap.Extension.Heist
 import Data.ByteString (ByteString)
 import Snap.Auth.Handlers
@@ -23,15 +24,25 @@ import Auth
 import State
 
 placeName place = TE.decodeUtf8 (BS.intercalate ", " $ (map ($ place) [pName,pOrg]))
-placeRoot place = TE.decodeUtf8 (BS.intercalate "/"  $ (map (repUnders. ($ place)) [const "",pOrg,pName]))
+placeRoot place = BS.intercalate "/"  $ (map (repUnders. ($ place)) [const "",pOrg,pName])
+
+getPlaceRoot :: Application (Maybe BS.ByteString)
+getPlaceRoot = do mplaceId <- getFromSession "place"
+                  muser <- currentUser
+                  let hm = do placeId <- mplaceId
+                              user <- muser
+                              place <- find ((==) placeId . pId) $ uPlaces user
+                              return $ placeRoot place
+                  return hm
+
+redirPlaceHome :: Application ()
+redirPlaceHome = do hm <- getPlaceRoot
+                    redirect $ fromMaybe "/" hm
+
 
 renderWS :: ByteString -> Application ()
-renderWS t = do mplaceId <- getFromSession "place"
-                muser <- currentUser
-                let placeSplice = maybeToList $ do placeId <- mplaceId
-                                                   user <- muser
-                                                   place <- find ((==) placeId . pId) $ uPlaces user
-                                                   return $ ("placeRoot", return [X.TextNode (placeRoot place)])
+renderWS t = do mplace <- getPlaceRoot
+                let placeSplice = maybeToList $ fmap (\p -> ("placeRoot", return [X.TextNode (TE.decodeUtf8 p)])) mplace
                 (heistLocal $ (bindSplices (splices ++ placeSplice))) $ render t
   where splices = [ ("ifLoggedIn", ifLoggedIn)
                   , ("ifGuest", ifGuest)
