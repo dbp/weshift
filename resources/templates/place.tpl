@@ -1,18 +1,8 @@
 <apply template="base">
 
 <bind tag="left">
-        
-        <div class="heading">
-          <div class="icon"><img src="/img/main/Profile.png" /></div>
-          <div class="content">
-            <h4>Daniel Patterson</h4>
-            <h5>Position, Providence</h5>
-          </div> <!-- .content -->
-        </div> <!-- .heading -->
-        
+       
         <apply template="profile/blank"></apply>
-        
-        
   
 </bind>
 

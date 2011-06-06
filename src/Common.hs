@@ -16,6 +16,7 @@ import Snap.Extension.Heist
 import Control.Monad.Trans (lift, liftIO)
 import Heist.Splices.Async (heistAsyncSplices)
 import Data.Maybe (fromMaybe, maybeToList)
+import Control.Monad (liftM)
 import Data.List (find)
 import Snap.Types
 
@@ -23,27 +24,32 @@ import Application
 import Auth
 import State
 
-placeName place = TE.decodeUtf8 (BS.intercalate ", " $ (map ($ place) [pName,pOrg]))
+placeName place = BS.intercalate ", " $ (map ($ place) [pName,pOrg])
 placeRoot place = BS.intercalate "/"  $ (map (repUnders. ($ place)) [const "",pOrg,pName])
 
-getPlaceRoot :: Application (Maybe BS.ByteString)
-getPlaceRoot = do mplaceId <- getFromSession "place"
-                  muser <- currentUser
-                  let hm = do placeId <- mplaceId
-                              user <- muser
-                              place <- find ((==) placeId . pId) $ uPlaces user
-                              return $ placeRoot place
-                  return hm
+getCurrentPlace :: Application (Maybe UserPlace)
+getCurrentPlace = do mplaceId <- getFromSession "place"
+                     muser <- currentUser
+                     let hm = do placeId <- mplaceId
+                                 user <- muser
+                                 place <- find ((==) placeId . pId) $ uPlaces user
+                                 return $ place
+                     return hm
 
 redirPlaceHome :: Application ()
-redirPlaceHome = do hm <- getPlaceRoot
+redirPlaceHome = do hm <- liftM (fmap placeRoot) getCurrentPlace
                     redirect $ fromMaybe "/" hm
 
+spliceMBS :: T.Text -> Maybe BS.ByteString -> [(T.Text, Splice Application)]
+spliceMBS name val = maybeToList $ fmap (\p -> (name, return [X.TextNode (TE.decodeUtf8 p)])) val
 
 renderWS :: ByteString -> Application ()
-renderWS t = do mplace <- getPlaceRoot
-                let placeSplice = maybeToList $ fmap (\p -> ("placeRoot", return [X.TextNode (TE.decodeUtf8 p)])) mplace
-                (heistLocal $ (bindSplices (splices ++ placeSplice))) $ render t
+renderWS t = do mplace <- liftM (fmap placeRoot) getCurrentPlace
+                mplaceName <- liftM (fmap placeName) getCurrentPlace
+                let placeSplices = concat $ map (uncurry spliceMBS) [("placeRoot", mplace),("placeName", mplaceName)]
+                muserName <- liftM (fmap uName) currentUser
+                let userSplices = concat $ map (uncurry spliceMBS) [("userName",muserName)]
+                (heistLocal $ (bindSplices (splices ++ placeSplices ++ userSplices))) $ render t
   where splices = [ ("ifLoggedIn", ifLoggedIn)
                   , ("ifGuest", ifGuest)
                   ] ++ heistAsyncSplices

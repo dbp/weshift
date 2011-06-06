@@ -17,21 +17,21 @@
       
     </div> <!-- #top -->
     <div id="middle">
-      <div id="left">
+      <div-async name="middle-left" id="left">
   
       <left/>
       
-    </div> <!-- #left -->
-    <div id="center">
+      </div-async> <!-- #left -->
+      <div id="center">
         
       <center/>
  
-    </div> <!-- #center -->
-    <div id="right">
+      </div> <!-- #center -->
+      <div id="right">
      
       <right/>
              
-    </div> <!-- #right -->
+      </div> <!-- #right -->
     </div> <!-- #middle -->
     <div id="bottom">
 

@@ -41,7 +41,9 @@ instance HasCookieSessionState ApplicationState where
 instance MonadAuth Application
 
 withPGDB r ps = do c <- asks pgPool
-                   liftIO $ withResource c (\conn -> quickQuery' conn r ps)
+                   liftIO $ withResource c (\conn -> do r <- quickQuery' conn r ps
+                                                        commit conn
+                                                        return r)
 
 applicationInitializer :: Initializer ApplicationState
 applicationInitializer = do
