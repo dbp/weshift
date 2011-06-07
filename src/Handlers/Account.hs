@@ -10,7 +10,8 @@ import Snap.Types
 import Common
 import Application
 import Auth
-import State
+import State.Types
+import State.Place
 import Text.Templating.Heist
 import Snap.Extension.Heist
 import Control.Monad

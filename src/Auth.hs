@@ -26,7 +26,8 @@ import            System.Random
 import            Database.HDBC
 
 import            Application
-import            State
+import            State.Types
+import            State.Place
 import            Mail (mailActivation)
 import qualified  Utils as U
 

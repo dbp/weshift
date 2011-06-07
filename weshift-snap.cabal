@@ -50,7 +50,8 @@ Executable weshift-snap
     heist-async,
     email-postmark,
     resource-pool >= 0.1 && < 0.2,
-    snap-less
+    snap-less,
+    old-locale
 
   extensions: TypeSynonymInstances MultiParamTypeClasses
 

@@ -6,7 +6,21 @@ import Snap.Types
 import Application
 import Auth (checkPlaceLogin)
 import Common
+import Control.Monad
 import Control.Monad.Trans (liftIO)
+
+import Data.Time.Format
+import System.Locale
+import qualified Data.ByteString.Char8 as B8
+
+import State.Types
+import State.Shifts
+import Common
+import Snap.Types
+import Text.Templating.Heist
+import Snap.Extension.Heist
+
+import Auth
 
 import Handlers.Coworkers
 import Handlers.Help
@@ -33,7 +47,14 @@ placeSite = do
         , ("/messages",               messagesH)
         ]
 
-placeHomeH = renderWS "place"
+placeHomeH = do mu <- currentUser
+                mp <- getCurrentPlace
+                nextShift <- case (mu,mp) of
+                  (Just u, Just p) -> getNextShift u p
+                  _ -> return Nothing
+                let nextShiftSplice = spliceMBS "nextShift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
+                heistLocal (bindSplices nextShiftSplice) $ renderWS "place"
+                
 monthH = renderWS "work/month_calendar"
 dayH = renderWS "work/day_calendar"
 timesheetH = renderWS "work/timesheet"

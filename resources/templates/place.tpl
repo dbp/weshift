@@ -11,7 +11,7 @@
          <div class="icon"><img src="/img/main/WorkSchedule.png" /></div>
          <div class="content">
            <h1>Work Schedule</h1>
-           <h5>Next Shift: 9:30am, 28 May 2011</h5>
+           <h5>Next Shift: <nextShift/></h5>
          </div>
        </div> <!-- .heading -->
        

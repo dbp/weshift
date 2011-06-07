@@ -31,7 +31,7 @@ import            System.Random (randomRIO)
 import            Heist.Splices.Async
 
 import            Application
-import            State
+import            State.Types
 import qualified  Utils as U
 import            Common
 import            Auth

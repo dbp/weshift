@@ -18,7 +18,7 @@ import Control.Monad.Trans (liftIO)
 
 import Application
 import Auth
-import State
+import State.Types
 import Common
 
 settingsH :: Application ()

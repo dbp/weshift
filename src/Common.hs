@@ -22,7 +22,7 @@ import Snap.Types
 
 import Application 
 import Auth
-import State
+import State.Types
 
 placeName place = BS.intercalate ", " $ (map ($ place) [pName,pOrg])
 placeRoot place = BS.intercalate "/"  $ (map (repUnders. ($ place)) [const "",pOrg,pName])
