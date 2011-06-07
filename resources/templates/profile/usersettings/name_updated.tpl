@@ -1,7 +1,7 @@
 <div-async name="middle-left" id="left">
   <apply template="/profile/base">
     <apply template="base">
-      <apply template="heading">
+      <apply template="usersettings_heading">
         <bind tag="name_sel">sel</bind>
       </apply>
     

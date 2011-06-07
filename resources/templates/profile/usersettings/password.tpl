@@ -1,5 +1,5 @@
 <apply template="base">
-  <apply template="heading">
+  <apply template="usersettings_heading">
     <bind tag="password_sel">sel</bind>
   </apply>
 

@@ -1,4 +1,4 @@
-<apply template="../heading">
+<apply template="heading">
   <bind tag="usersettings_sel">sel</bind>
 </apply>
 

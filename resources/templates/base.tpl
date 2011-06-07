@@ -8,7 +8,23 @@
     <script type="text/javascript" charset="utf-8" src="/js/jquery.tipTip.js"></script>
     <script type="text/javascript" charset="utf-8" src="/js/jquery-ui-1.8.11.custom.min.js"></script> -->
 
-    <activate-async/>
+    <script type="text/javascript" charset="utf-8" src="/js/valentine.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/js/qwery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/js/reqwest.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/js/ready.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/js/bean.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/js/bonzo.min.js"></script>
+    
+    <script type="text/javascript" charset="utf-8" src="/js/heist-async.js"></script>
+    
+    
+    <script type="text/javascript" charset="utf-8">
+      // domReady(function () {
+      //   bean.add(qwery("button"), "click", function (e) {
+      //     bonzo(e).addClass("processing").attr('disabled',1);
+      //   });
+      // });
+    </script>
     
   </head>
   <body>

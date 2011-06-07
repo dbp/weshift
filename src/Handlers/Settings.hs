@@ -13,6 +13,7 @@ import Text.Digestive.Validate
 import Database.HDBC
 
 import Data.Text (Text)
+import qualified Data.Text.Encoding as TE
 import Control.Applicative
 import Control.Monad.Trans (liftIO)
 
@@ -20,6 +21,7 @@ import Application
 import Auth
 import State.Types
 import Common
+import Control.Concurrent (threadDelay)
 
 settingsH :: Application ()
 settingsH = route [ ("/",         ifTop $ renderWS "profile/usersettings/blank")
@@ -33,15 +35,19 @@ nameForm :: SnapForm Application Text HeistView String
 nameForm = input "name" Nothing  `validate` nonEmpty <++ errors 
                   
 changeNameH = do r <- eitherSnapForm nameForm "change-name-form"
+                 mu <- currentUser
+                 let name = maybe "" (TE.decodeUtf8 . uName) mu
                  case r of
                      Left splices' -> do
-                       heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name"
+                       heistLocal (bindString "name" name ) $ 
+                        heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name"
                      Right name' -> do
                        u <- currentUser
                        case u of
                          Nothing -> redirPlaceHome -- Not sure how they could have gotten here, but... send'm home!
                          Just (User id' _ _ _ _) -> do
                            success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql id']
+                           liftIO $ threadDelay 200000
                            case success of
                              True  -> renderWS "profile/usersettings/name_updated"
                              False -> renderWS "profile/usersettings/name_couldntupdate"

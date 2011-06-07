@@ -41,13 +41,15 @@ import Handlers.Account
 
 site :: Application ()                 
 site = route [ ("/",                      ifTop $ renderWS "index")
+             , ("/js",                    serveDirectory "resources/static/js")
+             , ("/css",                   serveDirectory "resources/static/css")
+             , ("/img",                   serveDirectory "resources/static/img")
              , ("/:organization/:place",  placeSite)
              , ("/signup",                signupH)
              , ("/login",                 method GET $ loginGetH ())
              , ("/login",                 method POST $ loginPostH loginGetH redirTo)
              , ("/logout",                method GET $ logoutHandler redirTo)
              ]
-       <|> serveDirectory "resources/static"
 
 {-  This is going to work by having just about everything via ajax. Digestive-functors via ajax. 
     So all forms are fetched when needed, and then posted and redisplayed if errors. 

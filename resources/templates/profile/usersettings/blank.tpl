@@ -1,3 +1,3 @@
 <apply template="base">
-  <apply template="heading"></apply>
+  <apply template="usersettings_heading"></apply>
 </apply>
