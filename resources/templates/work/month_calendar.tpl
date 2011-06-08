@@ -17,7 +17,9 @@
     <div class="dayname">Sat</div>
   </div> <!-- #month-daynames -->
   <div id="month-days">
-    <div class="daybox top start"><div class="day">1</div></div>
+    <month>
+    </month>
+    <!-- <div class="daybox top start"><div class="day">1</div></div>
     <div class="daybox top"><div class="day self">2</div></div>
     <div class="daybox top"><div class="day other">3</div></div>
     <div class="daybox top"><div class="day self">4</div></div>
@@ -51,7 +53,7 @@
     <div class="daybox bottom"><div class="day none">&nbsp;</div></div>
     <div class="daybox bottom"><div class="day none">&nbsp;</div></div>
     <div class="daybox bottom"><div class="day none">&nbsp;</div></div>
-    <div class="daybox bottom end"><div class="day none">&nbsp;</div></div>
+    <div class="daybox bottom end"><div class="day none">&nbsp;</div></div> -->
   </div> <!-- .days -->
 
 </div-async> <!-- .main -->

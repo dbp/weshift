@@ -63,7 +63,7 @@
     reqwest({
           url: elem.getAttribute('action') || "",
           data: reqwest.serialize(elem),
-          method: 'post',
+          method: elem.getAttribute('method') || 'post',
           type: 'html',
           success: replace_splices
         });

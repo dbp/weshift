@@ -22,7 +22,11 @@ import qualified Snap.Auth as A
 loginGetH _ = do pl <- getParam "pl" -- this is the place
                  place <- maybe (return Nothing) getPlaceFromId pl
                  when (isNothing place) $ redirect "/"
-                 heistLocal (bindString "placeName" (TE.decodeUtf8 $ placeName (fromJust place))) $ renderWS "login"
+                 rq <- getRequest
+                 heistLocal (bindStrings [("placeName", TE.decodeUtf8 $ placeName (fromJust place))
+                                         ,("placeRoot", TE.decodeUtf8 $ placeRoot (fromJust place))
+                                         ,("placeId", TE.decodeUtf8 $ fromJust pl)
+                                         ,("url", TE.decodeUtf8 $ rqURI rq)]) $ renderWS "login"
                                     
 
 loginPostH loginFailure loginSuccess = do

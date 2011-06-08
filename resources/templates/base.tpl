@@ -17,17 +17,9 @@
     
     <script type="text/javascript" charset="utf-8" src="/js/heist-async.js"></script>
     
-    
-    <script type="text/javascript" charset="utf-8">
-      // domReady(function () {
-      //   bean.add(qwery("button"), "click", function (e) {
-      //     bonzo(e).addClass("processing").attr('disabled',1);
-      //   });
-      // });
-    </script>
-    
   </head>
   <body>
+    <div-async name="whole-page">
     <div id="top">
       
       
@@ -52,5 +44,6 @@
     <div id="bottom">
 
     </div> <!-- #bottom -->
+    </div-async> <!-- whole-page -->
   </body>
 </html>

@@ -45,12 +45,12 @@ requireUserBounce' :: (User -> Application ()) -> Application ()
 requireUserBounce' good = do
     uri <- liftM rqURI getRequest
     let loginPage = redirect (BS.concat ["/login?redirectTo=", uri])
-    u <- currentUser
+    u <- getCurrentUser
     case u of
       Nothing -> loginPage
       Just user -> good user
 
-checkPlaceLogin (Just org) (Just place) = do u <- currentUser
+checkPlaceLogin (Just org) (Just place) = do u <- getCurrentUser
                                              uri <- liftM rqURI getRequest
                                              let loginPage = do p <- getPlace (repSpaces org) (repSpaces place)
                                                                 let pid = maybe "" pId p
@@ -88,13 +88,13 @@ performLogin euid = do
       maybe (return ()) (setInSession "place" . BS.concat) $ M.lookup "pl" euid
       return (Right x)
 
-currentUser = do au <- currentAuthUser
-                 let u = do (Attrs active super places) <- liftM snd au
-                            auth <- liftM fst au
-                            (UserId id')   <- userId auth
-                            name <- userEmail auth 
-                            return $ User id' name active super places
-                 return u
+getCurrentUser = do au <- currentAuthUser
+                    let u = do (Attrs active super places) <- liftM snd au
+                               auth <- liftM fst au
+                               (UserId id')   <- userId auth
+                               name <- userEmail auth 
+                               return $ User id' name active super places
+                    return u
                  
 
 buildUser (ui:un:ua:us:[]) places = 

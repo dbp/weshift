@@ -29,7 +29,7 @@ placeRoot place = BS.intercalate "/"  $ (map (repUnders. ($ place)) [const "",pO
 
 getCurrentPlace :: Application (Maybe UserPlace)
 getCurrentPlace = do mplaceId <- getFromSession "place"
-                     muser <- currentUser
+                     muser <- getCurrentUser
                      let hm = do placeId <- mplaceId
                                  user <- muser
                                  place <- find ((==) placeId . pId) $ uPlaces user
@@ -47,7 +47,7 @@ renderWS :: ByteString -> Application ()
 renderWS t = do mplace <- liftM (fmap placeRoot) getCurrentPlace
                 mplaceName <- liftM (fmap placeName) getCurrentPlace
                 let placeSplices = concat $ map (uncurry spliceMBS) [("placeRoot", mplace),("placeName", mplaceName)]
-                muserName <- liftM (fmap uName) currentUser
+                muserName <- liftM (fmap uName) getCurrentUser
                 let userSplices = concat $ map (uncurry spliceMBS) [("userName",muserName)]
                 (heistLocal $ (bindSplices (splices ++ placeSplices ++ userSplices))) $ render t
   where splices = [ ("ifLoggedIn", ifLoggedIn)

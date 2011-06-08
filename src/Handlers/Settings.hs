@@ -35,19 +35,19 @@ nameForm :: SnapForm Application Text HeistView String
 nameForm = input "name" Nothing  `validate` nonEmpty <++ errors 
                   
 changeNameH = do r <- eitherSnapForm nameForm "change-name-form"
-                 mu <- currentUser
+                 mu <- getCurrentUser
                  let name = maybe "" (TE.decodeUtf8 . uName) mu
                  case r of
                      Left splices' -> do
                        heistLocal (bindString "name" name ) $ 
                         heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name"
                      Right name' -> do
-                       u <- currentUser
+                       u <- getCurrentUser
                        case u of
                          Nothing -> redirPlaceHome -- Not sure how they could have gotten here, but... send'm home!
                          Just (User id' _ _ _ _) -> do
                            success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql id']
-                           liftIO $ threadDelay 200000
+                           {-liftIO $ threadDelay 200000-}
                            case success of
                              True  -> renderWS "profile/usersettings/name_updated"
                              False -> renderWS "profile/usersettings/name_couldntupdate"
@@ -58,7 +58,7 @@ nonEmpty = check "Field must not be empty:" $ \s -> not $ null s
 
 checkPassword :: Validator Application Text String
 checkPassword = checkM "Current password not correct:" fn
-  where fn p = do mUs <- currentUser
+  where fn p = do mUs <- getCurrentUser
                   case mUs of
                     Nothing -> return False
                     Just (User id' _ _ _ _) ->
@@ -82,7 +82,7 @@ changePasswordH = do r <- eitherSnapForm passwordForm "change-password-form"
                          Left splices' -> do
                            heistLocal (bindSplices splices') $ renderWS "profile/usersettings/password"
                          Right (NewPassword _ new _) -> do
-                           u <- currentUser
+                           u <- getCurrentUser
                            case u of
                              Nothing -> redirPlaceHome -- Not sure how they could have gotten here, but... send'm home!
                              Just (User id' _ _ _ _) -> do

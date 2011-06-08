@@ -25,8 +25,9 @@ import Auth
 import Handlers.Coworkers
 import Handlers.Help
 import Handlers.Settings
-import Handlers.Shift
+import Handlers.Shifts
 import Handlers.Messages
+import Handlers.Month
 
 placeSite :: Application ()
 placeSite = do
@@ -47,15 +48,16 @@ placeSite = do
         , ("/messages",               messagesH)
         ]
 
-placeHomeH = do mu <- currentUser
+placeHomeH = do mu <- getCurrentUser
                 mp <- getCurrentPlace
                 nextShift <- case (mu,mp) of
                   (Just u, Just p) -> getNextShift u p
                   _ -> return Nothing
                 let nextShiftSplice = spliceMBS "nextShift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
-                heistLocal (bindSplices nextShiftSplice) $ renderWS "place"
+                let monthSplice = [("month", monthView 2011 5)]
+                heistLocal (bindSplices (nextShiftSplice ++ monthSplice)) $ renderWS "place"
                 
-monthH = renderWS "work/month_calendar"
+monthH = heistLocal (bindSplices [("month", monthView 2011 5)]) $ renderWS "work/month_calendar"
 dayH = renderWS "work/day_calendar"
 timesheetH = renderWS "work/timesheet"
 bulkInputH = renderWS "work/bulk"

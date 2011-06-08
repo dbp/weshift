@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Handlers.Shift where
+module Handlers.Shifts where
   
 import Snap.Types
 import Application
