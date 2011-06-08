@@ -4,13 +4,13 @@
 
 <div-async name="center-main" class="main" id="timesheet">
   <h2>Timesheet | Total Hours: 14.</h2>
-    <form><div id="timesheet"><input type="hidden" name="place" value="1">
+    <form-async><div id="timesheet"><input type="hidden" name="place" value="1">
       <input type="text" name="start" value="2011-5-1"> 
       to 
       <input type="text" name="stop" value="2011-5-30">
       for
       <span><input type="hidden" name="user" value="1"><input disabled="disabled" value="Daniel Patterson" /></span>
-      <button type="submit" title="Get Timesheet" /></div></form>
+      <button type="submit" title="Get Timesheet" /></div></form-async>
     <table id="entries"><tbody><tr class="heading">
       <td id="hours"><h5>Hours Worked</h5></td>
       <td id="shift"><h5>Original Shift</h5></td>

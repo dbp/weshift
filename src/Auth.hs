@@ -89,13 +89,14 @@ performLogin euid = do
       return (Right x)
 
 getCurrentUser = do au <- currentAuthUser
-                    let u = do (Attrs active super places) <- liftM snd au
-                               auth <- liftM fst au
-                               (UserId id')   <- userId auth
-                               name <- userEmail auth 
-                               return $ User id' name active super places
+                    let u = mkUser au
                     return u
                  
+mkUser au = do (Attrs active super places) <- liftM snd au
+               auth <- liftM fst au
+               (UserId id')   <- userId auth
+               name <- userEmail auth 
+               return $ User id' name active super places
 
 buildUser (ui:un:ua:us:[]) places = 
   Just (emptyAuthUser { userId = Just $ UserId (fromSql ui) 

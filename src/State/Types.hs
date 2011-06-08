@@ -29,6 +29,8 @@ data UserPlace = UserPlace { pId    :: BS.ByteString
                            }
       deriving (Eq, Show)
 
+emptyUserPlace = UserPlace "" "" "" False ""
+
 data Attrs = Attrs Bool Bool [UserPlace]
       deriving (Eq, Show)
       

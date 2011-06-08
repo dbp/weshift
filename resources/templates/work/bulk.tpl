@@ -4,10 +4,10 @@
 
 <div-async name="center-main" class="main" id="bulk">
    <h2>Bulk Input</h2>
-   <form>
+   <form-async>
      <textarea></textarea>
      <button type="submit" title="Load Data"></button>
-   </form>
+   </form-async>
    <p><strong>Important:</strong> What you paste in should look like the following. It is a format called CSV, which most spreadsheet programs can save as / export to.</p>
    <code>Name,5/2/2011,5/3/2011,5/4/2011,5/5/2011,5/6/2011<br>
    Jane Doe,7-3pm,7-3pm,off,7-3pm,7-3pm<br>
