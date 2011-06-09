@@ -73,21 +73,27 @@ placeHomeH = do mu <- getCurrentUser
 monthDayLargeH = do mmonth <- getParam "month"
                     myear  <- getParam "year"
                     mday   <- getParam "day"
+                    mplace <- getCurrentPlace
+                    muser <- getCurrentUser
                     today <- liftM utctDay $ liftIO getCurrentTime
-                    let daySplice = case (mmonth >>= maybeRead, myear >>= maybeRead, mday >>= maybeRead) of
-                                      (Just month, Just year, Just day) ->
-                                        [("day", renderDay $ formatDay year month [] [] emptyUser (emptyDayFormat (Just day)))]
-                                      _ -> []
+                    daySplice <- case (mmonth >>= maybeRead, myear >>= maybeRead, mday >>= maybeRead, mplace, muser) of
+                                      (Just month, Just year, Just day, Just place, Just user) -> do
+                                        shifts <- getShifts (fromGregorian year month day) (fromGregorian year month (day+1)) place
+                                        return [("day", renderDay $ formatDay year month shifts [] user (emptyDayFormat (Just day)))]
+                                      _ -> return []
                     heistLocal (bindSplices (daySplice ++ (commonSplices today))) $renderWS "work/month_day_large"
 
 monthDaySmallH = do mmonth <- getParam "month"
                     myear  <- getParam "year"
                     mday   <- getParam "day"
+                    mplace <- getCurrentPlace
+                    muser <- getCurrentUser
                     today <- liftM utctDay $ liftIO getCurrentTime
-                    let daySplice = case (mmonth >>= maybeRead, myear >>= maybeRead, mday >>= maybeRead) of
-                                      (Just month, Just year, Just day) ->
-                                        [("day", renderDay $ formatDay year month [] [] emptyUser (emptyDayFormat (Just day)))]
-                                      _ -> []
+                    daySplice <- case (mmonth >>= maybeRead, myear >>= maybeRead, mday >>= maybeRead, mplace, muser) of
+                                      (Just month, Just year, Just day, Just place, Just user) -> do
+                                        shifts <- getShifts (fromGregorian year month day) (fromGregorian year month (day+1)) place
+                                        return [("day", renderDay $ formatDay year month shifts [] user (emptyDayFormat (Just day)))]
+                                      _ -> return []
                     heistLocal (bindSplices (daySplice ++ (commonSplices today))) $ renderWS "work/month_day_small"
                                 
 monthH = do month <- fmap (maybeRead =<<) $ getParam "month"
