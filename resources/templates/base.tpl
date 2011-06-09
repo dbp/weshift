@@ -21,7 +21,7 @@
   <body>
     <div-async name="whole-page">
     <div id="top">
-      
+      <a href="$(placeRoot)/"><img src="/img/logo.png" /></a>
       
     </div> <!-- #top -->
     <div id="middle">
