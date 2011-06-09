@@ -6,6 +6,7 @@
     
     <script type="text/javascript" charset="utf-8" src="/js/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" charset="utf-8" src="/js/jquery.tipTip.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/js/jquery.bt.min.js"></script>
     <script type="text/javascript" charset="utf-8" src="/js/jquery-ui-1.8.11.custom.min.js"></script>
 
     <script type="text/javascript" charset="utf-8" src="/js/valentine.min.js"></script>
@@ -16,6 +17,7 @@
     <script type="text/javascript" charset="utf-8" src="/js/bonzo.min.js"></script>
     
     <script type="text/javascript" charset="utf-8" src="/js/heist-async.js"></script>
+    
     
   </head>
   <body>

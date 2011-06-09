@@ -22,6 +22,12 @@
         }
       }
     };
+    // now run any included javascript
+    var scripts, scriptsFinder=/<script[^>]*>([\s\S]+)<\/script>/gi;
+    while(scripts=scriptsFinder.exec(resp))
+    {
+       eval(scripts[1]);
+    }
   };
 
   // Listeners for most common interations                                            

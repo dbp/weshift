@@ -48,6 +48,7 @@ placeSite = do
   {-h <- fmap (getHeader "X-Requested-With") $ getRequest
   liftIO $ putStrLn $ show h-}
   route [ ("/",                       ifTop $ placeHomeH)
+        , ("/month/:year/:month/:day", monthOneDayH)
         , ("/month/:year/:month",     monthH)
         , ("/day/:year/:month/:day",  dayH)  
         , ("/timesheet",              timesheetH)  
@@ -67,7 +68,12 @@ placeHomeH = do mu <- getCurrentUser
                   _ -> return Nothing
                 let nextShiftSplice = spliceMBS "nextShift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
                 heistLocal (bindSplices (nextShiftSplice ++ (monthSplices today) ++ (commonSplices today))) $ renderWS "place"
-                
+
+monthOneDayH = do renderWS "work/month_one_day"
+                {-month <- fmap (maybeRead =<<) $ getParam "month"
+                                                  year <- fmap (maybeRead =<<) $ getParam "year"
+                                                  day <- fmap (maybeRead =<<) $ getParam "day"
+                                -}
 monthH = do month <- fmap (maybeRead =<<) $ getParam "month"
             year <- fmap (maybeRead =<<) $ getParam "year"
             today <- liftM utctDay $ liftIO getCurrentTime
