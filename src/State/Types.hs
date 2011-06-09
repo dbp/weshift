@@ -20,7 +20,10 @@ data User = User { uId :: BS.ByteString
                  , uPlaces :: [UserPlace]
                  }
               deriving (Eq, Show)
-              
+
+emptyUser = User "" "" False False []
+
+             
 data UserPlace = UserPlace { pId    :: BS.ByteString 
                            , pName  :: BS.ByteString 
                            , pOrg   :: BS.ByteString
@@ -42,6 +45,8 @@ data Shift = Shift { sId :: BS.ByteString
                    , sRecorded :: LocalTime
                    , sRecorder :: BS.ByteString
                    }
+                   deriving (Eq, Show)
+                   
 
 buildPlace (pi:pn:pt:po:[]) = Just $ UserPlace (fromSql pi) (fromSql pn) (fromSql po) False (fromSql pt) 
 buildPlace _ = Nothing
