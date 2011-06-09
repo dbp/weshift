@@ -37,7 +37,7 @@ Executable weshift-snap
     containers,
     bson,
     digestive-functors,
-    digestive-functors-snap-heist == 0.1.1.*,
+    digestive-functors-snap-heist == 0.1.2.*,
     -- digestive-functors-heist == 0.1,
     QuickCheck >= 2 && < 3,
     split,
