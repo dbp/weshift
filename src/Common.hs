@@ -61,6 +61,10 @@ normalUserSplice = do node <- getParamNode
                         Just place -> if (not $ pFac place) then return (X.elementChildren node) else return []
                         Nothing -> return []
 
+identitySplice :: TemplateMonad Application [X.Node]
+identitySplice = do n <- getParamNode
+                    return $ X.elementChildren n
+
 parseWSDate s = parseTime defaultTimeLocale "%m.%d.%Y" $ B8.unpack s
                          
 -- stolen from cgi:

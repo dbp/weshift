@@ -50,9 +50,6 @@ renderDay (DayFormat num myshifts shifts top start end bottom request) =
                       , ("dayClasses", dayclasses)
                       , ("dayNum", (maybe " " (T.pack . show) num))
                       ]
-  {-  return [X.Element "div" [("class", boxclasses)] 
-             [X.Element "div" [("class", dayclasses)] 
-               [X.TextNode (maybe " " (T.pack . show) num)]]]-}
       where boxclasses = T.concat (["daybox"] ++ 
                                   (if start then [" start"] else []) ++ 
                                   (if end then [" end"] else []) ++ 

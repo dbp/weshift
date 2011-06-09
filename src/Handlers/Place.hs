@@ -48,7 +48,8 @@ placeSite = do
   {-h <- fmap (getHeader "X-Requested-With") $ getRequest
   liftIO $ putStrLn $ show h-}
   route [ ("/",                       ifTop $ placeHomeH)
-        , ("/month/:year/:month/:day", monthOneDayH)
+        , ("/month/:year/:month/:day/large", monthDayLargeH)
+        , ("/month/:year/:month/:day/small", monthDaySmallH)
         , ("/month/:year/:month",     monthH)
         , ("/day/:year/:month/:day",  dayH)  
         , ("/timesheet",              timesheetH)  
@@ -69,11 +70,26 @@ placeHomeH = do mu <- getCurrentUser
                 let nextShiftSplice = spliceMBS "nextShift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
                 heistLocal (bindSplices (nextShiftSplice ++ (monthSplices today) ++ (commonSplices today))) $ renderWS "place"
 
-monthOneDayH = do renderWS "work/month_one_day"
-                {-month <- fmap (maybeRead =<<) $ getParam "month"
-                                                  year <- fmap (maybeRead =<<) $ getParam "year"
-                                                  day <- fmap (maybeRead =<<) $ getParam "day"
-                                -}
+monthDayLargeH = do mmonth <- getParam "month"
+                    myear  <- getParam "year"
+                    mday   <- getParam "day"
+                    today <- liftM utctDay $ liftIO getCurrentTime
+                    let daySplice = case (mmonth >>= maybeRead, myear >>= maybeRead, mday >>= maybeRead) of
+                                      (Just month, Just year, Just day) ->
+                                        [("day", renderDay $ formatDay year month [] [] emptyUser (emptyDayFormat (Just day)))]
+                                      _ -> []
+                    heistLocal (bindSplices (daySplice ++ (commonSplices today))) $renderWS "work/month_day_large"
+
+monthDaySmallH = do mmonth <- getParam "month"
+                    myear  <- getParam "year"
+                    mday   <- getParam "day"
+                    today <- liftM utctDay $ liftIO getCurrentTime
+                    let daySplice = case (mmonth >>= maybeRead, myear >>= maybeRead, mday >>= maybeRead) of
+                                      (Just month, Just year, Just day) ->
+                                        [("day", renderDay $ formatDay year month [] [] emptyUser (emptyDayFormat (Just day)))]
+                                      _ -> []
+                    heistLocal (bindSplices (daySplice ++ (commonSplices today))) $ renderWS "work/month_day_small"
+                                
 monthH = do month <- fmap (maybeRead =<<) $ getParam "month"
             year <- fmap (maybeRead =<<) $ getParam "year"
             today <- liftM utctDay $ liftIO getCurrentTime
@@ -92,6 +108,7 @@ monthSplices day = [("monthName", textSplice $ T.pack (formatTime defaultTimeLoc
                    ,("nextMonth", textSplice $ T.pack $ show nextMonth)
                    ,("prevYear",  textSplice $ T.pack $ show prevYear)
                    ,("prevMonth", textSplice $ T.pack $ show prevMonth)
+                   ,("day", identitySplice) -- this is to allow the same template to be used in other ways
                    ]
   where (year,month,_) = toGregorian day
         (nextYear,nextMonth,_) = toGregorian $ addGregorianMonthsClip 1 day

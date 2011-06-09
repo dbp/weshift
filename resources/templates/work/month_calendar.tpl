@@ -20,51 +20,8 @@
   </div> <!-- #month-daynames -->
   <div id="month-days">
     <monthDays>
-      <div class="$(boxClasses)">
-        <div class="$(dayClasses)" data-href="$(placeRoot)/month/$(currYear)/$(currMonth)/$(dayNum)">
-          <dayNum/>
-        </div>
-      </div>
+      <apply template="month_day_small"></apply>
     </monthDays>
   </div> <!-- #month-days -->
 
 </div-async> <!-- .main -->
-
-<script type="text/javascript" charset="utf-8">
-  $('#month-days .day').not('.none').each(function (i) {
-    $(this).bt({
-    fill: '#F7F7F7', 
-    
-    ajaxPath: ["$(this).attr('data-href')"],
-    ajaxLoading:     '<strong>Loading...</strong>',
-    // ajaxCache:        false,
-    // ajaxType:         'POST',  
-    // 
-    // contentSelector: "$(this).children('.day-info').html()",
-    // preShow: function (box) {
-    //   var change = $(box).find(".change");
-    //   change.hide();
-    //   change.find(".cancel").click(function () {
-    //     change.hide();
-    //     $(box).find(".shift").show();
-    //   });
-    //   $(box).find(".show-change").click(function () {
-    //     $(this).parent().hide();
-    //     change.show();
-    //   });
-    //   },
-    strokeStyle: '#B7B7B7', 
-    spikeLength: 10, 
-    spikeGirth: 10, 
-    padding: 8, 
-    cornerRadius: 0,
-    trigger: 'click',
-    closeWhenOthersOpen: true,
-    positions: ['bottom'],
-    cssStyles: {
-      fontFamily: '"lucida grande",tahoma,verdana,arial,sans-serif', 
-      fontSize: '11px',
-      width: '420px'
-    }
-  });});
-</script>

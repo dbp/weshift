@@ -284,6 +284,7 @@ button.processing, button.processing:hover {
 
 #month-days .daybox {
   float: left;
+  position: relative;
   width: 59px;
   height: 59px;
   border-bottom: 1px solid #A3E5EF;
@@ -297,15 +298,35 @@ button.processing, button.processing:hover {
   border-bottom: 0;
 }
 
+#month-days .daybox.large {
+ width: 200px;
+ height: 200px;
+ margin-right: -141px; 
+ margin-bottom: -141px; 
+ background-color: red;
+ z-index: 10;
+}
+
+
 #month-days .daybox .day {
   width: 25px;
   height: 20px;
   background-color: black;
-  color: white;
   font-weight: normal;
   font-size: 14px;
   text-align: center;
   padding-top: 5px;
+  a {
+    display: block;
+    text-decoration: none;
+    color: white;
+  }
+}
+
+#month-days .daybox.large .day {
+  width: 59px;
+  height: 59px;
+
 }
 
 #month-days .daybox .day:hover {
@@ -325,8 +346,10 @@ button.processing, button.processing:hover {
   height: 19px;
   border-right: 1px solid #A3E5EF;
   border-bottom: 1px solid #A3E5EF;
-  color: #44B9DE;
   background-color: transparent;
+  a {
+    color: #44B9DE;
+  }
 }
 
 #month-days .daybox.start .day.other {
