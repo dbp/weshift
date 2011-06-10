@@ -47,5 +47,43 @@
 
     </div> <!-- #bottom -->
     </div-async> <!-- whole-page -->
+    <div id="preload">
+      <img src="/img/messages/Message_post_mo.png" />
+      <img src="/img/messages_next_mo.png" />
+      <img src="/img/message_flag_mo.png" />
+      <img src="/img/message_down_mo.png" />
+      <img src="/img/message_up_mo.png" />
+      <img src="/img/messages/Message_post_mo.png" />
+      <img src="/img/workschedule/calendar/Arrow_right_mo.png" />
+      <img src="/img/workschedule/calendar/Arrow_left_mo.png" />
+      
+      <img src="/img/profile/Profile_UserSettings/delete_mo.png" />
+      <img src="/img/profile/Profile_UserSettings/email_mo.png" />
+      <img src="/img/profile/Profile_UserSettings/password_mo.png" />
+      <img src="/img/profile/Profile_UserSettings/name_mo.png" />
+      <img src="/img/workschedule/Work_Bulk_mo.png" />
+      <img src="/img/workschedule/Work_Timesheet_mo.png" />
+      <img src="/img/workschedule/Work_Day_mo.png" />
+      <img src="/img/workschedule/Work_Month_mo.png" />
+      <img src="/img/profile/Profile_Help_mo.png" />
+      <img src="/img/profile/Profile_Coworkers_mo.png" />
+      <img src="/img/profile/Profile_UserSettings_mo.png" />
+
+      <img src="/img/profile/Profile_UserSettings/delete_sel.png" />
+      <img src="/img/profile/Profile_UserSettings/email_sel.png" />
+      <img src="/img/profile/Profile_UserSettings/password_sel.png" />
+      <img src="/img/profile/Profile_UserSettings/name_sel.png" />
+      <img src="/img/workschedule/Work_Bulk_sel.png" />
+      <img src="/img/workschedule/Work_Timesheet_sel.png" />
+      <img src="/img/workschedule/Work_Day_sel.png" />
+      <img src="/img/workschedule/Work_Month_sel.png" />
+      <img src="/img/profile/Profile_Help_sel.png" />
+      <img src="/img/profile/Profile_Coworkers_sel.png" />
+      <img src="/img/profile/Profile_UserSettings_sel.png" />
+
+      
+      <img src="/img/main/SubmitArrow_mo.png" />
+      <img src="/img/main/Processing.gif" />
+    </div>
   </body>
 </html>
