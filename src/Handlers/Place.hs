@@ -67,7 +67,7 @@ placeHomeH = do mu <- getCurrentUser
                 nextShift <- case (mu,mp) of
                   (Just u, Just p) -> getNextShift u p
                   _ -> return Nothing
-                let nextShiftSplice = spliceMBS "nextShift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
+                let nextShiftSplice = spliceMBS "nextShift" $ Just $ fromMaybe "No Next Shift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
                 heistLocal (bindSplices (nextShiftSplice ++ (monthSplices today) ++ (commonSplices today))) $ renderWS "place"
 
 monthDayLargeH = do mmonth <- getParam "month"

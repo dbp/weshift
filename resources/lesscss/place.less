@@ -8,16 +8,24 @@ body,html {
   display: none;
 }
 
+.loading {
+  width: 100%;
+  height: 100%;
+  background: transparent url("/img/Loading.gif") no-repeat 50% 10%;
+}
+
 #top {
   height: 80px;
   background-color: black;
-/*  width: 960px;
-  margin: 0px auto;*/
 }
 
-#top img {
-  margin-top: 20px;
-  margin-left: 50px;
+#top #top-holder {
+  width: 960px;
+  margin: 0px auto;
+}
+
+#top #top-holder img {
+  margin-top: 30px;
 }
 
 #middle {
@@ -305,11 +313,13 @@ button.processing, button.processing:hover {
 #month-days .daybox.large {
  width: 240px;
  height: 240px;
- margin-right: -181px; 
- margin-bottom: -181px; 
+ margin-right: -185px; 
+ margin-bottom: -185px; 
  background-color: black;
  color: white;
  z-index: 10;
+ border-bottom: 2px solid white;
+ border-right: 2px solid white;
 }
 
 
@@ -329,11 +339,20 @@ button.processing, button.processing:hover {
 }
 
 #month-days .daybox.large .day {
-  width: 59px;
-  height: 59px;
+  width: 58px;
+  height: 53px;
   color: white;
   font-size: 40px;
+  line-height: 30px;
+  border-bottom: 2px solid white;
+  border-right: 2px solid white;
 }
+
+#month-days .daybox.large .day.self, #month-days .daybox.large .day.other  {
+  border-bottom: 2px solid #44B9DE;
+  border-right: 2px solid #44B9DE;
+}
+
 
 #month-days .daybox .day:hover {
   cursor: pointer;

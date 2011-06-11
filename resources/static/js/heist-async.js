@@ -46,6 +46,11 @@
     switch (elem.rel) {
     case 'async':
     case 'async-post':
+      if (elem.getAttribute("data-loading-div")) {
+        if (qwery(elem.getAttribute("data-loading-div"))[0]) {
+          qwery(elem.getAttribute("data-loading-div"))[0].innerHTML = "<div class='loading'></div>";
+        }
+      };
       reqwest({
         url:href, 
         type: 'html',

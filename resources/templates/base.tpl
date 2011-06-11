@@ -23,8 +23,9 @@
   <body>
     <div-async name="whole-page">
     <div id="top">
-      <a href="$(placeRoot)/"><img src="/img/logo.png" /></a>
-      
+      <div id="top-holder">
+        <a href="$(placeRoot)/"><img src="/img/logo.png" /></a>
+      </div>
     </div> <!-- #top -->
     <div id="middle">
       <div-async name="middle-left" id="left">
@@ -84,6 +85,7 @@
       
       <img src="/img/main/SubmitArrow_mo.png" />
       <img src="/img/main/Processing.gif" />
+      <img src="/img/Loading.gif" />
     </div>
   </body>
 </html>

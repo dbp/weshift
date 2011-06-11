@@ -55,7 +55,4 @@
     
     </tbody></table>
     
-    <script type="text/javascript" charset="utf-8">
-        $("input.date").datepicker({ dateFormat: 'mm.dd.yyyy' });
-    </script>
 </div-async>
