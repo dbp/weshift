@@ -23,34 +23,32 @@ import State.Types
 import Common
 import Control.Concurrent (threadDelay)
 
-settingsH :: Application ()
-settingsH = route [ ("/",         ifTop $ renderWS "profile/usersettings/blank")
-                  , ("/name",     changeNameH)
-                  , ("/password", changePasswordH)
-                  , ("/remove",   removeAccountH)
-                  , ("/email",    emailH)
-                  ]
+settingsH :: Maybe User -> Maybe UserPlace -> Application ()
+settingsH u p = route [ ("/",         ifTop $ renderWS "profile/usersettings/blank")
+                      , ("/name",     changeNameH u p)
+                      , ("/password", changePasswordH u p)
+                      , ("/remove",   removeAccountH u p)
+                      , ("/email",    emailH u p)
+                      ]
 
 nameForm :: SnapForm Application Text HeistView String
 nameForm = input "name" Nothing  `validate` nonEmpty <++ errors 
                   
-changeNameH = do r <- eitherSnapForm nameForm "change-name-form"
-                 mu <- getCurrentUser
-                 let name = maybe "" (TE.decodeUtf8 . uName) mu
-                 case r of
-                     Left splices' -> do
-                       heistLocal (bindString "name" name ) $ 
-                        heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name"
-                     Right name' -> do
-                       u <- getCurrentUser
-                       case u of
-                         Nothing -> redirPlaceHome -- Not sure how they could have gotten here, but... send'm home!
-                         Just (User id' _ _ _ _) -> do
-                           success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql id']
-                           {-liftIO $ threadDelay 200000-}
-                           case success of
-                             True  -> renderWS "profile/usersettings/name_updated"
-                             False -> renderWS "profile/usersettings/name_couldntupdate"
+changeNameH u p = do r <- eitherSnapForm nameForm "change-name-form"
+                     let name = maybe "" (TE.decodeUtf8 . uName) u
+                     case r of
+                         Left splices' -> do
+                           heistLocal (bindString "name" name ) $ 
+                            heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name"
+                         Right name' -> do
+                           case u of
+                             Nothing -> redirPlaceHome -- Not sure how they could have gotten here, but... send'm home!
+                             Just (User id' _ _ _ _) -> do
+                               success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql id']
+                               {-liftIO $ threadDelay 200000-}
+                               case success of
+                                 True  -> renderWS "profile/usersettings/name_updated"
+                                 False -> renderWS "profile/usersettings/name_couldntupdate"
 
 
 nonEmpty :: Validator Application Text String
@@ -77,19 +75,18 @@ passwordForm = (`validate` matchingPasswords) $ (<++ errors) $ NewPassword
   where matchingPasswords = check "New passwords do not match:" $ \(NewPassword _ p1 p2) -> p1 == p2
 
 
-changePasswordH = do r <- eitherSnapForm passwordForm "change-password-form"
-                     case r of
-                         Left splices' -> do
-                           heistLocal (bindSplices splices') $ renderWS "profile/usersettings/password"
-                         Right (NewPassword _ new _) -> do
-                           u <- getCurrentUser
-                           case u of
-                             Nothing -> redirPlaceHome -- Not sure how they could have gotten here, but... send'm home!
-                             Just (User id' _ _ _ _) -> do
-                               success <- fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql new, toSql id']
-                               case success of
-                                 True  -> renderWS "profile/usersettings/password_updated"
-                                 False -> renderWS "profile/usersettings/password_couldntupdate"
+changePasswordH u p = do r <- eitherSnapForm passwordForm "change-password-form"
+                         case r of
+                             Left splices' -> do
+                               heistLocal (bindSplices splices') $ renderWS "profile/usersettings/password"
+                             Right (NewPassword _ new _) -> do
+                               case u of
+                                 Nothing -> redirPlaceHome -- Not sure how they could have gotten here, but... send'm home!
+                                 Just (User id' _ _ _ _) -> do
+                                   success <- fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql new, toSql id']
+                                   case success of
+                                     True  -> renderWS "profile/usersettings/password_updated"
+                                     False -> renderWS "profile/usersettings/password_couldntupdate"
 
-removeAccountH = undefined
-emailH = undefined
+removeAccountH u p = undefined
+emailH u p = undefined

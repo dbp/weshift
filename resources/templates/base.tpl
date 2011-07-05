@@ -21,7 +21,6 @@
     
   </head>
   <body>
-    <div-async name="whole-page">
     <div id="top">
       <div id="top-holder">
         <a href="$(placeRoot)/"><img src="/img/logo.png" /></a>
@@ -47,7 +46,6 @@
     <div id="bottom">
 
     </div> <!-- #bottom -->
-    </div-async> <!-- whole-page -->
     <div id="preload">
       <img src="/img/messages/Message_post_mo.png" />
       <img src="/img/messages_next_mo.png" />

@@ -53,10 +53,11 @@ requireUserBounce' good = do
 
 checkPlaceLogin (Just org) (Just place) = do u <- getCurrentUser
                                              uri <- liftM rqURI getRequest
-                                             let loginPage = do p <- getPlace (repSpaces org) (repSpaces place)
-                                                                let pid = maybe "" pId p
+                                             p <- getPlace (repSpaces org) (repSpaces place)
+                                             let loginPage = do let pid = maybe "" pId p
                                                                 redirect (BS.concat ["/login?redirectTo=", uri, "&pl=", pid])
                                              unless (userHasPlace org place u) loginPage
+                                             return (u,p)
   where userHasPlace org place (Just (User _ _ _ super places)) = super || any (\p -> pName p == place && pOrg p == org) places
         userHasPlace _ _ Nothing = False
 checkPlaceLogin _ _ = mzero

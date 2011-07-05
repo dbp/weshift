@@ -4,15 +4,16 @@ module Handlers.Messages where
   
 import Snap.Types
 import Application
+import State.Types
 
         
-messagesH :: Application ()
-messagesH = route [ ("/add",            messageAddH)
-                  , ("/page/:num",      messagesPageH)
-                  , ("/vote/up/:id",    messageVoteUpH)
-                  , ("/vote/down/:id",  messageVoteDownH)
-                  , ("/flag/:id",       messageFlagH)
-                  ]
+messagesH :: Maybe User -> Maybe UserPlace -> Application ()
+messagesH u p = route [ ("/add",            messageAddH)
+                      , ("/page/:num",      messagesPageH)
+                      , ("/vote/up/:id",    messageVoteUpH)
+                      , ("/vote/down/:id",  messageVoteDownH)
+                      , ("/flag/:id",       messageFlagH)
+                      ]
                   
 messageAddH = undefined
 messagesPageH = undefined

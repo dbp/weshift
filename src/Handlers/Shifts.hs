@@ -4,14 +4,15 @@ module Handlers.Shifts where
   
 import Snap.Types
 import Application
+import State.Types
 
-shiftH :: Application ()
-shiftH = route [ ("/add",             shiftAddH)
-               , ("/edit/:id",        shiftEditH)
-               , ("/delete/:id",      shiftDeleteH)
-               , ("/requestoff/:id",  requestOffH)
-               , ("/cover/:id",       coverH)
-               ]
+shiftH :: Maybe User -> Maybe UserPlace -> Application ()
+shiftH u p = route [ ("/add",             shiftAddH)
+                   , ("/edit/:id",        shiftEditH)
+                   , ("/delete/:id",      shiftDeleteH)
+                   , ("/requestoff/:id",  requestOffH)
+                   , ("/cover/:id",       coverH)
+                   ]
 
 shiftAddH = undefined
 shiftEditH = undefined

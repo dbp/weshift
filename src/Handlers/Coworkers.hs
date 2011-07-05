@@ -28,11 +28,9 @@ renderCoworkers :: [User] -> Splice Application
 renderCoworkers coworkers = mapSplices renderCoworker coworkers
 
 
-coworkersH :: Application ()
-coworkersH = do 
-  mplace <- getCurrentPlace
+coworkersH :: Maybe User -> Maybe UserPlace -> Application ()
+coworkersH muser mplace = do 
   when (isNothing mplace) $ redirect "/"
-  muser <- getCurrentUser
   when (isNothing muser) $ redirect "/"
   let place = fromJust mplace
   let user = fromJust muser
