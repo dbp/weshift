@@ -16,6 +16,10 @@ import State.Account
 import Auth
 
 getCoworkers :: User -> UserPlace -> Application [User]
-getCoworkers u p = do
+getCoworkers u p = do us <- getWorkers p
+                      return $ filter (\c -> uId c /= uId u) us
+
+getWorkers :: UserPlace -> Application [User]
+getWorkers p = do
   users <- withPGDB "SELECT PU.facilitator, U.id, U.name, U.active, U.super FROM users AS U JOIN placeusers AS PU ON PU.user_id = U.id WHERE PU.place = ? ORDER BY name ASC;" [toSql $ pId p]
-  return $ filter (\c -> uId c /= uId u) $ catMaybes $ map mkUser $ map (\su -> buildUser (tail su) [[toSql (""::String), toSql (""::String), toSql (""::String), toSql (""::String), head su]]) users
+  return $ catMaybes $ map mkUser $ map (\su -> buildUser (tail su) [[toSql (""::String), toSql (""::String), toSql (""::String), toSql (""::String), head su]]) users

@@ -8,6 +8,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
+import qualified Data.Map as M
 import Snap.Extension.Heist
 import Data.ByteString (ByteString)
 import Snap.Auth.Handlers
@@ -29,6 +30,7 @@ import System.Locale
 import Application 
 import Auth
 import State.Types
+import State.Coworkers
 
 placeName place = BS.intercalate ", " $ (map ($ place) [pName,pOrg])
 placeRoot place = BS.intercalate "/"  $ (map (repUnders. ($ place)) [const "",pOrg,pName])
@@ -46,6 +48,10 @@ redirPlaceHome :: Application ()
 redirPlaceHome = do hm <- liftM (fmap placeRoot) getCurrentPlace
                     redirect $ fromMaybe "/" hm
 
+renderTime t = T.pack $ formatTime defaultTimeLocale "%-l:%M%P" t
+renderDate t = T.pack $ formatTime defaultTimeLocale "%m.%d.%Y" t
+renderDateLong t = T.pack $ formatTime defaultTimeLocale "%B %e, %Y" t
+
 spliceMBS :: T.Text -> Maybe BS.ByteString -> [(T.Text, Splice Application)]
 spliceMBS name val = maybeToList $ fmap (\p -> (name, return [X.TextNode (TE.decodeUtf8 p)])) val
 
@@ -61,9 +67,13 @@ normalUserSplice = do node <- getParamNode
                         Just place -> if (not $ pFac place) then return (X.elementChildren node) else return []
                         Nothing -> return []
 
-identitySplice :: TemplateMonad Application [X.Node]
-identitySplice = do n <- getParamNode
-                    return $ X.elementChildren n
+
+identitySplice :: Monad m => Splice m
+identitySplice = do node <- getParamNode
+                    return (X.elementChildren node)
+                    
+blackHoleSplice :: Monad m => Splice m
+blackHoleSplice = return []
 
 parseWSDate s = parseTime defaultTimeLocale "%m.%d.%Y" $ B8.unpack s
                          
@@ -71,14 +81,30 @@ parseWSDate s = parseTime defaultTimeLocale "%m.%d.%Y" $ B8.unpack s
 maybeRead :: Read a => ByteString -> Maybe a
 maybeRead = fmap fst . listToMaybe . reads . B8.unpack
 
+
+nameLookup :: M.Map BS.ByteString User -> Splice Application
+nameLookup names = do node <- getParamNode
+                      case X.getAttribute "lookup" node >>= (flip M.lookup names . TE.encodeUtf8) of
+                        Nothing -> return []
+                        Just user -> runChildrenWith [("id", textSplice $ TE.decodeUtf8 $ uId user)
+                                                     ,("name", textSplice $ TE.decodeUtf8 $ uName user)
+                                                     ,("active", if uActive user then identitySplice else blackHoleSplice)
+                                                     ,("super",  if uSuper user then identitySplice else blackHoleSplice)
+                                                     ]  
+
 renderWS :: ByteString -> Application ()
-renderWS t = do mplace <- liftM (fmap placeRoot) getCurrentPlace
-                mplaceName <- liftM (fmap placeName) getCurrentPlace
-                let placeSplices = concat $ map (uncurry spliceMBS) [("placeRoot", mplace),("placeName", mplaceName)]
+renderWS t = do mplace <- getCurrentPlace
+                let mplaceRoot = fmap placeRoot mplace
+                let mplaceName = fmap placeName mplace
+                let placeSplices = concat $ map (uncurry spliceMBS) [("placeRoot", mplaceRoot),("placeName", mplaceName)]
                 muserName <- liftM (fmap uName) getCurrentUser
                 let userSplices = concat $ map (uncurry spliceMBS) [("userName",muserName)]
                 let permissionSplices = [("isFacilitator", facilitatorSplice),("isNormalUser", normalUserSplice)]
-                (heistLocal $ (bindSplices (splices ++ placeSplices ++ userSplices))) $ render t
+                workersSplice <- case mplace of
+                                    Nothing -> return []
+                                    Just place -> do us <- getWorkers place
+                                                     return [("user", nameLookup $ M.fromList $ map (\u -> (uId u, u)) us)]
+                (heistLocal $ (bindSplices (splices ++ placeSplices ++ userSplices ++ workersSplice))) $ render t
   where splices = [ ("ifLoggedIn", ifLoggedIn)
                   , ("ifGuest", ifGuest)
                   ] ++ heistAsyncSplices

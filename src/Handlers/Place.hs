@@ -76,10 +76,12 @@ monthDayLargeH muser mplace = do mmonth <- getParam "month"
                                                    (Just month, Just year, Just day, Just place, Just user) -> do
                                                      let d = (fromGregorian year month day)
                                                      shifts <- getShifts d (addDays 1 d) place
-                                                     {-liftIO $ putStrLn $ show (fromGregorian year month day)
-                                                     liftIO $ putStrLn $ show (fromGregorian year month (day+1))
-                                                     liftIO $ putStrLn $ show shifts-}
-                                                     return (d,[("day", renderDay $ formatDay year month shifts [] user (emptyDayFormat (Just day)))])
+                                                     let selfShifts = filter ((== (uId user)) . sUser) shifts
+                                                     let otherShifts = filter ((/= (uId user)) . sUser) shifts
+                                                     return (d,[("day", renderDay $ formatDay year month shifts [] user (emptyDayFormat (Just day)))
+                                                               ,("selfShifts", renderShifts selfShifts)
+                                                               ,("otherShifts", renderShifts otherShifts)
+                                                               ])
                                                    _ -> do
                                                      today <- liftM utctDay $ liftIO getCurrentTime
                                                      return (today,[])

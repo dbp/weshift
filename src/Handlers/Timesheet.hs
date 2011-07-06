@@ -64,9 +64,6 @@ timesheetEntry shift = do
 
 data Entry = Entry Int LocalTime LocalTime [Modification] -- hours worked, orig. start, orig. end, list of modifications
 
-renderTime t = T.pack $ formatTime defaultTimeLocale "%-l:%M%P" t
-renderDate t = T.pack $ formatTime defaultTimeLocale "%m.%d.%Y" t
-renderDateLong t = T.pack $ formatTime defaultTimeLocale "%B %e, %Y" t
 
 renderChange (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
                                                 , ("changeDescription", "Deleted")

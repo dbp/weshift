@@ -1,7 +1,10 @@
 <day>
   <div-async name="day-$(dayNum)" id="day-$(dayNum)" class="$(boxClasses) large">
     <div class="user-wrap">
-      <userName/> - 
+      <userName/><br>
+      <selfShifts>
+        <start/>-<stop/> - Request Off - Delete Shift - Change Shift
+      </selfShifts>
       <a-async href="$(placeRoot)/month/$(currYear)/$(currMonth)/$(dayNum)/small">X</a-async>
     </div>
   
@@ -9,6 +12,8 @@
       <a-async href="$(placeRoot)/month/$(currYear)/$(currMonth)/$(dayNum)/small"><dayNum/></a-async>
     </div>
 
-    This is where all the stuff will go!
+    <otherShifts>
+      <user lookup="$(user)"><name/></user> - <start/>-<stop/>
+    </otherShifts>
   </div-async>
 </day>
