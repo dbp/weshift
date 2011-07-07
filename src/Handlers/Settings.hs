@@ -23,7 +23,7 @@ import State.Types
 import Common
 import Control.Concurrent (threadDelay)
 
-settingsH :: Maybe User -> Maybe UserPlace -> Application ()
+settingsH :: User -> UserPlace -> Application ()
 settingsH u p = route [ ("/",         ifTop $ renderWS "profile/usersettings/blank")
                       , ("/name",     changeNameH u p)
                       , ("/password", changePasswordH u p)
@@ -35,15 +35,14 @@ nameForm :: SnapForm Application Text HeistView String
 nameForm = input "name" Nothing  `validate` nonEmpty <++ errors 
                   
 changeNameH u p = do r <- eitherSnapForm nameForm "change-name-form"
-                     let name = maybe "" (TE.decodeUtf8 . uName) u
+                     let name = (TE.decodeUtf8 . uName) u
                      case r of
                          Left splices' -> do
                            heistLocal (bindString "name" name ) $ 
                             heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name"
                          Right name' -> do
                            case u of
-                             Nothing -> redirPlaceHome -- Not sure how they could have gotten here, but... send'm home!
-                             Just (User id' _ _ _ _) -> do
+                             (User id' _ _ _ _) -> do
                                success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql id']
                                {-liftIO $ threadDelay 200000-}
                                case success of
@@ -81,8 +80,7 @@ changePasswordH u p = do r <- eitherSnapForm passwordForm "change-password-form"
                                heistLocal (bindSplices splices') $ renderWS "profile/usersettings/password"
                              Right (NewPassword _ new _) -> do
                                case u of
-                                 Nothing -> redirPlaceHome -- Not sure how they could have gotten here, but... send'm home!
-                                 Just (User id' _ _ _ _) -> do
+                                 (User id' _ _ _ _) -> do
                                    success <- fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql new, toSql id']
                                    case success of
                                      True  -> renderWS "profile/usersettings/password_updated"

@@ -28,12 +28,8 @@ renderCoworkers :: [User] -> Splice Application
 renderCoworkers coworkers = mapSplices renderCoworker coworkers
 
 
-coworkersH :: Maybe User -> Maybe UserPlace -> Application ()
-coworkersH muser mplace = do 
-  when (isNothing mplace) $ redirect "/"
-  when (isNothing muser) $ redirect "/"
-  let place = fromJust mplace
-  let user = fromJust muser
+coworkersH :: User -> UserPlace -> Application ()
+coworkersH user place = do 
   coworkers <- getCoworkers user place  -- Note: this gives back incomplete place lists, just the current place
   let coworkersSplices = (spliceMBS "count" (Just $ B8.pack $ show $ length coworkers)) ++ 
                          [("coworkers", renderCoworkers coworkers)]

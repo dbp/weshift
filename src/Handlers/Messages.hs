@@ -7,7 +7,7 @@ import Application
 import State.Types
 
         
-messagesH :: Maybe User -> Maybe UserPlace -> Application ()
+messagesH :: User -> UserPlace -> Application ()
 messagesH u p = route [ ("/add",            messageAddH)
                       , ("/page/:num",      messagesPageH)
                       , ("/vote/up/:id",    messageVoteUpH)

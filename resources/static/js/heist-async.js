@@ -29,19 +29,18 @@
             }
           }
         }
-      } // else if (elements[i].nodeName == "TITLE") {
-      //         // in this case, we are supposed to be showing a whole page. the only way this could happen is 
-      //         // with a session timeout. so just redirect to login.
-      //         document.location.href = "/login";
-      //         return;
-      //       }
+      } else if (elements[i].nodeName == "DIV" && elements[i].hasAttribute("data-redirect-url")) {
+        // this is a redirect, so do it!
+        document.location.href = elements[i].getAttribute("data-redirect-url");
+        return;
+      }
     };
     // now run any included javascript
-    // var scripts, scriptsFinder=/<script[^>]*>([\s\S]+)<\/script>/gi;
-    // while(scripts=scriptsFinder.exec(resp))
-    // {
-    //    eval(scripts[1]);
-    // }
+    var scripts, scriptsFinder=/<script[^>]*>([\s\S]+)<\/script>/gi;
+    while(scripts=scriptsFinder.exec(resp))
+    {
+       eval(scripts[1]);
+    }
   };
 
   // Listeners for most common interations                                            
@@ -50,12 +49,8 @@
     lct = e.target || e.srcElement;
 
     if (lct && lct.nodeName === "BUTTON") {
-      if (bonzo(lct).hasClass("processing")) {
-        return false; // this button has already been submitted
-      } else {
-        bonzo(lct).addClass("processing");
-        return;
-      }
+      bonzo(lct).addClass("processing");
+      return;
     }
 
     var elem = nearest(lct, 'A') || htm,

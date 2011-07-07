@@ -7,5 +7,5 @@ import Application
 import Common
 import State.Types
 
-helpH :: Maybe User -> Maybe UserPlace -> Application ()
+helpH :: User -> UserPlace -> Application ()
 helpH u p = renderWS "profile/help/blank"

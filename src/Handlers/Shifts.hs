@@ -10,7 +10,7 @@ import Application
 import State.Types
 import Common
 
-shiftH :: Maybe User -> Maybe UserPlace -> Application ()
+shiftH :: User -> UserPlace -> Application ()
 shiftH u p = route [ ("/add",             shiftAddH)
                    , ("/edit/:id",        shiftEditH)
                    , ("/delete/:id",      shiftDeleteH)
