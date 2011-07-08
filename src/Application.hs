@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, TypeSynonymInstances, MultiParamTypeClasses #-}
 
 {-
 
@@ -47,12 +47,12 @@ withPGDB r ps = do c <- asks pgPool
 
 applicationInitializer :: Initializer ApplicationState
 applicationInitializer = do
-    heist  <- heistInitializer "resources/templates"
+    heist  <- heistInitializer "resources/templates" id
     cookie <- cookieSessionStateInitializer $ defCookieSessionState
               { csKeyPath = "config/site-key.txt" 
               , csCookieName = "weshift-session" }
     pgconn <- liftIO $ createPool
-                        (connectPostgreSQL "hostaddr=127.0.0.1 dbname=postgres user=postgres password=3612st") 
+                        (connectPostgreSQL "hostaddr=127.0.0.1 dbname=postgres user=postgres password=pass") 
                         disconnect 
                         1
                         10

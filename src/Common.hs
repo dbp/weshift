@@ -49,9 +49,15 @@ redirPlaceHome :: Application ()
 redirPlaceHome = do hm <- liftM (fmap placeRoot) getCurrentPlace
                     redirect $ fromMaybe "/" hm
 
+redirectAsync url = heistLocal (bindSplice "url" (textSplice $ TE.decodeUtf8 url)) $ renderWS "redirect"
+
+redirPlaceHomeAsync :: Application ()
+redirPlaceHomeAsync = do hm <- liftM (fmap placeRoot) getCurrentPlace
+                         redirectAsync $ fromMaybe "/" hm
+
 
 checkPlaceLogin = checkPlaceLogin' redirect
-checkPlaceLoginAsync = checkPlaceLogin' (\url -> (heistLocal (bindSplice "url" (textSplice $ TE.decodeUtf8 url)) $ renderWS "redirect"))
+checkPlaceLoginAsync = checkPlaceLogin' redirectAsync
 
 checkPlaceLogin' :: (BS.ByteString -> Application ()) -> Maybe BS.ByteString -> Maybe BS.ByteString -> (User -> UserPlace -> Application ()) -> Application ()
 checkPlaceLogin' redr (Just org) (Just place) handler = 
@@ -110,6 +116,12 @@ userLookup users = do node <- getParamNode
                                                      ,("active", if uActive user then identitySplice else blackHoleSplice)
                                                      ,("super",  if uSuper user then identitySplice else blackHoleSplice)
                                                      ]  
+
+
+commonSplices today = [("currYear",  textSplice $ T.pack $ show year)
+                      ,("currMonth", textSplice $ T.pack $ show month)
+                      ]
+  where (year,month,_) = toGregorian today  
 
 renderWS :: ByteString -> Application ()
 renderWS t = do mplace <- getCurrentPlace

@@ -4,8 +4,8 @@
 
 <div-async name="center-main" class="main" id="bulk">
    <h2>Bulk Input</h2>
-   <form-async>
-     <textarea></textarea>
+   <form-async action="$(placeRoot)/bulk/upload" method="POST">
+     <textarea name="data"></textarea>
      <button type="submit" title="Load Data"></button>
    </form-async>
    <p><strong>Important:</strong> What you paste in should look like the following. It is a format called CSV, which most spreadsheet programs can save as / export to.</p>

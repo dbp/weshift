@@ -8,6 +8,7 @@ import qualified  Data.ByteString as BS
 import qualified  Data.ByteString.Char8 as B8
 import            Data.Maybe (catMaybes, listToMaybe)
 import            Database.HDBC
+import            Database.HDBC.SqlValue ()
 import            Data.Time.LocalTime
 
 import Application

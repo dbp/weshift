@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings, FlexibleContexts, TypeSynonymInstances, MultiParamTypeClasses #-}
 
 module Auth where
 

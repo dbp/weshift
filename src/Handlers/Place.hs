@@ -38,6 +38,7 @@ import Handlers.Shifts
 import Handlers.Messages
 import Handlers.Month
 import Handlers.Timesheet
+import Handlers.Bulk
 
 placeSite :: Application ()
 placeSite = do
@@ -103,11 +104,7 @@ monthH u p = do month <- fmap (maybeRead =<<) $ getParam "month"
                 let day = fromMaybe today $ liftM2 (\y m -> fromGregorian y m 1) year month
                 heistLocal (bindSplices ((monthSplices day) ++ (commonSplices day))) $ renderWS "work/month_calendar"
 
-
-commonSplices today = [("currYear",  textSplice $ T.pack $ show year)
-                      ,("currMonth", textSplice $ T.pack $ show month)
-                      ]
-  where (year,month,_) = toGregorian today         
+       
             
 monthSplices day = [("monthName", textSplice $ T.pack (formatTime defaultTimeLocale "%B %Y" day))
                    ,("monthDays", monthView year month)
@@ -150,7 +147,3 @@ timesheetH user place = do
                                                         , ("userName", TE.decodeUtf8 $ uName u)
                                                         , ("selected", if u == self then "selected='selected'" else "")
                                                         ]
-
-bulkInputH user place = do
-    today <- liftM utctDay $ liftIO getCurrentTime
-    heistLocal (bindSplices (commonSplices today)) $ renderWS "work/bulk"
