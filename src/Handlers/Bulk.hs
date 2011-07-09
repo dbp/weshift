@@ -83,6 +83,9 @@ data AP = AM | PM | NONE deriving Show
 
 data TIME = KNOWN NominalDiffTime | UNKNOWN NominalDiffTime deriving Show
 
+halfDay = 12*60*60
+fullDay = 24*60*60
+
 time = do d1 <- fmap (Just . digitToInt) digit
           d2 <- option Nothing (fmap (Just . digitToInt) digit)
           s <- option Nothing (fmap Just $ char ':')
@@ -103,42 +106,45 @@ time = do d1 <- fmap (Just . digitToInt) digit
                     let ds = catMaybes [d1,d2,d3,d4] in
                     case ds of
                       (x:[]) -> hours x
-                      (x1:x2:[]) -> hours (x1 * 10 + x2)
-                      _ -> let n = listToInt ds in minutes $ (n `mod` 100) * 60 + (n `div` 100)
-                  _ -> -- this means there was a divider, so we can process before and after separately
+                      (x1:x2:[]) -> let n = (x1 * 10 + x2) in 
+                                    if n > 24 {-assuming they forgot trailing 0-} 
+                                      then minutes (x1 * 60 + x2 * 10) 
+                                      else hours n 
+                      _ -> let n = listToInt ds in minutes $ (n `div` 100) * 60 + (n `mod` 100)
+                  _ -> -- this means there was a colon divider, so we can process before and after separately
                     let hs = listToInt $ catMaybes [d1,d2]
                         ms = listToInt $ catMaybes [d3,d4] in
                     minutes $ hs * 60 + ms
           case ampm of
-            AM -> return $ KNOWN prelimTime
-            PM -> return $ KNOWN $ prelimTime + 12*60*60
-            NONE -> return $ if prelimTime > 12*60*60 then KNOWN prelimTime {-this is 24hr time-} else UNKNOWN prelimTime
+            AM -> if prelimTime < halfDay then return (KNOWN prelimTime) else fail "AM time above 12hrs"
+            PM -> if prelimTime < halfDay then return (KNOWN $ prelimTime + halfDay) else fail "PM time above 12hs"
+            NONE -> if prelimTime > fullDay then fail "time above 24hrs" else 
+                    return $ if prelimTime > halfDay then KNOWN prelimTime {-this is 24hr time-} else UNKNOWN prelimTime
     where hours h = minutes (h * 60)
           minutes m = fromInteger $ toInteger (m * 60) :: NominalDiffTime
           listToInt ls = foldr (\(x,m) t -> t + (x * m)) 0 $ zip ls (reverse $ take (length ls) $ iterate (*10) 1)
 
 parseTimeRange :: Parser (NominalDiffTime,NominalDiffTime)
 parseTimeRange = do
-  start <- time
-  spaces
-  optional (char '-')
-  spaces
-  end <- time
-  -- now if the times are unknown, figure out our best guess of what they should be,
-  -- based on our knowledge of the domain, ie, work shifts.
-  return $ case (start,end) of
-            (KNOWN s, KNOWN e) -> 
-              (s,e)
-            (KNOWN s, UNKNOWN e') -> 
-              if e' - s < 0 then (s,e' + 12*60*60) else (s,e')
-            (UNKNOWN s', KNOWN e) -> 
-              -- assume that a shift is less than 12hrs (otherwise, something evil is happening)
-              if e - s' > 12*60*60 then (s' + 12*60*60,e) else (s',e)
-            (UNKNOWN s', UNKNOWN e') -> 
-              -- here is where we make biggest guess - that shifts will not start before 5am, 
-              -- and of course won't be more than 12hrs
-              let s = if s' < 5*60*60 then s' + 12*60*60 else s' in
-              if e' - s < 0 then (s,e' + 12*60*60) else (s,e')
-
-
+    start <- time
+    spaces
+    optional (char '-')
+    spaces
+    end <- time
+    -- now if the times are unknown, figure out our best guess of what they should be,
+    -- based on our knowledge of the domain, ie, work shifts.
+    check $ case (start,end) of
+              (KNOWN s, KNOWN e) -> 
+                (s,e)
+              (KNOWN s, UNKNOWN e') -> 
+                if e' < s then (s,e' + halfDay) else (s,e')
+              (UNKNOWN s', KNOWN e) -> 
+                -- assume that a shift is less than 12hrs (otherwise, something evil is happening)
+                if e - s' > halfDay then (s' + halfDay,e) else (s',e)
+              (UNKNOWN s', UNKNOWN e') -> 
+                -- here is where we make biggest guess - that shifts will not start before 5am, 
+                -- and of course won't be more than 12hrs
+                let s = if s' < 5*60*60 then s' + halfDay else s' in
+                if e' < s then (s,e' + halfDay) else (s,e')
+  where check (s,e) = if s < e then return (s,e) else fail "start time after end time"  
 
