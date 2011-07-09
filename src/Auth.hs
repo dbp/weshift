@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, FlexibleContexts, TypeSynonymInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings, FlexibleContexts, TypeSynonymInstances, MultiParamTypeClasses, PackageImports #-}
 
 module Auth where
 
@@ -8,8 +8,8 @@ import            Snap.Auth.Handlers
 import            Snap.Extension.Session.CookieSession
 import qualified  Data.Map as M
 import            Control.Monad
-import            Control.Monad.Reader
-import            Control.Monad.Trans
+import  "mtl"     Control.Monad.Reader
+import  "mtl"     Control.Monad.Trans
 import            Control.Applicative
 import            Snap.Types
 import qualified  Data.ByteString as BS

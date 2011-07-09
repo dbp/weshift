@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, PackageImports #-}
 
 module Handlers.Settings where
   
@@ -15,7 +15,7 @@ import Database.HDBC
 import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
 import Control.Applicative
-import Control.Monad.Trans (liftIO)
+import "mtl" Control.Monad.Trans (liftIO)
 
 import Application
 import Auth

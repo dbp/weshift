@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, TypeSynonymInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings, TypeSynonymInstances, MultiParamTypeClasses, PackageImports #-}
 
 {-
 
@@ -19,9 +19,9 @@ import            Snap.Auth
 import            Snap.Extension.Session.CookieSession
 import            Database.HDBC.PostgreSQL
 import            Database.HDBC
-import            Control.Monad.Trans (liftIO)
+import  "mtl"     Control.Monad.Trans (liftIO)
 import            Data.Pool
-import            Control.Monad.Reader (asks)
+import  "mtl"     Control.Monad.Reader (asks)
 
 type Application = SnapExtend ApplicationState
 

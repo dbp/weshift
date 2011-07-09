@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, PackageImports #-}
 
 module Site
   ( site
@@ -6,7 +6,7 @@ module Site
 
 import            Control.Applicative
 import            Control.Monad
-import            Control.Monad.Trans (liftIO)
+import "mtl"      Control.Monad.Trans (liftIO)
 import            Data.Maybe
 import qualified  Data.Text.Encoding as TE
 import qualified  Data.Text as T

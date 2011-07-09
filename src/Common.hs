@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, PackageImports #-}
 
 module Common where
 
@@ -15,7 +15,7 @@ import Snap.Auth.Handlers
 import Snap.Auth
 import Snap.Extension.Session.CookieSession
 import Snap.Extension.Heist
-import Control.Monad.Trans (lift, liftIO)
+import "mtl" Control.Monad.Trans (lift, liftIO)
 import Heist.Splices.Async (heistAsyncSplices)
 import Data.Maybe (fromMaybe, maybeToList, listToMaybe, fromJust)
 import Control.Monad (liftM, mzero, unless)

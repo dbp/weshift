@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, PackageImports #-}
 
 module Handlers.Place where
   
@@ -6,7 +6,7 @@ import Snap.Types
 import Application
 import Common
 import Control.Monad
-import Control.Monad.Trans (liftIO)
+import "mtl" Control.Monad.Trans (liftIO)
 import Data.Maybe (fromMaybe, isNothing, fromJust)
 
 import Data.Time.Format

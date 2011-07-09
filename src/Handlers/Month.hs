@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, PackageImports #-}
 
 module Handlers.Month where
   
@@ -19,7 +19,7 @@ import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
 import Control.Applicative
-import Control.Monad.Trans (liftIO, lift)
+import "mtl" Control.Monad.Trans (liftIO, lift)
 
 import Data.Time.Calendar
 import Data.Time.LocalTime

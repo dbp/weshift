@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, PackageImports #-}
 
 module Mail where
 
@@ -16,7 +16,7 @@ import Network.HTTP.Base
 import Network.HTTP.Headers
 import Network.URI (parseURI)
 import Secrets (postmarkToken)
-import Control.Monad.Trans
+import "mtl" Control.Monad.Trans
 
 import Snap.Types hiding (POST)
 

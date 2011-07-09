@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, PackageImports #-}
 
 module Handlers.Account where
 
@@ -15,6 +15,7 @@ import State.Place
 import Text.Templating.Heist
 import Snap.Extension.Heist
 import Control.Monad
+import "mtl" Control.Monad.Trans
 
 import qualified Snap.Auth as A
 
