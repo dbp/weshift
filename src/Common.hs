@@ -66,8 +66,8 @@ checkPlaceLogin' redr (Just org) (Just place) handler =
      p <- getPlace (repSpaces org) (repSpaces place)
      let loginPage = do let pid = maybe "" pId p
                         redr (BS.concat ["/login?redirectTo=", uri, "&pl=", pid])
-     case (userHasPlace org place u, p) of
-       (True,Just pl) -> handler (fromJust u) pl
+     case (userHasPlace org place u, p, u) of
+       (True,Just pl, Just u) -> handler u $ if uSuper u then pl { pFac = True } else pl
        _ -> loginPage
        
   where userHasPlace org place (Just (User _ _ _ super places)) = super || any (\p -> pName p == place && pOrg p == org) places
@@ -117,6 +117,19 @@ userLookup users = do node <- getParamNode
                                                      ,("super",  if uSuper user then identitySplice else blackHoleSplice)
                                                      ]  
 
+-- | this splice shows it's children if the blank attribute is blank, or if it's notblank attribute is not blank, 
+--   or another attribute is equal to it's name
+showContent :: Monad m => Splice m
+showContent = do node <- getParamNode
+                 case X.getAttribute "notblank" node of
+                   Just "" -> return []
+                   Nothing -> case X.getAttribute "blank" node of
+                     Just "" -> return $ X.elementChildren node
+                     Nothing -> if checkAttrs node then return (X.elementChildren node) else return []
+                     _ -> return []
+                   _ -> return $ X.elementChildren node
+        where checkAttrs node = any (\(a,b) -> a == b) $ X.elementAttrs node
+
 
 commonSplices today = [("currYear",  textSplice $ T.pack $ show year)
                       ,("currMonth", textSplice $ T.pack $ show month)
@@ -138,6 +151,7 @@ renderWS t = do mplace <- getCurrentPlace
                 (heistLocal $ (bindSplices (splices ++ placeSplices ++ userSplices ++ workersSplice))) $ render t
   where splices = [ ("ifLoggedIn", ifLoggedIn)
                   , ("ifGuest", ifGuest)
+                  , ("show", showContent)
                   ] ++ heistAsyncSplices
                   
                   

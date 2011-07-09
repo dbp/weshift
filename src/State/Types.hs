@@ -10,6 +10,8 @@ import            Data.Maybe (catMaybes, listToMaybe)
 import            Database.HDBC
 import            Database.HDBC.SqlValue ()
 import            Data.Time.LocalTime
+import            Data.Time.Calendar
+import            Data.Time.Clock
 
 import Application
 
@@ -37,6 +39,8 @@ emptyUserPlace = UserPlace "" "" "" False ""
 
 data Attrs = Attrs Bool Bool [UserPlace]
       deriving (Eq, Show)
+
+emptyLocalTime = utcToLocalTime utc (UTCTime (fromGregorian 0 0 0) (fromInteger 0))      
       
 data Shift = Shift { sId :: BS.ByteString
                    , sUser :: BS.ByteString
@@ -46,8 +50,9 @@ data Shift = Shift { sId :: BS.ByteString
                    , sRecorded :: LocalTime
                    , sRecorder :: BS.ByteString
                    }
-                   deriving (Eq, Show)
-                   
+                   deriving (Eq, Show, Read)
+emptyShift = Shift "" "" "" emptyLocalTime emptyLocalTime emptyLocalTime ""
+
 
 buildPlace (pi:pn:pt:po:[]) = Just $ UserPlace (fromSql pi) (fromSql pn) (fromSql po) False (fromSql pt) 
 buildPlace _ = Nothing

@@ -29,6 +29,7 @@ renderShift (Shift id' user place start stop recorded recorder) =
   runChildrenWithText [("id", TE.decodeUtf8 id')
                       ,("user", TE.decodeUtf8 user)
                       ,("place", TE.decodeUtf8 place)
+                      ,("date", renderDate start)
                       ,("start", renderTime start)
                       ,("stop", renderTime stop)
                       ,("recorded", renderTime recorded)

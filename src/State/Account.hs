@@ -31,10 +31,10 @@ mkUser au = do (Attrs active super places) <- liftM snd au
 
 buildUser (ui:un:ua:us:[]) places = 
   Just (emptyAuthUser { userId = Just $ UserId (fromSql ui) 
-                                             , userEmail = fromSql un
-                                             , userPassword = Just (Encrypted "")
-                                             , userSalt = Just ""
-                                             }
+                      , userEmail = fromSql un
+                      , userPassword = Just (Encrypted "")
+                      , userSalt = Just ""
+                      }
         , Attrs (fromSql ua) (fromSql us) 
                 (map (\(pi:pn:pt:po:pf:[]) -> 
                   UserPlace (fromSql pi) (fromSql pn) (fromSql po) (fromSql pf) (fromSql pt)) 
