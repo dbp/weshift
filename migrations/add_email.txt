@@ -1,0 +1,8 @@
+Description: Adds a table to keep track of user's email addresses.
+Created: 2011-04-14 16:56:07.85237 UTC
+Depends: 
+Apply:
+	CREATE TABLE useremails (id serial primary key, user_id integer not null references users on delete cascade, email text not null, active bool not null default false, confirmed bool not null default false);  
+
+Revert:
+  DROP TABLE useremails

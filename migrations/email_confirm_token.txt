@@ -1,0 +1,8 @@
+Description: (Description here.)
+Created: 2011-04-17 17:09:01.748293 UTC
+Depends: add_email
+Apply:
+  ALTER TABLE useremails ADD COLUMN token TEXT NOT NULL DEFAULT "substring"(md5((random())::text), 1, 10);
+
+Revert:
+  ALTER TABLE useremails DROP COLUMN token;

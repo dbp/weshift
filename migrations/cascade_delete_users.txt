@@ -1,0 +1,44 @@
+Description: (Description here.)
+Created: 2011-04-23 18:59:30.082809 UTC
+Depends: add_email add_shift_requests_covers
+Apply:
+  alter table shifts drop constraint shifts_recorder_fkey;
+  alter table shifts drop constraint shifts_user_id_fkey;
+  alter table shiftdeletes drop constraint shiftdeletes_recorder_fkey;
+  alter table shiftdeletes drop constraint shiftdeletes_user_id_fkey;
+  alter table shiftchanges drop constraint shiftchanges_recorder_fkey;
+  alter table shiftchanges drop constraint shiftchanges_user_id_fkey;
+  alter table shiftrequests drop constraint shiftrequests_requester_fkey;
+  alter table obligations drop constraint obligations_user_id_fkey;
+  alter table shiftcovers drop constraint shiftcovers_coverer_fkey;
+  
+  alter table shifts add constraint shifts_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id) ON DELETE CASCADE;
+  alter table shifts add constraint shifts_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+  alter table shiftchanges add constraint shiftchanges_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id) ON DELETE CASCADE;
+  alter table shiftchanges add constraint shiftchanges_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+  alter table shiftdeletes add constraint shiftdeletes_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id) ON DELETE CASCADE;
+  alter table shiftdeletes add constraint shiftdeletes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+  alter table shiftrequests add constraint shiftrequests_requester_fkey FOREIGN KEY (requester) REFERENCES users(id) ON DELETE CASCADE;
+  alter table obligations add constraint obligations_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+  alter table shiftcovers add constraint shiftcovers_coverer_fkey FOREIGN KEY (coverer) REFERENCES users(id) ON DELETE CASCADE;
+Revert:                                         
+  alter table shifts drop constraint shifts_recorder_fkey;
+  alter table shifts drop constraint shifts_user_id_fkey;
+  alter table shiftdeletes drop constraint shiftdeletes_recorder_fkey;
+  alter table shiftdeletes drop constraint shiftdeletes_user_id_fkey;
+  alter table shiftchanges drop constraint shiftchanges_recorder_fkey;
+  alter table shiftchanges drop constraint shiftchanges_user_id_fkey;
+  alter table shiftrequests drop constraint shiftrequests_requester_fkey;
+  alter table obligations drop constraint obligations_user_id_fkey;
+  alter table shiftcovers drop constraint shiftcovers_coverer_fkey;
+  
+  alter table shifts add constraint shifts_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id);
+  alter table shifts add constraint shifts_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+  alter table shiftchanges add constraint shiftchanges_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id);
+  alter table shiftchanges add constraint shiftchanges_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+  alter table shiftdeletes add constraint shiftdeletes_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id);
+  alter table shiftdeletes add constraint shiftdeletes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+  alter table shiftrequests add constraint shiftrequests_requester_fkey FOREIGN KEY (requester) REFERENCES users(id);
+  alter table obligations add constraint obligations_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+  alter table shiftcovers add constraint shiftcovers_coverer_fkey FOREIGN KEY (coverer) REFERENCES users(id);
+  

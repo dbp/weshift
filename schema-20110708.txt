@@ -1,0 +1,1779 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = off;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET escape_string_warning = off;
+
+SET search_path = public, pg_catalog;
+
+--
+-- Name: armor(bytea); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION armor(bytea) RETURNS text
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_armor';
+
+
+ALTER FUNCTION public.armor(bytea) OWNER TO postgres;
+
+--
+-- Name: crypt(text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION crypt(text, text) RETURNS text
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_crypt';
+
+
+ALTER FUNCTION public.crypt(text, text) OWNER TO postgres;
+
+--
+-- Name: dearmor(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION dearmor(text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_dearmor';
+
+
+ALTER FUNCTION public.dearmor(text) OWNER TO postgres;
+
+--
+-- Name: decrypt(bytea, bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION decrypt(bytea, bytea, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_decrypt';
+
+
+ALTER FUNCTION public.decrypt(bytea, bytea, text) OWNER TO postgres;
+
+--
+-- Name: decrypt_iv(bytea, bytea, bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION decrypt_iv(bytea, bytea, bytea, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_decrypt_iv';
+
+
+ALTER FUNCTION public.decrypt_iv(bytea, bytea, bytea, text) OWNER TO postgres;
+
+--
+-- Name: digest(text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION digest(text, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_digest';
+
+
+ALTER FUNCTION public.digest(text, text) OWNER TO postgres;
+
+--
+-- Name: digest(bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION digest(bytea, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_digest';
+
+
+ALTER FUNCTION public.digest(bytea, text) OWNER TO postgres;
+
+--
+-- Name: encrypt(bytea, bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION encrypt(bytea, bytea, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_encrypt';
+
+
+ALTER FUNCTION public.encrypt(bytea, bytea, text) OWNER TO postgres;
+
+--
+-- Name: encrypt_iv(bytea, bytea, bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION encrypt_iv(bytea, bytea, bytea, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_encrypt_iv';
+
+
+ALTER FUNCTION public.encrypt_iv(bytea, bytea, bytea, text) OWNER TO postgres;
+
+--
+-- Name: gen_random_bytes(integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION gen_random_bytes(integer) RETURNS bytea
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pg_random_bytes';
+
+
+ALTER FUNCTION public.gen_random_bytes(integer) OWNER TO postgres;
+
+--
+-- Name: gen_salt(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION gen_salt(text) RETURNS text
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pg_gen_salt';
+
+
+ALTER FUNCTION public.gen_salt(text) OWNER TO postgres;
+
+--
+-- Name: gen_salt(text, integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION gen_salt(text, integer) RETURNS text
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pg_gen_salt_rounds';
+
+
+ALTER FUNCTION public.gen_salt(text, integer) OWNER TO postgres;
+
+--
+-- Name: hmac(text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION hmac(text, text, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_hmac';
+
+
+ALTER FUNCTION public.hmac(text, text, text) OWNER TO postgres;
+
+--
+-- Name: hmac(bytea, bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION hmac(bytea, bytea, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pg_hmac';
+
+
+ALTER FUNCTION public.hmac(bytea, bytea, text) OWNER TO postgres;
+
+--
+-- Name: pgp_key_id(bytea); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_key_id(bytea) RETURNS text
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_key_id_w';
+
+
+ALTER FUNCTION public.pgp_key_id(bytea) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_decrypt(bytea, bytea); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_decrypt(bytea, bytea) RETURNS text
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_decrypt_text';
+
+
+ALTER FUNCTION public.pgp_pub_decrypt(bytea, bytea) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_decrypt(bytea, bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_decrypt(bytea, bytea, text) RETURNS text
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_decrypt_text';
+
+
+ALTER FUNCTION public.pgp_pub_decrypt(bytea, bytea, text) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_decrypt(bytea, bytea, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_decrypt(bytea, bytea, text, text) RETURNS text
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_decrypt_text';
+
+
+ALTER FUNCTION public.pgp_pub_decrypt(bytea, bytea, text, text) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_decrypt_bytea(bytea, bytea); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_decrypt_bytea(bytea, bytea) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_decrypt_bytea';
+
+
+ALTER FUNCTION public.pgp_pub_decrypt_bytea(bytea, bytea) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_decrypt_bytea(bytea, bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_decrypt_bytea(bytea, bytea, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_decrypt_bytea';
+
+
+ALTER FUNCTION public.pgp_pub_decrypt_bytea(bytea, bytea, text) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_decrypt_bytea(bytea, bytea, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_decrypt_bytea(bytea, bytea, text, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_decrypt_bytea';
+
+
+ALTER FUNCTION public.pgp_pub_decrypt_bytea(bytea, bytea, text, text) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_encrypt(text, bytea); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_encrypt(text, bytea) RETURNS bytea
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_encrypt_text';
+
+
+ALTER FUNCTION public.pgp_pub_encrypt(text, bytea) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_encrypt(text, bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_encrypt(text, bytea, text) RETURNS bytea
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_encrypt_text';
+
+
+ALTER FUNCTION public.pgp_pub_encrypt(text, bytea, text) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_encrypt_bytea(bytea, bytea); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_encrypt_bytea(bytea, bytea) RETURNS bytea
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_encrypt_bytea';
+
+
+ALTER FUNCTION public.pgp_pub_encrypt_bytea(bytea, bytea) OWNER TO postgres;
+
+--
+-- Name: pgp_pub_encrypt_bytea(bytea, bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_pub_encrypt_bytea(bytea, bytea, text) RETURNS bytea
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pgp_pub_encrypt_bytea';
+
+
+ALTER FUNCTION public.pgp_pub_encrypt_bytea(bytea, bytea, text) OWNER TO postgres;
+
+--
+-- Name: pgp_sym_decrypt(bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_sym_decrypt(bytea, text) RETURNS text
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_sym_decrypt_text';
+
+
+ALTER FUNCTION public.pgp_sym_decrypt(bytea, text) OWNER TO postgres;
+
+--
+-- Name: pgp_sym_decrypt(bytea, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_sym_decrypt(bytea, text, text) RETURNS text
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_sym_decrypt_text';
+
+
+ALTER FUNCTION public.pgp_sym_decrypt(bytea, text, text) OWNER TO postgres;
+
+--
+-- Name: pgp_sym_decrypt_bytea(bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_sym_decrypt_bytea(bytea, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_sym_decrypt_bytea';
+
+
+ALTER FUNCTION public.pgp_sym_decrypt_bytea(bytea, text) OWNER TO postgres;
+
+--
+-- Name: pgp_sym_decrypt_bytea(bytea, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_sym_decrypt_bytea(bytea, text, text) RETURNS bytea
+    LANGUAGE c IMMUTABLE STRICT
+    AS '$libdir/pgcrypto', 'pgp_sym_decrypt_bytea';
+
+
+ALTER FUNCTION public.pgp_sym_decrypt_bytea(bytea, text, text) OWNER TO postgres;
+
+--
+-- Name: pgp_sym_encrypt(text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_sym_encrypt(text, text) RETURNS bytea
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pgp_sym_encrypt_text';
+
+
+ALTER FUNCTION public.pgp_sym_encrypt(text, text) OWNER TO postgres;
+
+--
+-- Name: pgp_sym_encrypt(text, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_sym_encrypt(text, text, text) RETURNS bytea
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pgp_sym_encrypt_text';
+
+
+ALTER FUNCTION public.pgp_sym_encrypt(text, text, text) OWNER TO postgres;
+
+--
+-- Name: pgp_sym_encrypt_bytea(bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_sym_encrypt_bytea(bytea, text) RETURNS bytea
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pgp_sym_encrypt_bytea';
+
+
+ALTER FUNCTION public.pgp_sym_encrypt_bytea(bytea, text) OWNER TO postgres;
+
+--
+-- Name: pgp_sym_encrypt_bytea(bytea, text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION pgp_sym_encrypt_bytea(bytea, text, text) RETURNS bytea
+    LANGUAGE c STRICT
+    AS '$libdir/pgcrypto', 'pgp_sym_encrypt_bytea';
+
+
+ALTER FUNCTION public.pgp_sym_encrypt_bytea(bytea, text, text) OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: activations; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE activations (
+    token character varying(32) DEFAULT md5((random())::text) NOT NULL,
+    user_id integer NOT NULL
+);
+
+
+ALTER TABLE public.activations OWNER TO postgres;
+
+--
+-- Name: configuration; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE configuration (
+    user_id integer NOT NULL,
+    receive_messages boolean DEFAULT true NOT NULL
+);
+
+
+ALTER TABLE public.configuration OWNER TO postgres;
+
+--
+-- Name: installed_migrations; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE installed_migrations (
+    migration_id text
+);
+
+
+ALTER TABLE public.installed_migrations OWNER TO postgres;
+
+--
+-- Name: message_downs; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE message_downs (
+    message integer NOT NULL,
+    user_hash text NOT NULL
+);
+
+
+ALTER TABLE public.message_downs OWNER TO postgres;
+
+--
+-- Name: message_flags; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE message_flags (
+    message integer NOT NULL,
+    user_hash text NOT NULL
+);
+
+
+ALTER TABLE public.message_flags OWNER TO postgres;
+
+--
+-- Name: message_ups; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE message_ups (
+    message integer NOT NULL,
+    user_hash text NOT NULL
+);
+
+
+ALTER TABLE public.message_ups OWNER TO postgres;
+
+--
+-- Name: messages; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE messages (
+    id integer NOT NULL,
+    parent integer,
+    contents character varying(140) NOT NULL,
+    place integer NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.messages OWNER TO postgres;
+
+--
+-- Name: messages_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.messages_id_seq OWNER TO postgres;
+
+--
+-- Name: messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE messages_id_seq OWNED BY messages.id;
+
+
+--
+-- Name: messages_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('messages_id_seq', 9, true);
+
+
+--
+-- Name: shifts; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE shifts (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    place integer NOT NULL,
+    start timestamp without time zone NOT NULL,
+    stop timestamp without time zone NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL,
+    recorder integer NOT NULL
+);
+
+
+ALTER TABLE public.shifts OWNER TO postgres;
+
+--
+-- Name: shifts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE shifts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.shifts_id_seq OWNER TO postgres;
+
+--
+-- Name: shifts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE shifts_id_seq OWNED BY shifts.id;
+
+
+--
+-- Name: shifts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('shifts_id_seq', 241, true);
+
+
+--
+-- Name: obligations; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE obligations (
+    id integer DEFAULT nextval('shifts_id_seq'::regclass) NOT NULL,
+    user_id integer NOT NULL,
+    start timestamp without time zone NOT NULL,
+    stop timestamp without time zone NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.obligations OWNER TO postgres;
+
+--
+-- Name: organizations; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE organizations (
+    name character varying(30) NOT NULL
+);
+
+
+ALTER TABLE public.organizations OWNER TO postgres;
+
+--
+-- Name: places; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE places (
+    id integer NOT NULL,
+    name character varying(30) NOT NULL,
+    token character varying(10) DEFAULT "substring"(md5((random())::text), 1, 10) NOT NULL,
+    organization character varying(30) NOT NULL
+);
+
+
+ALTER TABLE public.places OWNER TO postgres;
+
+--
+-- Name: places_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE places_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.places_id_seq OWNER TO postgres;
+
+--
+-- Name: places_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE places_id_seq OWNED BY places.id;
+
+
+--
+-- Name: places_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('places_id_seq', 5, true);
+
+
+--
+-- Name: placeusers; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE placeusers (
+    user_id integer,
+    place integer,
+    facilitator boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.placeusers OWNER TO postgres;
+
+--
+-- Name: shiftchanges; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE shiftchanges (
+    user_id integer NOT NULL,
+    place integer NOT NULL,
+    old_shift integer NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL,
+    recorder integer NOT NULL,
+    start timestamp without time zone NOT NULL,
+    stop timestamp without time zone NOT NULL,
+    id integer NOT NULL
+);
+
+
+ALTER TABLE public.shiftchanges OWNER TO postgres;
+
+--
+-- Name: shiftchanges_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE shiftchanges_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.shiftchanges_id_seq OWNER TO postgres;
+
+--
+-- Name: shiftchanges_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE shiftchanges_id_seq OWNED BY shiftchanges.id;
+
+
+--
+-- Name: shiftchanges_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('shiftchanges_id_seq', 8, true);
+
+
+--
+-- Name: shiftcovers; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE shiftcovers (
+    id integer NOT NULL,
+    shift_id integer NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL,
+    coverer integer NOT NULL
+);
+
+
+ALTER TABLE public.shiftcovers OWNER TO postgres;
+
+--
+-- Name: shiftcovers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE shiftcovers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.shiftcovers_id_seq OWNER TO postgres;
+
+--
+-- Name: shiftcovers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE shiftcovers_id_seq OWNED BY shiftcovers.id;
+
+
+--
+-- Name: shiftcovers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('shiftcovers_id_seq', 2, true);
+
+
+--
+-- Name: shiftdeletes; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE shiftdeletes (
+    user_id integer NOT NULL,
+    place integer NOT NULL,
+    old_shift integer NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL,
+    recorder integer NOT NULL
+);
+
+
+ALTER TABLE public.shiftdeletes OWNER TO postgres;
+
+--
+-- Name: shiftrequests; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE shiftrequests (
+    id integer NOT NULL,
+    shift_id integer NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL,
+    requester integer NOT NULL
+);
+
+
+ALTER TABLE public.shiftrequests OWNER TO postgres;
+
+--
+-- Name: shiftrequests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE shiftrequests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.shiftrequests_id_seq OWNER TO postgres;
+
+--
+-- Name: shiftrequests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE shiftrequests_id_seq OWNED BY shiftrequests.id;
+
+
+--
+-- Name: shiftrequests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('shiftrequests_id_seq', 5, true);
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE users (
+    id integer NOT NULL,
+    name character varying(50) NOT NULL,
+    password text NOT NULL,
+    active boolean DEFAULT false NOT NULL,
+    super boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO postgres;
+
+--
+-- Name: shifts_current; Type: VIEW; Schema: public; Owner: postgres
+--
+
+CREATE VIEW shifts_current AS
+    SELECT DISTINCT ON (s.id) s.id, COALESCE(co.coverer, s.user_id) AS user_id, s.place, COALESCE(sc.recorder, s.recorder) AS recorder, COALESCE(sc.recorded, s.recorded) AS recorded, COALESCE(sc.start, s.start) AS start, COALESCE(sc.stop, s.stop) AS stop FROM ((((shifts s LEFT JOIN shiftchanges sc ON ((s.id = sc.old_shift))) LEFT JOIN shiftdeletes sd ON ((s.id = sd.old_shift))) JOIN users u ON ((u.id = s.user_id))) LEFT JOIN shiftcovers co ON ((co.shift_id = s.id))) WHERE (sd.old_shift IS NULL) ORDER BY s.id, sc.recorded DESC, co.recorded DESC;
+
+
+ALTER TABLE public.shifts_current OWNER TO postgres;
+
+--
+-- Name: useremails; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE useremails (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    email text NOT NULL,
+    active boolean DEFAULT false NOT NULL,
+    confirmed boolean DEFAULT false NOT NULL,
+    token text DEFAULT "substring"(md5((random())::text), 1, 10) NOT NULL
+);
+
+
+ALTER TABLE public.useremails OWNER TO postgres;
+
+--
+-- Name: useremails_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE useremails_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.useremails_id_seq OWNER TO postgres;
+
+--
+-- Name: useremails_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE useremails_id_seq OWNED BY useremails.id;
+
+
+--
+-- Name: useremails_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('useremails_id_seq', 8, true);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_id_seq OWNER TO postgres;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('users_id_seq', 36, true);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE messages ALTER COLUMN id SET DEFAULT nextval('messages_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE places ALTER COLUMN id SET DEFAULT nextval('places_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE shiftchanges ALTER COLUMN id SET DEFAULT nextval('shiftchanges_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE shiftcovers ALTER COLUMN id SET DEFAULT nextval('shiftcovers_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE shiftrequests ALTER COLUMN id SET DEFAULT nextval('shiftrequests_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE shifts ALTER COLUMN id SET DEFAULT nextval('shifts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE useremails ALTER COLUMN id SET DEFAULT nextval('useremails_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+
+
+--
+-- Data for Name: activations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY activations (token, user_id) FROM stdin;
+1422ac28c1d45ac82f243d36f0544eeb	4
+722e55bfc43bad705c0c4a84f90838f4	4
+923b85526e4f2ccfb234160d35dcc2f5	36
+\.
+
+
+--
+-- Data for Name: configuration; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY configuration (user_id, receive_messages) FROM stdin;
+\.
+
+
+--
+-- Data for Name: installed_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY installed_migrations (migration_id) FROM stdin;
+root
+remove_master
+add_shift_requests_covers
+add_current_shifts_view
+add_email
+email_confirm_token
+cascade_delete_users
+\.
+
+
+--
+-- Data for Name: message_downs; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY message_downs (message, user_hash) FROM stdin;
+2	5df4b2acdc683635de986dc8ee20af3764a2ce5f
+7	929e7cb81c68bd3fe9b44e099270771366f40319
+\.
+
+
+--
+-- Data for Name: message_flags; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY message_flags (message, user_hash) FROM stdin;
+3	2702533c83a789c364e78c1059addd187b84d857
+\.
+
+
+--
+-- Data for Name: message_ups; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY message_ups (message, user_hash) FROM stdin;
+1	8c65e96b1937c6b97d2d7a858c5a6ea783e5305b
+1	4a877e7d49893691f9a02c41782b34702a6ccffd
+2	25317b5c0c9d4a62a785b91b1be09b59650a48ca
+1	70039d6fb0717cdbc79e4135856c7156c3d838c4
+5	f47d6a34890b7173753214919c811120271002c6
+\.
+
+
+--
+-- Data for Name: messages; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY messages (id, parent, contents, place, created) FROM stdin;
+1	\N	Hello world!	1	2011-04-10 00:01:47.637776
+2	1	Response\r\n	1	2011-04-14 17:28:32.119366
+3	\N	testtest1	1	2011-04-15 16:19:42.98105
+4	\N	testest	1	2011-04-15 16:19:51.693078
+5	\N	testtest2	1	2011-04-15 16:19:57.235721
+6	\N	testes1	1	2011-04-15 16:20:03.426319
+7	\N	hellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohello	1	2011-04-15 16:20:31.035729
+8	\N	Hello again!	1	2011-04-25 03:19:46.183139
+9	\N	hey everyone! maybe we could all log time that we do on this page.	1	2011-05-21 09:41:52.441967
+\.
+
+
+--
+-- Data for Name: obligations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY obligations (id, user_id, start, stop, recorded) FROM stdin;
+2	4	2011-04-10 05:00:00	2011-04-10 06:00:00	2011-04-10 21:02:19.453645
+13	4	2011-04-03 06:45:00	2011-04-03 07:45:00	2011-04-18 20:33:06.859518
+241	3	2011-05-19 09:00:00	2011-05-19 10:00:00	2011-05-14 19:21:00.788577
+\.
+
+
+--
+-- Data for Name: organizations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY organizations (name) FROM stdin;
+Position
+RISD
+\.
+
+
+--
+-- Data for Name: places; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY places (id, name, token, organization) FROM stdin;
+1	Providence	bfd3b230c7	Position
+2	Cambridge	a181dc0c7e	Position
+3	New York	7166b43b74	Position
+4	The Portfolio Cafe	7792f0cac6	RISD
+\.
+
+
+--
+-- Data for Name: placeusers; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY placeusers (user_id, place, facilitator) FROM stdin;
+1	1	t
+3	1	f
+4	1	f
+3	2	t
+4	3	t
+3	3	f
+9	4	t
+9	1	f
+6	3	t
+10	4	f
+11	4	f
+12	4	f
+13	4	f
+14	4	f
+15	4	f
+16	4	f
+17	4	f
+18	4	f
+19	4	f
+20	4	f
+21	4	f
+22	4	f
+23	4	f
+24	4	f
+25	4	f
+26	4	f
+27	4	f
+28	4	f
+29	4	f
+30	4	f
+31	4	f
+32	4	f
+33	4	f
+1	4	f
+34	4	f
+35	1	f
+7	1	t
+\.
+
+
+--
+-- Data for Name: shiftchanges; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY shiftchanges (user_id, place, old_shift, recorded, recorder, start, stop, id) FROM stdin;
+3	1	1	2011-04-10 00:01:09.696524	3	2011-04-10 09:00:00	2011-04-10 16:00:00	1
+7	1	3	2011-04-14 17:21:42.517347	7	2011-04-20 10:00:00	2011-04-20 19:30:00	2
+33	4	29	2011-04-22 05:27:06.227079	9	2011-04-26 19:00:00	2011-04-26 22:00:00	3
+9	4	79	2011-04-26 04:14:21.620987	9	2011-04-23 12:00:00	2011-04-23 21:30:00	4
+9	4	77	2011-04-26 04:15:17.471118	9	2011-04-25 16:00:00	2011-04-25 21:30:00	5
+9	4	177	2011-05-05 09:44:03.294969	9	2011-05-02 15:30:00	2011-05-02 21:30:00	6
+35	1	238	2011-05-10 17:56:07.044022	3	2011-05-10 08:45:00	2011-05-10 16:45:00	7
+1	1	234	2011-05-30 23:04:25.179139	1	2011-05-11 05:00:00	2011-05-11 11:00:00	8
+\.
+
+
+--
+-- Data for Name: shiftcovers; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY shiftcovers (id, shift_id, recorded, coverer) FROM stdin;
+1	5	2011-04-14 17:25:15.098407	1
+2	3	2011-04-19 14:59:02.924785	4
+\.
+
+
+--
+-- Data for Name: shiftdeletes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY shiftdeletes (user_id, place, old_shift, recorded, recorder) FROM stdin;
+7	4	8	2011-04-21 18:59:39.951257	9
+9	4	9	2011-04-21 19:00:32.140465	9
+9	4	179	2011-04-27 04:46:54.509296	9
+29	4	136	2011-04-27 04:53:42.911793	9
+9	4	178	2011-04-27 04:53:46.414789	9
+1	1	235	2011-05-30 23:04:39.01572	1
+\.
+
+
+--
+-- Data for Name: shiftrequests; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY shiftrequests (id, shift_id, recorded, requester) FROM stdin;
+3	11	2011-04-15 02:45:24.56989	3
+5	233	2011-05-14 18:29:56.70297	3
+\.
+
+
+--
+-- Data for Name: shifts; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY shifts (id, user_id, place, start, stop, recorded, recorder) FROM stdin;
+1	3	1	2011-04-06 09:00:00	2011-04-06 16:00:00	2011-04-06 23:37:25.721028	3
+3	7	1	2011-04-20 10:00:00	2011-04-20 18:00:00	2011-04-14 15:36:39.188819	7
+4	7	1	2011-04-21 10:00:00	2011-04-21 18:00:00	2011-04-14 15:36:49.977815	7
+5	7	1	2011-04-22 10:00:00	2011-04-22 18:00:00	2011-04-14 15:37:03.019991	7
+6	1	1	2011-04-18 11:00:00	2011-04-18 15:00:00	2011-04-14 15:38:06.960889	1
+8	7	4	2011-04-08 07:00:00	2011-04-08 09:15:00	2011-04-14 18:40:38.28314	7
+9	9	4	2011-04-15 13:00:00	2011-04-15 21:00:00	2011-04-14 18:58:08.032643	9
+11	3	1	2011-04-11 07:00:00	2011-04-11 14:45:00	2011-04-15 02:45:20.726505	3
+12	4	3	2011-04-03 05:15:00	2011-04-03 06:30:00	2011-04-18 20:32:45.980303	4
+14	4	1	2011-04-10 08:00:00	2011-04-10 09:00:00	2011-04-18 20:34:22.061752	4
+15	7	1	2011-04-10 16:00:00	2011-04-10 19:30:00	2011-04-19 14:56:15.566387	7
+16	10	4	2011-04-29 12:00:00	2011-04-29 21:00:00	2011-04-21 17:57:47.367377	9
+17	10	4	2011-04-28 16:00:00	2011-04-28 21:00:00	2011-04-21 17:57:47.38337	9
+18	10	4	2011-04-27 16:00:00	2011-04-27 21:00:00	2011-04-21 17:57:47.402969	9
+19	10	4	2011-04-24 12:00:00	2011-04-24 21:00:00	2011-04-21 17:57:47.414974	9
+20	10	4	2011-04-23 12:00:00	2011-04-23 21:00:00	2011-04-21 17:57:47.426816	9
+21	12	4	2011-04-29 13:00:00	2011-04-29 22:00:00	2011-04-21 17:57:47.439622	9
+22	12	4	2011-04-28 13:00:00	2011-04-28 22:00:00	2011-04-21 17:57:47.455361	9
+23	12	4	2011-04-27 13:00:00	2011-04-27 22:00:00	2011-04-21 17:57:47.46708	9
+24	12	4	2011-04-26 13:00:00	2011-04-26 22:00:00	2011-04-21 17:57:47.478878	9
+25	11	4	2011-04-29 12:00:00	2011-04-29 22:00:00	2011-04-21 17:57:47.490785	9
+26	11	4	2011-04-26 09:00:00	2011-04-26 18:00:00	2011-04-21 17:57:47.503293	9
+27	11	4	2011-04-25 13:00:00	2011-04-25 22:00:00	2011-04-21 17:57:47.515232	9
+28	11	4	2011-04-23 13:00:00	2011-04-23 21:30:00	2011-04-21 17:57:47.530854	9
+29	33	4	2011-04-26 18:00:00	2011-04-26 21:00:00	2011-04-21 18:25:49.423673	9
+30	32	4	2011-04-24 09:00:00	2011-04-24 14:00:00	2011-04-21 18:25:49.4507	9
+31	32	4	2011-04-23 09:00:00	2011-04-23 14:00:00	2011-04-21 18:25:49.468685	9
+32	31	4	2011-04-29 16:00:00	2011-04-29 21:00:00	2011-04-21 18:25:49.484013	9
+33	31	4	2011-04-23 16:00:00	2011-04-23 21:00:00	2011-04-21 18:25:49.496009	9
+34	30	4	2011-04-29 12:00:00	2011-04-29 21:30:00	2011-04-21 18:25:49.508051	9
+35	30	4	2011-04-28 19:00:00	2011-04-28 22:00:00	2011-04-21 18:25:49.520021	9
+36	30	4	2011-04-27 19:00:00	2011-04-27 22:00:00	2011-04-21 18:25:49.537532	9
+37	30	4	2011-04-26 19:00:00	2011-04-26 22:00:00	2011-04-21 18:25:49.562368	9
+38	30	4	2011-04-25 19:00:00	2011-04-25 22:00:00	2011-04-21 18:25:49.576126	9
+39	30	4	2011-04-24 14:00:00	2011-04-24 19:00:00	2011-04-21 18:25:49.588234	9
+40	28	4	2011-04-29 09:00:00	2011-04-29 14:00:00	2011-04-21 18:25:49.600068	9
+41	28	4	2011-04-28 10:00:00	2011-04-28 14:00:00	2011-04-21 18:25:49.611826	9
+42	28	4	2011-04-27 10:00:00	2011-04-27 14:00:00	2011-04-21 18:25:49.624003	9
+43	28	4	2011-04-26 10:00:00	2011-04-26 14:00:00	2011-04-21 18:25:49.635938	9
+44	28	4	2011-04-25 10:00:00	2011-04-25 14:00:00	2011-04-21 18:25:49.647973	9
+45	27	4	2011-04-28 18:00:00	2011-04-28 22:00:00	2011-04-21 18:25:49.65999	9
+46	27	4	2011-04-27 18:00:00	2011-04-27 22:00:00	2011-04-21 18:25:49.672073	9
+47	27	4	2011-04-26 18:00:00	2011-04-26 22:00:00	2011-04-21 18:25:49.692696	9
+48	27	4	2011-04-25 18:00:00	2011-04-25 22:00:00	2011-04-21 18:25:49.712168	9
+49	27	4	2011-04-24 18:00:00	2011-04-24 22:00:00	2011-04-21 18:25:49.723922	9
+50	26	4	2011-04-28 10:00:00	2011-04-28 18:30:00	2011-04-21 18:25:49.735939	9
+51	26	4	2011-04-27 10:00:00	2011-04-27 18:30:00	2011-04-21 18:25:49.747915	9
+52	26	4	2011-04-26 10:00:00	2011-04-26 18:30:00	2011-04-21 18:25:49.759873	9
+53	26	4	2011-04-25 10:00:00	2011-04-25 18:30:00	2011-04-21 18:25:49.77204	9
+54	26	4	2011-04-24 10:00:00	2011-04-24 18:30:00	2011-04-21 18:25:49.783988	9
+55	25	4	2011-04-29 06:30:00	2011-04-29 23:30:00	2011-04-21 18:25:49.795954	9
+56	25	4	2011-04-28 06:30:00	2011-04-28 15:00:00	2011-04-21 18:25:49.807824	9
+57	25	4	2011-04-27 06:30:00	2011-04-27 17:00:00	2011-04-21 18:25:49.820873	9
+58	25	4	2011-04-26 06:30:00	2011-04-26 23:30:00	2011-04-21 18:25:49.834734	9
+59	25	4	2011-04-25 06:30:00	2011-04-25 15:00:00	2011-04-21 18:25:49.855982	9
+60	24	4	2011-04-28 03:30:00	2011-04-28 12:00:00	2011-04-21 18:25:49.867804	9
+61	24	4	2011-04-27 03:30:00	2011-04-27 12:00:00	2011-04-21 18:25:49.880728	9
+62	24	4	2011-04-26 03:30:00	2011-04-26 12:00:00	2011-04-21 18:25:49.896478	9
+63	24	4	2011-04-25 03:30:00	2011-04-25 12:00:00	2011-04-21 18:25:49.918349	9
+64	24	4	2011-04-24 03:30:00	2011-04-24 12:00:00	2011-04-21 18:25:49.936797	9
+65	23	4	2011-04-29 17:00:00	2011-04-29 21:00:00	2011-04-21 18:25:49.952043	9
+66	23	4	2011-04-28 19:00:00	2011-04-28 22:00:00	2011-04-21 18:25:49.976624	9
+67	23	4	2011-04-23 14:00:00	2011-04-23 21:00:00	2011-04-21 18:25:49.992454	9
+68	22	4	2011-04-28 12:00:00	2011-04-28 20:30:00	2011-04-21 18:25:50.016119	9
+69	22	4	2011-04-27 11:00:00	2011-04-27 19:30:00	2011-04-21 18:25:50.028084	9
+70	22	4	2011-04-26 11:30:00	2011-04-26 20:00:00	2011-04-21 18:25:50.043933	9
+71	22	4	2011-04-24 08:00:00	2011-04-24 16:30:00	2011-04-21 18:25:50.055865	9
+72	22	4	2011-04-23 08:00:00	2011-04-23 16:30:00	2011-04-21 18:25:50.06854	9
+73	21	4	2011-04-28 09:00:00	2011-04-28 14:00:00	2011-04-21 18:25:50.088457	9
+74	21	4	2011-04-27 09:00:00	2011-04-27 14:00:00	2011-04-21 18:25:50.108088	9
+75	21	4	2011-04-25 09:00:00	2011-04-25 14:00:00	2011-04-21 18:25:50.123906	9
+76	9	4	2011-04-29 12:00:00	2011-04-29 21:00:00	2011-04-21 18:25:50.140095	9
+77	9	4	2011-04-25 16:00:00	2011-04-25 21:00:00	2011-04-21 18:25:50.155881	9
+78	9	4	2011-04-24 12:00:00	2011-04-24 21:00:00	2011-04-21 18:25:50.168067	9
+79	9	4	2011-04-23 12:00:00	2011-04-23 21:00:00	2011-04-21 18:25:50.183894	9
+80	20	4	2011-04-29 07:00:00	2011-04-29 15:30:00	2011-04-21 18:25:50.200068	9
+81	20	4	2011-04-28 07:00:00	2011-04-28 15:30:00	2011-04-21 18:25:50.215827	9
+82	20	4	2011-04-27 07:00:00	2011-04-27 15:30:00	2011-04-21 18:25:50.227969	9
+83	20	4	2011-04-26 07:00:00	2011-04-26 15:30:00	2011-04-21 18:25:50.239886	9
+84	20	4	2011-04-25 07:00:00	2011-04-25 15:30:00	2011-04-21 18:25:50.251971	9
+85	19	4	2011-04-29 11:30:00	2011-04-29 21:00:00	2011-04-21 18:25:50.263982	9
+86	19	4	2011-04-28 13:00:00	2011-04-28 21:00:00	2011-04-21 18:25:50.276022	9
+87	19	4	2011-04-27 13:00:00	2011-04-27 21:00:00	2011-04-21 18:25:50.288856	9
+88	19	4	2011-04-26 13:00:00	2011-04-26 21:00:00	2011-04-21 18:25:50.303912	9
+89	19	4	2011-04-25 12:00:00	2011-04-25 21:00:00	2011-04-21 18:25:50.3238	9
+90	18	4	2011-04-26 16:00:00	2011-04-26 21:00:00	2011-04-21 18:25:50.335963	9
+91	18	4	2011-04-25 16:00:00	2011-04-25 21:00:00	2011-04-21 18:25:50.347953	9
+92	18	4	2011-04-23 12:00:00	2011-04-23 21:00:00	2011-04-21 18:25:50.359936	9
+93	17	4	2011-04-29 11:00:00	2011-04-29 19:00:00	2011-04-21 18:25:50.424439	9
+94	17	4	2011-04-26 10:00:00	2011-04-26 16:00:00	2011-04-21 18:25:50.44025	9
+95	17	4	2011-04-25 09:00:00	2011-04-25 16:00:00	2011-04-21 18:25:50.456146	9
+96	17	4	2011-04-24 07:00:00	2011-04-24 15:30:00	2011-04-21 18:25:50.471947	9
+97	17	4	2011-04-23 08:00:00	2011-04-23 16:00:00	2011-04-21 18:25:50.488743	9
+98	16	4	2011-04-28 13:30:00	2011-04-28 22:00:00	2011-04-21 18:25:50.504424	9
+99	16	4	2011-04-27 13:30:00	2011-04-27 22:00:00	2011-04-21 18:25:50.520692	9
+100	15	4	2011-04-28 13:00:00	2011-04-28 21:30:00	2011-04-21 18:25:50.540346	9
+101	15	4	2011-04-27 13:00:00	2011-04-27 21:30:00	2011-04-21 18:25:50.55795	9
+102	15	4	2011-04-26 13:00:00	2011-04-26 21:30:00	2011-04-21 18:25:50.57211	9
+103	15	4	2011-04-25 13:00:00	2011-04-25 21:30:00	2011-04-21 18:25:50.587971	9
+104	15	4	2011-04-24 13:00:00	2011-04-24 21:30:00	2011-04-21 18:25:50.604169	9
+105	14	4	2011-04-29 06:00:00	2011-04-29 14:30:00	2011-04-21 18:25:50.62074	9
+106	14	4	2011-04-28 06:00:00	2011-04-28 14:30:00	2011-04-21 18:25:50.634329	9
+107	14	4	2011-04-27 06:00:00	2011-04-27 14:30:00	2011-04-21 18:25:50.648095	9
+108	14	4	2011-04-26 06:00:00	2011-04-26 14:30:00	2011-04-21 18:25:50.664695	9
+109	14	4	2011-04-23 06:00:00	2011-04-23 14:30:00	2011-04-21 18:25:50.680523	9
+110	13	4	2011-04-29 06:00:00	2011-04-30 00:00:00	2011-04-21 18:25:50.696387	9
+111	13	4	2011-04-28 09:00:00	2011-04-28 17:00:00	2011-04-21 18:25:50.713063	9
+112	13	4	2011-04-27 09:00:00	2011-04-27 17:00:00	2011-04-21 18:25:50.731953	9
+113	13	4	2011-04-26 09:00:00	2011-04-26 17:00:00	2011-04-21 18:25:50.748181	9
+114	13	4	2011-04-25 06:00:00	2011-04-25 14:30:00	2011-04-21 18:25:50.760579	9
+115	13	4	2011-04-24 13:00:00	2011-04-24 21:30:00	2011-04-21 18:25:50.776896	9
+116	9	4	2011-04-18 16:00:00	2011-04-18 22:00:00	2011-04-21 19:01:33.349859	9
+117	9	4	2011-04-19 15:30:00	2011-04-19 21:45:00	2011-04-21 19:02:32.708107	9
+118	33	4	2011-05-03 19:00:00	2011-05-03 22:00:00	2011-04-27 04:36:45.841442	9
+119	33	4	2011-05-01 10:00:00	2011-05-01 16:00:00	2011-04-27 04:36:45.862852	9
+120	33	4	2011-04-30 10:00:00	2011-04-30 16:00:00	2011-04-27 04:36:45.882545	9
+121	32	4	2011-05-01 09:00:00	2011-05-01 14:00:00	2011-04-27 04:36:45.903282	9
+122	32	4	2011-04-30 09:00:00	2011-04-30 14:00:00	2011-04-27 04:36:45.921246	9
+123	31	4	2011-05-06 18:00:00	2011-05-06 21:00:00	2011-04-27 04:36:45.939635	9
+124	31	4	2011-04-30 16:00:00	2011-04-30 21:00:00	2011-04-27 04:36:45.954574	9
+125	30	4	2011-05-06 12:00:00	2011-05-06 21:30:00	2011-04-27 04:36:45.970724	9
+126	30	4	2011-05-05 19:00:00	2011-05-05 22:00:00	2011-04-27 04:36:45.986429	9
+127	30	4	2011-05-04 19:00:00	2011-05-04 22:00:00	2011-04-27 04:36:46.002639	9
+128	30	4	2011-05-03 19:00:00	2011-05-03 22:00:00	2011-04-27 04:36:46.018443	9
+129	30	4	2011-05-02 19:00:00	2011-05-02 22:00:00	2011-04-27 04:36:46.034393	9
+130	30	4	2011-05-01 14:00:00	2011-05-01 19:00:00	2011-04-27 04:36:46.050421	9
+131	29	4	2011-05-06 12:00:00	2011-05-06 12:00:00	2011-04-27 04:36:46.067043	9
+132	29	4	2011-05-05 12:00:00	2011-05-05 12:00:00	2011-04-27 04:36:46.082596	9
+133	29	4	2011-05-04 12:00:00	2011-05-04 12:00:00	2011-04-27 04:36:46.098347	9
+134	29	4	2011-05-03 12:00:00	2011-05-03 12:00:00	2011-04-27 04:36:46.115065	9
+135	29	4	2011-05-02 12:00:00	2011-05-02 12:00:00	2011-04-27 04:36:46.130864	9
+136	29	4	2011-05-01 12:00:00	2011-05-01 12:00:00	2011-04-27 04:36:46.146936	9
+137	29	4	2011-04-30 12:00:00	2011-04-30 12:00:00	2011-04-27 04:36:46.163484	9
+138	28	4	2011-05-06 09:00:00	2011-05-06 14:00:00	2011-04-27 04:36:46.178476	9
+139	28	4	2011-05-05 10:00:00	2011-05-05 14:00:00	2011-04-27 04:36:46.195294	9
+140	28	4	2011-05-04 10:00:00	2011-05-04 14:00:00	2011-04-27 04:36:46.212739	9
+141	28	4	2011-05-03 10:00:00	2011-05-03 14:00:00	2011-04-27 04:36:46.234844	9
+142	28	4	2011-05-02 10:00:00	2011-05-02 14:00:00	2011-04-27 04:36:46.25081	9
+143	27	4	2011-05-05 18:00:00	2011-05-05 22:00:00	2011-04-27 04:36:46.266559	9
+144	27	4	2011-05-04 18:00:00	2011-05-04 22:00:00	2011-04-27 04:36:46.285613	9
+145	27	4	2011-05-03 18:00:00	2011-05-03 22:00:00	2011-04-27 04:36:46.299177	9
+146	27	4	2011-05-02 18:00:00	2011-05-02 22:00:00	2011-04-27 04:36:46.314988	9
+147	27	4	2011-05-01 18:00:00	2011-05-01 22:00:00	2011-04-27 04:36:46.330294	9
+148	26	4	2011-05-05 10:00:00	2011-05-05 18:30:00	2011-04-27 04:36:46.34705	9
+149	26	4	2011-05-04 10:00:00	2011-05-04 18:30:00	2011-04-27 04:36:46.364161	9
+150	26	4	2011-05-03 10:00:00	2011-05-03 18:30:00	2011-04-27 04:36:46.379289	9
+151	26	4	2011-05-02 10:00:00	2011-05-02 18:30:00	2011-04-27 04:36:46.395092	9
+152	26	4	2011-05-01 10:00:00	2011-05-01 18:30:00	2011-04-27 04:36:46.411843	9
+153	25	4	2011-05-06 06:30:00	2011-05-06 15:00:00	2011-04-27 04:36:46.43134	9
+154	25	4	2011-05-05 06:30:00	2011-05-05 15:00:00	2011-04-27 04:36:46.448761	9
+155	25	4	2011-05-04 06:30:00	2011-05-04 15:00:00	2011-04-27 04:36:46.4732	9
+156	25	4	2011-05-03 06:30:00	2011-05-03 23:30:00	2011-04-27 04:36:46.48971	9
+157	25	4	2011-05-02 12:00:00	2011-05-02 12:00:00	2011-04-27 04:36:46.507282	9
+158	34	4	2011-05-02 06:30:00	2011-05-02 15:00:00	2011-04-27 04:36:46.523428	9
+159	24	4	2011-05-05 03:30:00	2011-05-05 12:00:00	2011-04-27 04:36:46.538704	9
+160	24	4	2011-05-04 03:30:00	2011-05-04 12:00:00	2011-04-27 04:36:46.562246	9
+161	24	4	2011-05-03 03:30:00	2011-05-03 12:00:00	2011-04-27 04:36:46.582275	9
+162	24	4	2011-05-02 03:30:00	2011-05-02 12:00:00	2011-04-27 04:36:46.598369	9
+163	24	4	2011-05-01 03:30:00	2011-05-01 12:00:00	2011-04-27 04:36:46.618088	9
+164	23	4	2011-05-06 17:00:00	2011-05-06 21:00:00	2011-04-27 04:36:46.634118	9
+165	23	4	2011-05-05 19:00:00	2011-05-05 22:00:00	2011-04-27 04:36:46.65014	9
+166	23	4	2011-04-30 14:00:00	2011-04-30 21:00:00	2011-04-27 04:36:46.664501	9
+167	22	4	2011-05-06 06:30:00	2011-05-06 11:00:00	2011-04-27 04:36:46.678396	9
+168	22	4	2011-05-05 12:00:00	2011-05-05 20:30:00	2011-04-27 04:36:46.694277	9
+169	22	4	2011-05-04 11:00:00	2011-05-04 19:30:00	2011-04-27 04:36:46.711229	9
+170	22	4	2011-05-03 11:30:00	2011-05-03 20:00:00	2011-04-27 04:36:46.727407	9
+171	22	4	2011-05-01 08:00:00	2011-05-01 16:30:00	2011-04-27 04:36:46.7424	9
+172	22	4	2011-04-30 08:00:00	2011-04-30 16:30:00	2011-04-27 04:36:46.758409	9
+173	21	4	2011-05-05 09:00:00	2011-05-05 14:00:00	2011-04-27 04:36:46.774508	9
+174	21	4	2011-05-04 09:00:00	2011-05-04 14:00:00	2011-04-27 04:36:46.790256	9
+175	21	4	2011-05-02 09:00:00	2011-05-02 14:00:00	2011-04-27 04:36:46.808249	9
+176	9	4	2011-05-06 12:00:00	2011-05-06 21:00:00	2011-04-27 04:36:46.828243	9
+177	9	4	2011-05-02 16:00:00	2011-05-02 21:00:00	2011-04-27 04:36:46.847075	9
+178	9	4	2011-05-01 12:00:00	2011-05-01 12:00:00	2011-04-27 04:36:46.866705	9
+179	9	4	2011-04-30 12:00:00	2011-04-30 12:00:00	2011-04-27 04:36:46.886831	9
+180	20	4	2011-05-06 07:00:00	2011-05-06 15:30:00	2011-04-27 04:36:46.919968	9
+181	20	4	2011-05-05 07:00:00	2011-05-05 15:30:00	2011-04-27 04:36:46.938081	9
+182	20	4	2011-05-04 07:00:00	2011-05-04 15:30:00	2011-04-27 04:36:46.959745	9
+183	20	4	2011-05-03 07:00:00	2011-05-03 15:30:00	2011-04-27 04:36:46.97867	9
+184	20	4	2011-05-02 07:00:00	2011-05-02 15:30:00	2011-04-27 04:36:46.993833	9
+185	19	4	2011-05-06 11:30:00	2011-05-06 21:00:00	2011-04-27 04:36:47.011738	9
+186	19	4	2011-05-05 13:00:00	2011-05-05 21:00:00	2011-04-27 04:36:47.027569	9
+187	19	4	2011-05-04 13:00:00	2011-05-04 21:00:00	2011-04-27 04:36:47.050913	9
+188	19	4	2011-05-03 13:00:00	2011-05-03 21:00:00	2011-04-27 04:36:47.067335	9
+189	19	4	2011-05-02 12:00:00	2011-05-02 21:00:00	2011-04-27 04:36:47.083428	9
+190	18	4	2011-05-02 16:00:00	2011-05-02 21:00:00	2011-04-27 04:36:47.103543	9
+191	18	4	2011-05-01 12:00:00	2011-05-01 21:00:00	2011-04-27 04:36:47.120043	9
+192	18	4	2011-04-30 12:00:00	2011-04-30 21:00:00	2011-04-27 04:36:47.135559	9
+193	10	4	2011-05-06 12:00:00	2011-05-06 21:00:00	2011-04-27 04:36:47.150742	9
+194	10	4	2011-05-05 16:00:00	2011-05-05 21:00:00	2011-04-27 04:36:47.167548	9
+195	10	4	2011-05-04 16:00:00	2011-05-04 21:00:00	2011-04-27 04:36:47.185336	9
+196	10	4	2011-05-01 12:00:00	2011-05-01 21:00:00	2011-04-27 04:36:47.201448	9
+197	10	4	2011-04-30 12:00:00	2011-04-30 21:00:00	2011-04-27 04:36:47.218463	9
+198	17	4	2011-05-06 17:00:00	2011-05-06 21:00:00	2011-04-27 04:36:47.23603	9
+199	17	4	2011-05-03 17:00:00	2011-05-03 21:00:00	2011-04-27 04:36:47.262743	9
+200	16	4	2011-05-05 13:30:00	2011-05-05 22:00:00	2011-04-27 04:36:47.282631	9
+201	16	4	2011-05-04 13:30:00	2011-05-04 22:00:00	2011-04-27 04:36:47.302366	9
+202	16	4	2011-05-03 13:30:00	2011-05-03 22:00:00	2011-04-27 04:36:47.319777	9
+203	16	4	2011-05-02 13:30:00	2011-05-02 22:00:00	2011-04-27 04:36:47.351467	9
+204	16	4	2011-05-01 13:30:00	2011-05-01 22:00:00	2011-04-27 04:36:47.370048	9
+205	15	4	2011-05-05 13:00:00	2011-05-05 21:30:00	2011-04-27 04:36:47.390117	9
+206	15	4	2011-05-04 13:00:00	2011-05-04 21:30:00	2011-04-27 04:36:47.40756	9
+207	15	4	2011-05-03 13:00:00	2011-05-03 21:30:00	2011-04-27 04:36:47.42762	9
+208	15	4	2011-05-02 13:00:00	2011-05-02 21:30:00	2011-04-27 04:36:47.443598	9
+209	15	4	2011-05-01 13:00:00	2011-05-01 21:30:00	2011-04-27 04:36:47.463851	9
+210	14	4	2011-05-06 06:00:00	2011-05-06 14:30:00	2011-04-27 04:36:47.482635	9
+211	14	4	2011-05-05 06:00:00	2011-05-05 14:30:00	2011-04-27 04:36:47.50019	9
+212	14	4	2011-05-04 06:00:00	2011-05-04 14:30:00	2011-04-27 04:36:47.518486	9
+213	14	4	2011-05-03 06:00:00	2011-05-03 14:30:00	2011-04-27 04:36:47.534472	9
+214	14	4	2011-04-30 06:00:00	2011-04-30 14:30:00	2011-04-27 04:36:47.550307	9
+215	13	4	2011-05-06 06:00:00	2011-05-07 00:00:00	2011-04-27 04:36:47.568398	9
+216	13	4	2011-05-05 09:00:00	2011-05-05 17:00:00	2011-04-27 04:36:47.587872	9
+217	13	4	2011-05-04 09:00:00	2011-05-04 17:00:00	2011-04-27 04:36:47.610564	9
+218	13	4	2011-05-03 09:00:00	2011-05-03 17:00:00	2011-04-27 04:36:47.634969	9
+219	13	4	2011-05-02 06:00:00	2011-05-02 14:30:00	2011-04-27 04:36:47.65416	9
+220	12	4	2011-05-06 10:00:00	2011-05-06 21:00:00	2011-04-27 04:36:47.670227	9
+221	12	4	2011-05-05 13:00:00	2011-05-05 22:00:00	2011-04-27 04:36:47.690041	9
+222	12	4	2011-05-04 13:00:00	2011-05-04 22:00:00	2011-04-27 04:36:47.707842	9
+223	12	4	2011-05-03 13:00:00	2011-05-03 22:00:00	2011-04-27 04:36:47.7264	9
+224	12	4	2011-04-30 10:00:00	2011-04-30 21:00:00	2011-04-27 04:36:47.74216	9
+225	11	4	2011-05-05 09:00:00	2011-05-05 18:00:00	2011-04-27 04:36:47.758265	9
+226	11	4	2011-05-04 09:00:00	2011-05-04 18:00:00	2011-04-27 04:36:47.775755	9
+227	11	4	2011-05-03 09:00:00	2011-05-03 13:00:00	2011-04-27 04:36:47.790148	9
+228	11	4	2011-05-02 09:00:00	2011-05-02 18:00:00	2011-04-27 04:36:47.807599	9
+229	11	4	2011-05-01 05:00:00	2011-05-01 13:00:00	2011-04-27 04:36:47.826637	9
+230	7	1	2011-05-18 05:00:00	2011-05-18 07:00:00	2011-05-03 15:44:02.894302	7
+231	7	1	2011-05-17 05:00:00	2011-05-17 09:00:00	2011-05-03 15:44:10.891247	7
+232	7	1	2011-05-04 05:00:00	2011-05-04 09:30:00	2011-05-03 15:44:16.212027	7
+233	7	1	2011-05-05 06:30:00	2011-05-05 13:15:00	2011-05-03 15:44:24.0375	7
+234	1	1	2011-05-11 05:00:00	2011-05-11 10:00:00	2011-05-03 15:44:42.010606	1
+235	1	1	2011-05-13 06:45:00	2011-05-13 13:45:00	2011-05-03 15:44:51.27077	1
+236	1	1	2011-05-10 10:30:00	2011-05-10 17:30:00	2011-05-03 15:45:08.951194	1
+237	35	1	2011-05-12 06:30:00	2011-05-12 10:30:00	2011-05-03 15:46:32.885568	35
+238	35	1	2011-05-10 08:45:00	2011-05-10 16:45:00	2011-05-03 15:46:44.282472	35
+239	9	4	2011-05-04 14:00:00	2011-05-04 21:30:00	2011-05-05 09:43:05.980837	9
+240	3	1	2011-05-10 05:45:00	2011-05-10 08:15:00	2011-05-14 19:02:00.668905	3
+\.
+
+
+--
+-- Data for Name: useremails; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY useremails (id, user_id, email, active, confirmed, token) FROM stdin;
+2	1	dbp@riseup.net	t	t	c48eff26d9
+3	4	woo.weiling@gmail.com	t	t	20e9efc6f2
+4	9	jonathanbjuarez@gmail.com	f	f	474f0658e4
+5	9	mysticetoi@gmail.com	t	t	e9afb61fa8
+7	33	zkuredji@risd.edu	t	t	b8fad5fc80
+8	30	elguate5@yahoo.com	f	f	2b1599d199
+6	3	r.j.b.forbes@gmail.com	t	t	8a5e64327d
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY users (id, name, password, active, super) FROM stdin;
+4	Wei-Ling Woo	$2a$06$GAneZBiJHmNX2AfTpW9D8OaIylt4Q5An9jFOJD4M6Ubf76ohdwgyi	t	t
+6	Jakob Jurgensen	$2a$06$uP8lvmw/STKyXufBWOJSYOwmU2AYQQ6ZBbTV9Pe2S08POrh4G9rsq	t	f
+7	Jane Doe	$2a$06$xDNkdNF/diUOaNOa2X0y7edNqp0taBSXwq6IjiVLbDEGVWIXgVmNm	t	f
+9	Jonathan "oi" Juarez	$2a$06$/rXxE.bzh5uJ8Qjz9eSb/eM.FLbYTSNwn4xN0aWpkSnTOvOVziEcO	t	f
+10	Matt Blanchette	abf49f7c4b301fc59491f77f3e32485f	f	f
+11	Tim McFate	2dd34db8960a669a33776f1f08c75d8a	f	f
+12	Jeff Fields	7939db6985db824689f0938e69bd1719	f	f
+13	Thomas Dugan	180f86ac043ab6974b7c548fc8fe0034	f	f
+14	Maria Cabral	042d976e3a93eab1cdcc60b0fc36a4ea	f	f
+15	Vincent Guadalupe	e1eb63cab320c336809fc126987df6b8	f	f
+16	Karapet Kozinian	3f3ec8814292e05ba917a4c05d34167b	f	f
+17	Maria Medieros	fc4473980f2455b68f2f032b19312e35	f	f
+18	Tyler Vorce	930739ac828ad3cc819772f9afaa71e2	f	f
+19	Karen Yates	4c9e8538e46e466224a172319a447709	f	f
+20	Danielle DeAngelis	5cccbdbb01c69d01a03f0c1caf786852	f	f
+21	Pat Jernigan	577d349dd03509264d9fffdb549d9c38	f	f
+22	Antoinette Dantas	cd996419ddf42a572679ef151fbfaf34	f	f
+23	Ian Mccord	8eb3ecd0e337da359638c90e212f3a8c	f	f
+24	Kristina Price	f1e7ff1c89a0aaf1b33232d2883b873d	f	f
+25	Maria Velasquez	b69ed63df2cbff9bb8a603de8ba2c451	f	f
+26	Jose Mejia	56b870347bdc97faf032b2a6f5af177c	f	f
+27	Leonel Correia	6f66844facec0efca7fa3e2d72f90973	f	f
+28	Donna Specht	ab8b9b8104273b80da93b68a12034de1	f	f
+29	Adinilson Sequeira	4f6b9cf9ff067dc7e96cbeff48a495cf	f	f
+31	Jason Morales	35b11fd53e53afb60903ba4442dbe74e	f	f
+32	Robyn	883b7150f5542ff96d42586881bade56	f	f
+1	Daniel Patterson	$2a$06$q6/YzaMIg.VThAstY5gEIOjYYqwNv.Mg1PU3L3JtoxgAEH41/FNpe	t	t
+34	Kim Domianque	3efcbcf66acb9de72a6fd212df2ad13e	f	f
+33	Zara	$2a$06$uUSFlxyUsY2Pl8zdSq8RR.Jj3jUzv5hVWYdkWFQYZ5G4s.ipmM7Ty	t	f
+30	Edwin Cartagena	$2a$06$/EvUMuW7zRqDaY5RYvuVHeldHGFMdjkCBLvmYHDWwBJljgGq6KwAW	t	f
+35	John Doe	$2a$06$xb6lUf0.LFVNiB1G4EXdlOoafAKkRZeO/BHr2Ru8KxOHmq2CRgiwu	t	f
+36	Gray Sutherland	7c61ae3f2eb05e9f0a87acd3b4328fae	f	f
+3	Remeike Forbes	$2a$06$YIqfJBGWwiPl0Tsl2fFDC.ew0Je9shscyHUZX2lfypA/a1Un.VzxO	t	t
+\.
+
+
+--
+-- Name: message_downs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY message_downs
+    ADD CONSTRAINT message_downs_pkey PRIMARY KEY (message, user_hash);
+
+
+--
+-- Name: message_flags_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY message_flags
+    ADD CONSTRAINT message_flags_pkey PRIMARY KEY (message, user_hash);
+
+
+--
+-- Name: message_ups_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY message_ups
+    ADD CONSTRAINT message_ups_pkey PRIMARY KEY (message, user_hash);
+
+
+--
+-- Name: messages_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY messages
+    ADD CONSTRAINT messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: obligations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY obligations
+    ADD CONSTRAINT obligations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: organizations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY organizations
+    ADD CONSTRAINT organizations_pkey PRIMARY KEY (name);
+
+
+--
+-- Name: places_name_organization_unique; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY places
+    ADD CONSTRAINT places_name_organization_unique UNIQUE (name, organization);
+
+
+--
+-- Name: places_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY places
+    ADD CONSTRAINT places_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: shiftchanges_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY shiftchanges
+    ADD CONSTRAINT shiftchanges_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: shiftcovers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY shiftcovers
+    ADD CONSTRAINT shiftcovers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: shiftdeletes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_pkey PRIMARY KEY (old_shift);
+
+
+--
+-- Name: shiftrequests_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY shiftrequests
+    ADD CONSTRAINT shiftrequests_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: shifts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY shifts
+    ADD CONSTRAINT shifts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: useremails_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY useremails
+    ADD CONSTRAINT useremails_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activations_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY activations
+    ADD CONSTRAINT activations_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: configuration_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY configuration
+    ADD CONSTRAINT configuration_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: message_downs_message_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY message_downs
+    ADD CONSTRAINT message_downs_message_fkey FOREIGN KEY (message) REFERENCES messages(id);
+
+
+--
+-- Name: message_flags_message_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY message_flags
+    ADD CONSTRAINT message_flags_message_fkey FOREIGN KEY (message) REFERENCES messages(id);
+
+
+--
+-- Name: message_ups_message_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY message_ups
+    ADD CONSTRAINT message_ups_message_fkey FOREIGN KEY (message) REFERENCES messages(id);
+
+
+--
+-- Name: messages_parent_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY messages
+    ADD CONSTRAINT messages_parent_fkey FOREIGN KEY (parent) REFERENCES messages(id);
+
+
+--
+-- Name: messages_place_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY messages
+    ADD CONSTRAINT messages_place_fkey FOREIGN KEY (place) REFERENCES places(id) ON DELETE CASCADE;
+
+
+--
+-- Name: obligations_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY obligations
+    ADD CONSTRAINT obligations_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: places_organization_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY places
+    ADD CONSTRAINT places_organization_fkey FOREIGN KEY (organization) REFERENCES organizations(name);
+
+
+--
+-- Name: placeusers_place_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY placeusers
+    ADD CONSTRAINT placeusers_place_fkey FOREIGN KEY (place) REFERENCES places(id);
+
+
+--
+-- Name: placeusers_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY placeusers
+    ADD CONSTRAINT placeusers_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shiftchanges_old_shift_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftchanges
+    ADD CONSTRAINT shiftchanges_old_shift_fkey FOREIGN KEY (old_shift) REFERENCES shifts(id);
+
+
+--
+-- Name: shiftchanges_place_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftchanges
+    ADD CONSTRAINT shiftchanges_place_fkey FOREIGN KEY (place) REFERENCES places(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shiftchanges_recorder_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftchanges
+    ADD CONSTRAINT shiftchanges_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shiftchanges_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftchanges
+    ADD CONSTRAINT shiftchanges_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shiftcovers_coverer_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftcovers
+    ADD CONSTRAINT shiftcovers_coverer_fkey FOREIGN KEY (coverer) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shiftcovers_shift_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftcovers
+    ADD CONSTRAINT shiftcovers_shift_id_fkey FOREIGN KEY (shift_id) REFERENCES shifts(id);
+
+
+--
+-- Name: shiftdeletes_old_shift_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_old_shift_fkey FOREIGN KEY (old_shift) REFERENCES shifts(id);
+
+
+--
+-- Name: shiftdeletes_place_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_place_fkey FOREIGN KEY (place) REFERENCES places(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shiftdeletes_recorder_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shiftdeletes_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shiftrequests_requester_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftrequests
+    ADD CONSTRAINT shiftrequests_requester_fkey FOREIGN KEY (requester) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shiftrequests_shift_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shiftrequests
+    ADD CONSTRAINT shiftrequests_shift_id_fkey FOREIGN KEY (shift_id) REFERENCES shifts(id);
+
+
+--
+-- Name: shifts_place_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shifts
+    ADD CONSTRAINT shifts_place_fkey FOREIGN KEY (place) REFERENCES places(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shifts_recorder_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shifts
+    ADD CONSTRAINT shifts_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: shifts_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY shifts
+    ADD CONSTRAINT shifts_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: useremails_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY useremails
+    ADD CONSTRAINT useremails_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

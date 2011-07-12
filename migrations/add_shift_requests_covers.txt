@@ -1,0 +1,10 @@
+Description: This creates tables for ShiftRequests and ShiftCovers
+Created: 2011-04-12 16:20:09.581175 UTC
+Depends: 
+Apply:
+  CREATE TABLE shiftrequests (id serial primary key, shift_id integer not null references shifts, recorded timestamp not null default now(), requester integer not null references users);
+  CREATE TABLE shiftcovers (id serial primary key, shift_id integer not null references shifts, recorded timestamp not null default now(), coverer integer not null references users);
+
+Revert:
+  DROP TABLE shiftrequests;
+  DROP TABLE shiftcovers;

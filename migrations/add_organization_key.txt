@@ -1,0 +1,8 @@
+Description: Adds a key field for organization that can be used to verify permission.
+Created: 2011-05-28 23:29:42.845724 UTC
+Depends: cascade_delete_users email_confirm_token add_email add_current_shifts_view remove_master add_shift_requests_covers
+Apply:
+  ALTER TABLE organizations ADD COLUMN key TEXT NOT NULL DEFAULT "substring"(md5((random())::text), 1, 10);
+
+Revert:
+  ALTER TABLE useremails DROP COLUMN token;

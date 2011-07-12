@@ -1,0 +1,8 @@
+Description: (Description here.)
+Created: 2011-04-12 17:14:30.526661 UTC
+Depends: 
+Apply:
+  ALTER TABLE shifts DROP COLUMN master;
+
+Revert:
+  ALTER TABLE shifts ADD COLUMN master BOOLEAN NOT NULL DEFAULT TRUE;
