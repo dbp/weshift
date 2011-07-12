@@ -67,7 +67,8 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     coworkers <- getCoworkers u p
                     let monthday = maybe today (\(y,m) -> fromGregorian y m 1) savedMonth
                     let dayday = maybe today (\(y,m,d) -> fromGregorian y m d) savedDay
-                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices u p monthday) ++ (commonSplices today) ++ (coworkersSplice coworkers) ++ (daySplices u p dayday))) $ renderWS "place"
+                    shifts <- getShifts dayday (addDays 1 dayday) p
+                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices u p monthday) ++ (commonSplices today) ++ (coworkersSplice coworkers) ++ (daySplices u p shifts dayday))) $ renderWS "place"
       where mList Nothing = []
             mList (Just xs) = xs
             monthV = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."
@@ -153,22 +154,10 @@ dayH u p = do
                                             ,(maybe "" (T.append "." . T.pack . show) month)
                                             ,(maybe "" (T.append "." . T.pack . show) day)
                                             ]))
-  heistLocal (bindSplices ((commonSplices curday) ++ (daySplices u p curday))) $ renderWS "work/day_calendar"
+  shifts <- getShifts curday (addDays 1 curday) p
+  heistLocal (bindSplices ((commonSplices curday) ++ (daySplices u p shifts curday))) $ renderWS "work/day_calendar"
 
-daySplices :: User -> UserPlace -> Day -> [(T.Text, Splice Application)]
-daySplices u p day = [("dayName", textSplice $ T.pack (formatTime defaultTimeLocale "%A, %B %-d" day))
-                     ,("dayWorkers", dayView u p year month d)
-                     ,("nextYear",  textSplice $ T.pack $ show nextYear)
-                     ,("nextMonth", textSplice $ T.pack $ show nextMonth)
-                     ,("nextDay", textSplice $ T.pack $ show nextDay)
-                     ,("prevYear",  textSplice $ T.pack $ show prevYear)
-                     ,("prevMonth", textSplice $ T.pack $ show prevMonth)
-                     ,("prevDay", textSplice $ T.pack $ show prevDay)
-                     ]
-  where (year,month,d) = toGregorian day
-        (nextYear,nextMonth,nextDay) = toGregorian $ addDays 1 day
-        (prevYear,prevMonth,prevDay) = toGregorian $ addDays (-1) day
-  
+
 timesheetH user place = do
   targetUser <- getParam "user"
   mstart <- getParam "start"

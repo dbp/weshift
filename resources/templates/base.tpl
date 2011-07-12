@@ -1,8 +1,9 @@
 <html>
   <head>
     <link rel="stylesheet" href="/css/place.css" type="text/css" media="screen" title="no title" charset="utf-8">
-    <link rel="stylesheet" href="/css/tipTip.css" type="text/css" media="screen" title="no title" charset="utf-8">
-    <link rel="stylesheet" href="/css/jquery-ui-1.8.11.custom.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="/css/calendar.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <!-- <link rel="stylesheet" href="/css/tipTip.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="/css/jquery-ui-1.8.11.custom.css" type="text/css" media="screen" title="no title" charset="utf-8"> -->
     
     <!-- <script type="text/javascript" charset="utf-8" src="/js/jquery-1.5.2.min.js"></script>
     <script type="text/javascript" charset="utf-8" src="/js/jquery.tipTip.js"></script>

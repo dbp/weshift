@@ -47,7 +47,7 @@ Executable weshift-snap
     HTTP,
     attoparsec,
     aeson,
-    heist-async,
+    heist-async >= 0.4,
     email-postmark,
     resource-pool >= 0.1 && < 0.2,
     snap-less,
