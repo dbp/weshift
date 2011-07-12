@@ -12,6 +12,7 @@ import Data.Time.LocalTime
 import System.Locale (defaultTimeLocale)
 
 import "mtl" Control.Monad.Trans
+import Control.Applicative hiding (optional)
 import Text.Templating.Heist
 import Snap.Extension.Heist
 import Text.SSV
@@ -33,13 +34,14 @@ import Text.Parsec.String
 
 bulkInputH :: User -> UserPlace -> Application ()
 bulkInputH user place = 
-  route [("/", ifTop $ method GET $ inputForm)
+  route [("/", ifTop $ method GET $ inputForm user)
         ,("/upload", method POST $ upload user place)
         ,("/confirm", method POST $ confirm user place)
         ]
         
-inputForm = do
+inputForm u = do
     today <- fmap utctDay $ liftIO getCurrentTime
+    setView u "work" "work.bulk"
     heistLocal (bindSplices (commonSplices today)) $ renderWS "work/bulk"
     
 upload u p = do

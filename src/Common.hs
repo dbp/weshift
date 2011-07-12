@@ -20,6 +20,7 @@ import Heist.Splices.Async (heistAsyncSplices)
 import Data.Maybe (fromMaybe, maybeToList, listToMaybe, fromJust)
 import Control.Monad (liftM, mzero, unless)
 import Data.List (find)
+import Data.List.Split
 import Snap.Types
 
 import Data.Time.Format
@@ -30,8 +31,32 @@ import System.Locale
 import Application 
 import Auth
 import State.Types
+import State.Account
 import State.Place
 import State.Coworkers
+
+-- | this function takes a 'key' and a 'value' for the view, and sets it in the user's account.
+-- they key is the prefix of the value, so it is stored like: key.value.sub;key2.value2 etc.
+-- the idea is that these will indicate which panels are open, so that the site remembers
+-- what everything looks like.
+setView :: User -> BS.ByteString -> BS.ByteString -> Application ()
+setView user key value = do
+    updateUserView $ user { uView = view }
+    return ()
+  where views = T.splitOn ";" $ TE.decodeUtf8 (uView user)
+        newViews = map (\v -> if (TE.decodeUtf8 key) `T.isPrefixOf` v then (TE.decodeUtf8 value) else v) views
+        view = TE.encodeUtf8 $ T.intercalate ";" newViews
+
+viewSplice :: BS.ByteString -> Splice Application
+viewSplice v = do node <- getParamNode
+                  case X.getAttribute "is" node of
+                    Just i -> if isView v i then return (X.elementChildren node) else return []
+                    Nothing -> 
+                      case X.getAttribute "has" node of
+                        Just i -> if hasView v i then return (X.elementChildren node) else return []
+                        Nothing -> return []
+  where isView v i = i `elem` (T.splitOn ";" $ TE.decodeUtf8 v)
+        hasView v i = any (T.isPrefixOf i) (T.splitOn ";" $ TE.decodeUtf8 v)
 
 placeName place = BS.intercalate ", " $ (map ($ place) [pName,pOrg])
 placeRoot place = BS.intercalate "/"  $ (map (repUnders. ($ place)) [const "",pOrg,pName])
@@ -44,7 +69,15 @@ getCurrentPlace = do mplaceId <- getFromSession "place"
                                  place <- find ((==) placeId . pId) $ uPlaces user
                                  return $ place
                      return hm
-
+getCurrentUserAndPlace :: Application (Maybe (User,UserPlace))
+getCurrentUserAndPlace = do mplaceId <- getFromSession "place"
+                            muser <- getCurrentUser
+                            let hm = do placeId <- mplaceId
+                                        user <- muser
+                                        place <- find ((==) placeId . pId) $ uPlaces user
+                                        return $ (user,place)
+                            return hm
+                     
 redirPlaceHome :: Application ()
 redirPlaceHome = do hm <- liftM (fmap placeRoot) getCurrentPlace
                     redirect $ fromMaybe "/" hm
@@ -64,13 +97,14 @@ checkPlaceLogin' redr (Just org) (Just place) handler =
   do u <- getCurrentUser
      uri <- liftM rqURI getRequest
      p <- getPlace (repSpaces org) (repSpaces place)
-     let loginPage = do let pid = maybe "" pId p
-                        redr (BS.concat ["/login?redirectTo=", uri, "&pl=", pid])
+     let loginPage = maybe (redr "/")
+                           (\pl -> redr (BS.concat ["/login?redirectTo=", uri, "&pl=", pId pl]))
+                           p
      case (userHasPlace org place u, p, u) of
        (True,Just pl, Just u) -> handler u $ if uSuper u then pl { pFac = True } else pl
        _ -> loginPage
        
-  where userHasPlace org place (Just (User _ _ _ super places)) = super || any (\p -> pName p == place && pOrg p == org) places
+  where userHasPlace org place (Just (User _ _ _ super places _)) = super || any (\p -> pName p == place && pOrg p == org) places
         userHasPlace _ _ Nothing = False
 checkPlaceLogin' _ _ _ _ = mzero
 
@@ -137,22 +171,29 @@ commonSplices today = [("currYear",  textSplice $ T.pack $ show year)
   where (year,month,_) = toGregorian today  
 
 renderWS :: ByteString -> Application ()
-renderWS t = do mplace <- getCurrentPlace
-                let mplaceRoot = fmap placeRoot mplace
-                let mplaceName = fmap placeName mplace
-                let placeSplices = concat $ map (uncurry spliceMBS) [("placeRoot", mplaceRoot),("placeName", mplaceName)]
-                muserName <- liftM (fmap uName) getCurrentUser
-                let userSplices = concat $ map (uncurry spliceMBS) [("userName",muserName)]
-                let permissionSplices = [("isFacilitator", facilitatorSplice mplace),("isNormalUser", normalUserSplice mplace)]
-                workersSplice <- case mplace of
+renderWS t = do mup <- getCurrentUserAndPlace
+                let userSplices = do (u,p) <- mup
+                                     return [("placeRoot", bTS $ placeRoot p)
+                                            ,("placeName", bTS $ placeName p)
+                                            ,("userName", bTS $ uName u)
+                                            ,("view", viewSplice (uView u))
+                                            ]
+                let permissionSplices = [("isFacilitator", facilitatorSplice $ fmap snd mup)
+                                        ,("isNormalUser", normalUserSplice $ fmap snd mup)
+                                        ,("ifLoggedIn", ifLoggedIn)
+                                        ,("ifGuest", ifGuest)
+                                        ]
+                workersSplice <- case fmap snd mup of
                                     Nothing -> return []
                                     Just place -> do us <- getWorkers place
                                                      return [("user-lookup", userLookup $ M.fromList $ map (\u -> (uId u, u)) us)]
-                (heistLocal $ (bindSplices (splices ++ placeSplices ++ userSplices ++ workersSplice))) $ render t
-  where splices = [ ("ifLoggedIn", ifLoggedIn)
-                  , ("ifGuest", ifGuest)
-                  , ("show", showContent)
-                  ] ++ heistAsyncSplices
+                (heistLocal $ (bindSplices (concat [fromMaybe [] userSplices
+                                                   ,permissionSplices
+                                                   ,workersSplice
+                                                   ,heistAsyncSplices
+                                                   ,[("show", showContent)]
+                                                   ]))) $ render t
+  where bTS = textSplice . TE.decodeUtf8
                   
                   
 redirTo :: Application ()

@@ -24,25 +24,31 @@ import Common
 import Control.Concurrent (threadDelay)
 
 settingsH :: User -> UserPlace -> Application ()
-settingsH u p = route [ ("/",         ifTop $ renderWS "profile/usersettings/blank")
+settingsH u p = route [ ("/",         ifTop $ settingsHome u)
                       , ("/name",     changeNameH u p)
                       , ("/password", changePasswordH u p)
                       , ("/remove",   removeAccountH u p)
                       , ("/email",    emailH u p)
                       ]
 
+settingsHome :: User -> Application ()
+settingsHome u = do setView u "profile" "profile.settings"
+                    renderWS "profile/usersettings/blank"
+
+
 nameForm :: SnapForm Application Text HeistView String
 nameForm = input "name" Nothing  `validate` nonEmpty <++ errors 
                   
 changeNameH u p = do r <- eitherSnapForm nameForm "change-name-form"
                      let name = (TE.decodeUtf8 . uName) u
+                     setView u "profile" "profile.settings.name"
                      case r of
                          Left splices' -> do
                            heistLocal (bindString "name" name ) $ 
                             heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name"
                          Right name' -> do
                            case u of
-                             (User id' _ _ _ _) -> do
+                             (User id' _ _ _ _ _) -> do
                                success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql id']
                                {-liftIO $ threadDelay 200000-}
                                case success of
@@ -58,7 +64,7 @@ checkPassword = checkM "Current password not correct:" fn
   where fn p = do mUs <- getCurrentUser
                   case mUs of
                     Nothing -> return False
-                    Just (User id' _ _ _ _) ->
+                    Just (User id' _ _ _ _ _) ->
                       fmap (not.null) $ withPGDB 
                         "SELECT id FROM users WHERE id = ? AND password = crypt(?, password) LIMIT 1;" 
                         [toSql id', toSql p]                  
@@ -75,12 +81,13 @@ passwordForm = (`validate` matchingPasswords) $ (<++ errors) $ NewPassword
 
 
 changePasswordH u p = do r <- eitherSnapForm passwordForm "change-password-form"
+                         setView u "profile" "profile.settings.password"
                          case r of
                              Left splices' -> do
                                heistLocal (bindSplices splices') $ renderWS "profile/usersettings/password"
                              Right (NewPassword _ new _) -> do
                                case u of
-                                 (User id' _ _ _ _) -> do
+                                 (User id' _ _ _ _ _) -> do
                                    success <- fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql new, toSql id']
                                    case success of
                                      True  -> renderWS "profile/usersettings/password_updated"

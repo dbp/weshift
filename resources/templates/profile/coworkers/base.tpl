@@ -3,7 +3,7 @@
 </apply>
 
 <div-async name="profile-main" class="main">
-  <h2>Coworkers (<count/>)</h2>
+  <h2>Coworkers (<coworkersCount/>)</h2>
 
   <content/>
   

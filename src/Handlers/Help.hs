@@ -8,4 +8,5 @@ import Common
 import State.Types
 
 helpH :: User -> UserPlace -> Application ()
-helpH u p = renderWS "profile/help/blank"
+helpH u p = do setView u "profile" "profile.help"
+               renderWS "profile/help/blank"

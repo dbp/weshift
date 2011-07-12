@@ -1,9 +1,24 @@
 <apply template="base">
 
 <bind tag="left">
-       
-        <apply template="profile/blank"></apply>
-  
+        <view is="profile">
+          <apply template="profile/blank"></apply>
+        </view>
+        <view is="profile.settings">
+          <apply template="profile/usersettings/blank"></apply>
+        </view>
+        <view is="profile.settings.name">
+          <apply template="profile/usersettings/name"></apply>
+        </view>
+        <view is="profile.settings.password">
+          <apply template="profile/usersettings/password"></apply>
+        </view>
+        <view is="profile.coworkers">
+          <apply template="profile/coworkers/default"></apply>
+        </view>
+        <view is="profile.help">
+          <apply template="profile/help/blank"></apply>
+        </view>
 </bind>
 
     <bind tag="center">
@@ -15,8 +30,18 @@
          </div>
        </div> <!-- .heading -->
        
-       <apply template="work/month_calendar"/>
-
+       <view is="work.month">
+         <apply template="work/month_calendar"/>
+       </view>
+       <view is="work.day">
+         <apply template="work/day_calendar"/>
+       </view>
+       <view is="work.timesheet">
+         <apply template="work/timesheet"/>
+       </view>
+       <view is="work.bulk">
+         <apply template="work/bulk"/>
+       </view>
        
     </bind>
     

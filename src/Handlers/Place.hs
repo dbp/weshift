@@ -63,7 +63,8 @@ placeSite = do
 placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     nextShift <- getNextShift u p
                     let nextShiftSplice = spliceMBS "nextShift" $ Just $ fromMaybe "No Next Shift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
-                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices today) ++ (commonSplices today))) $ renderWS "place"
+                    coworkers <- getCoworkers u p
+                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices today) ++ (commonSplices today) ++ (coworkersSplice coworkers))) $ renderWS "place"
 
 monthDayLargeH user place = do mmonth <- getParam "month"
                                myear  <- getParam "year"
@@ -102,6 +103,7 @@ monthH u p = do month <- fmap (maybeRead =<<) $ getParam "month"
                 year <- fmap (maybeRead =<<) $ getParam "year"
                 today <- liftM utctDay $ liftIO getCurrentTime
                 let day = fromMaybe today $ liftM2 (\y m -> fromGregorian y m 1) year month
+                setView u "work" "work.month"
                 heistLocal (bindSplices ((monthSplices day) ++ (commonSplices day))) $ renderWS "work/month_calendar"
 
        
@@ -120,6 +122,7 @@ monthSplices day = [("monthName", textSplice $ T.pack (formatTime defaultTimeLoc
   
 dayH u p = do
   today <- liftM utctDay $ liftIO getCurrentTime
+  setView u "work" "work.day"
   heistLocal (bindSplices (commonSplices today)) $ renderWS "work/day_calendar"
   
 timesheetH user place = do
@@ -140,6 +143,8 @@ timesheetH user place = do
                         (Just start, Just stop) -> getTimesheet place user start stop
                         _ -> getTimesheet place user (addDays (-14) today) today
   
+  setView user "work" "work.timesheet"
+
   heistLocal (bindSplices (commonSplices today ++ coworkersSplice ++ timesheetSplice)) $ renderWS "work/timesheet"
 
     where renderTSCoworkers self coworkers = mapSplices (renderTSCoworker self) (self : coworkers)

@@ -19,7 +19,7 @@ import Common
 import Auth
 
 renderCoworker :: User -> Splice Application
-renderCoworker (User uid uname uact usuper uplaces) = do
+renderCoworker (User uid uname uact usuper uplaces uview) = do
   runChildrenWithText [("name",       TE.decodeUtf8 uname)
                       ,("classes",    T.concat (["member"] ++ if pFac (head uplaces) then [" facilitator"] else []))
                       ]
@@ -31,6 +31,8 @@ renderCoworkers coworkers = mapSplices renderCoworker coworkers
 coworkersH :: User -> UserPlace -> Application ()
 coworkersH user place = do 
   coworkers <- getCoworkers user place  -- Note: this gives back incomplete place lists, just the current place
-  let coworkersSplices = (spliceMBS "count" (Just $ B8.pack $ show $ length coworkers)) ++ 
-                         [("coworkers", renderCoworkers coworkers)]
-  heistLocal (bindSplices coworkersSplices) $ renderWS "profile/coworkers/default"
+  setView user "profile" "profile.coworkers"
+  heistLocal (bindSplices (coworkersSplice coworkers)) $ renderWS "profile/coworkers/default"
+
+coworkersSplice cs = [("coworkersCount", textSplice $ T.pack $ show $ length cs)
+                     ,("coworkers", renderCoworkers cs)]

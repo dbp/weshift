@@ -21,10 +21,11 @@ data User = User { uId :: BS.ByteString
                  , uActive :: Bool
                  , uSuper :: Bool
                  , uPlaces :: [UserPlace]
+                 , uView :: BS.ByteString
                  }
               deriving (Eq, Show)
 
-emptyUser = User "" "" False False []
+emptyUser = User "" "" False False [] ""
 
              
 data UserPlace = UserPlace { pId    :: BS.ByteString 
@@ -35,9 +36,9 @@ data UserPlace = UserPlace { pId    :: BS.ByteString
                            }
       deriving (Eq, Show)
 
-emptyUserPlace = UserPlace "" "" "" False ""
+emptyUserPlace = UserPlace "" "" "" False "" 
 
-data Attrs = Attrs Bool Bool [UserPlace]
+data Attrs = Attrs Bool Bool [UserPlace] BS.ByteString
       deriving (Eq, Show)
 
 emptyLocalTime = utcToLocalTime utc (UTCTime (fromGregorian 0 0 0) (fromInteger 0))      
