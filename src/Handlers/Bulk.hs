@@ -65,11 +65,11 @@ confirm u p = do
     (Just shifts, Just notUnderstood) -> do
       workers <- getWorkers p
       res <- mapM insertShift $ filterFac $ map (\s -> s { sPlace = (pId p), sRecorder = (uId u) }) shifts
-      let numSuccess = length $ filter isNothing res
-      let numFailed = length $ filter isJust res
-      let unparsed = renderNotUnderStoodCSV ((mapMaybe (formatNU workers) $ catMaybes res) ++ notUnderstood)
+      let numSuccess = length $ rights res
+      let numFailed = length $ lefts res
+      let unparsed = renderNotUnderStoodCSV ((mapMaybe (formatNU workers) $ lefts res) ++ notUnderstood)
       let status = if numFailed == 0 then "Inserted all " ++ (show numSuccess) ++ " shifts. Any not understood shifts are below"
-                   else "Inserted " ++ (show numSuccess) ++ "/" ++ (show $ numSuccess + numFailed) ++ " shifts. Those that could not be inserted, as well as those that could not be understood, are below:"
+                   else "Inserted " ++ (show numSuccess) ++ "/" ++ (show $ numSuccess + numFailed) ++ " shifts. Those that could not be inserted (due to overlapping with existing shifts), as well as those that could not be understood, are below:"
       heistLocal (bindSplices [("status", textSplice $ T.pack status)
                               ,("data", textSplice $ T.pack unparsed)
                               ]) $ renderWS "work/bulk"
@@ -78,7 +78,9 @@ confirm u p = do
  where filterFac ss = if pFac p then ss else filter (\s -> sUser s == uId u) ss   
        formatNU workers (Shift _ user _ start stop _ _) = do u <- find ((== user).uId) workers
                                                              return (B8.unpack $ uName u, localDay start, showTimeRange start stop)
-       showTimeRange start stop = (formatTime defaultTimeLocale "%R" start) ++ "-" ++ (formatTime defaultTimeLocale "%R" stop)
+       showTimeRange start stop = (ftime start) ++ "-" ++ (ftime stop)
+       ftime t = if ftime' "%M" t == "00" then ftime' "%H" t else ftime' "%R" t
+       ftime' = formatTime defaultTimeLocale
          
 renderNotUnderstood :: Monad m => [(String,Day,String)] -> Splice m
 renderNotUnderstood = mapSplices (\(name, date, shift) -> 
@@ -92,7 +94,7 @@ renderNotUnderStoodCSV nus = showCSV $ rows
   where days = nub $ map (\(_,d,_) -> d) nus
         names = nub $ map (\(n,_,_) -> n) nus
         blanks = map (\n -> (n,days)) names
-        rows = ("Name":(map (formatTime defaultTimeLocale "%m/%d/%Y") days)) : (map (\(n, days) -> n : (map (gets n) days)) blanks)
+        rows = ("Name":(map (formatTime defaultTimeLocale "%-m/%-d/%Y") days)) : (map (\(n, days) -> n : (map (gets n) days)) blanks)
         gets n d = maybe "" (\(_,_,s) -> s) $ find (\(n',d',s) -> n==n' && d==d') nus
 
 -- | This function tries to understand a date in as many ways as possible, stoping as soon as it finds one that works.
@@ -140,11 +142,13 @@ data TIME = KNOWN DiffTime | UNKNOWN DiffTime deriving Show
 halfDay = 12*60*60
 fullDay = 24*60*60
 
-time = do d1 <- fmap (Just . digitToInt) digit
-          d2 <- option Nothing (fmap (Just . digitToInt) digit)
-          s <- option Nothing (fmap Just $ char ':')
-          d3 <- option Nothing (fmap (Just . digitToInt) digit)
-          d4 <- option Nothing (fmap (Just . digitToInt) digit)
+int = digitToInt <$> digit
+
+time = do d1 <- Just <$> int
+          d2 <- optionMaybe int
+          s <- optionMaybe (char ':')
+          d3 <- optionMaybe int
+          d4 <- optionMaybe int
           ampm <- choice [ string "am" >> return AM
                          , string "pm" >> return PM
                          , string "AM" >> return AM
@@ -175,7 +179,7 @@ time = do d1 <- fmap (Just . digitToInt) digit
             NONE -> if prelimTime > fullDay then fail "time above 24hrs" else 
                     return $ if prelimTime > halfDay then KNOWN prelimTime {-this is 24hr time-} else UNKNOWN prelimTime
     where hours h = minutes (h * 60)
-          minutes m = fromInteger $ toInteger (m * 60) :: DiffTime
+          minutes m = fromIntegral (m * 60) :: DiffTime
           listToInt ls = foldr (\(x,m) t -> t + (x * m)) 0 $ zip ls (reverse $ take (length ls) $ iterate (*10) 1)
 
 timeRange :: Parser (DiffTime,DiffTime)

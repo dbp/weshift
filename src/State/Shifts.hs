@@ -22,10 +22,10 @@ mTime (Delete _ t) = t
 mTime (Change _ _ _ t) = t
 mTime (Cover _ t) = t
 
--- if successful, returns nothing, otherwise gives the shift back
-insertShift :: Shift -> Application (Maybe Shift)
+-- | if successful, returns Right id, else Left shift that could not be entered
+insertShift :: Shift -> Application (Either Shift BS.ByteString)
 insertShift s@(Shift _ u p start stop _ recorder) = 
-  fmap (\r -> if not (null r) then Nothing else Just s) $ withPGDB "INSERT INTO shifts (place, user_id, start, stop, recorder) (SELECT ? as place, ? as user_id, ? as start, ? as stop, ? as recorder WHERE NOT EXISTS (SELECT id, user_id, start, stop FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) UNION ALL select id, user_id, start, stop FROM obligations WHERE user_id = ? AND (? < stop AND ? > start))) RETURNING id;" [toSql p,toSql u, toSql start, toSql stop, toSql recorder, toSql u, toSql start, toSql stop, toSql u, toSql start, toSql stop]
+  fmap (\r -> if not (null r) && not (null $ head r) then Right (fromSql $ head $ head r) else Left s) $ withPGDB "INSERT INTO shifts (place, user_id, start, stop, recorder) (SELECT ? as place, ? as user_id, ? as start, ? as stop, ? as recorder WHERE NOT EXISTS (SELECT id, user_id, start, stop FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) UNION ALL select id, user_id, start, stop FROM obligations WHERE user_id = ? AND (? < stop AND ? > start))) RETURNING id;" [toSql p,toSql u, toSql start, toSql stop, toSql recorder, toSql u, toSql start, toSql stop, toSql u, toSql start, toSql stop]
 
 
 getNextShift :: User -> UserPlace -> Application (Maybe Shift)

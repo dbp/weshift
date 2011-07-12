@@ -79,6 +79,7 @@ performLogin euid = do
     login x@(user, _) = do
       setSessionUserId (userId user) 
       maybe (return ()) (setInSession "place" . BS.concat) $ M.lookup "pl" euid
+      {-liftIO $ putStrLn "logging in"-}
       return (Right x)
 
 getCurrentUser = do au <- currentAuthUser
