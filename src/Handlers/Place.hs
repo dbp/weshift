@@ -7,7 +7,7 @@ import Application
 import Common
 import Control.Monad
 import "mtl" Control.Monad.Trans (liftIO)
-import Data.Maybe (fromMaybe, isNothing, fromJust)
+import Data.Maybe (fromMaybe, isNothing, fromJust, mapMaybe)
 
 import Data.Time.Format
 import Data.Time.Clock
@@ -64,7 +64,18 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     nextShift <- getNextShift u p
                     let nextShiftSplice = spliceMBS "nextShift" $ Just $ fromMaybe "No Next Shift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
                     coworkers <- getCoworkers u p
-                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices today) ++ (commonSplices today) ++ (coworkersSplice coworkers))) $ renderWS "place"
+                    let day = maybe today (\(y,m) -> fromGregorian y m 1) savedMonth
+                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices day) ++ (commonSplices today) ++ (coworkersSplice coworkers))) $ renderWS "place"
+      where mList Nothing = []
+            mList (Just xs) = xs
+            view = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."
+            savedMonth = 
+              case map TE.encodeUtf8 (mList view) of
+                (y:m:[]) -> do month <- maybeRead m
+                               year <- maybeRead y
+                               return (year,month)
+                _ -> Nothing
+              
 
 monthDayLargeH user place = do mmonth <- getParam "month"
                                myear  <- getParam "year"
@@ -103,7 +114,9 @@ monthH u p = do month <- fmap (maybeRead =<<) $ getParam "month"
                 year <- fmap (maybeRead =<<) $ getParam "year"
                 today <- liftM utctDay $ liftIO getCurrentTime
                 let day = fromMaybe today $ liftM2 (\y m -> fromGregorian y m 1) year month
-                setView u "work" "work.month"
+                setView u "work" (TE.encodeUtf8 (T.concat ["work.month" 
+                                                          ,(maybe "" (T.append "." . T.pack . show ) year)
+                                                          ,(maybe "" (T.append "." . T.pack . show) month)]))
                 heistLocal (bindSplices ((monthSplices day) ++ (commonSplices day))) $ renderWS "work/month_calendar"
 
        

@@ -46,17 +46,28 @@ setView user key value = do
   where views = T.splitOn ";" $ TE.decodeUtf8 (uView user)
         newViews = map (\v -> if (TE.decodeUtf8 key) `T.isPrefixOf` v then (TE.decodeUtf8 value) else v) views
         view = TE.encodeUtf8 $ T.intercalate ";" newViews
+        
+-- | get's the suffix of the view that begins with what is provided, if it exists
+getView :: User -> T.Text -> Maybe BS.ByteString
+getView u i = fmap TE.encodeUtf8 $ (T.stripPrefix i) =<< (find (T.isPrefixOf i) views)
+  where views = (T.splitOn ";" $ TE.decodeUtf8 (uView u))
+
 
 viewSplice :: BS.ByteString -> Splice Application
 viewSplice v = do node <- getParamNode
                   case X.getAttribute "is" node of
-                    Just i -> if isView v i then return (X.elementChildren node) else return []
+                    Just i -> if isView i then return (X.elementChildren node) else return []
                     Nothing -> 
                       case X.getAttribute "has" node of
-                        Just i -> if hasView v i then return (X.elementChildren node) else return []
-                        Nothing -> return []
-  where isView v i = i `elem` (T.splitOn ";" $ TE.decodeUtf8 v)
-        hasView v i = any (T.isPrefixOf i) (T.splitOn ";" $ TE.decodeUtf8 v)
+                        Just i -> if hasView i then return (X.elementChildren node) else return []
+                        Nothing -> 
+                          case X.getAttribute "val" node of
+                            Just i -> return (getView i)
+                            Nothing -> return []
+  where views = (T.splitOn ";" $ TE.decodeUtf8 v)
+        isView i = i `elem` views
+        hasView i = any (T.isPrefixOf i) views
+        getView i = map X.TextNode $ maybeToList $ (T.stripPrefix i) =<< (find (T.isPrefixOf i) views)
 
 placeName place = BS.intercalate ", " $ (map ($ place) [pName,pOrg])
 placeRoot place = BS.intercalate "/"  $ (map (repUnders. ($ place)) [const "",pOrg,pName])

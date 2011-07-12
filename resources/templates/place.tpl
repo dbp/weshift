@@ -30,7 +30,7 @@
          </div>
        </div> <!-- .heading -->
        
-       <view is="work.month">
+       <view has="work.month">
          <apply template="work/month_calendar"/>
        </view>
        <view is="work.day">
