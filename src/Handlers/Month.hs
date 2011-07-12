@@ -99,15 +99,11 @@ formatMonth :: Integer -> Int -> [Shift] -> [Shift] -> User -> [[DayFormat]] -> 
 formatMonth y m s c u weeks = map (formatWeek y m s c u) $ 
                                 (map top (head weeks)) : ((init $ tail weeks) ++ [map bottom (last weeks)])
 
-monthView :: Integer -> Int -> Splice Application
-monthView year month = do let start = fromGregorian year month 1
-                          mplace <- lift getCurrentPlace
-                          muser <- lift getCurrentUser
-                          case (mplace, muser) of
-                            (Just place, Just user) -> do
-                              let end = addDays (toInteger $ gregorianMonthLength year month) start
-                              shifts <- lift $ getShifts start end place
-                              uncoveredShifts <- lift $ getUncoveredShifts start end place
-                              renderMonth $ concat $ formatMonth year month shifts uncoveredShifts user $ buildMonth year month
-                            _ -> return []
+monthView :: UserPlace -> User -> Integer -> Int -> Splice Application
+monthView place user year month = do 
+  let start = fromGregorian year month 1
+  let end = addDays (toInteger $ gregorianMonthLength year month) start
+  shifts <- lift $ getShifts start end place
+  uncoveredShifts <- lift $ getUncoveredShifts start end place
+  renderMonth $ concat $ formatMonth year month shifts uncoveredShifts user $ buildMonth year month
                             
