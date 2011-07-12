@@ -147,7 +147,7 @@
 #day-workernames {
   height: 33px;
   border-bottom: 1px solid black;
-  border-left: 1px solid black;
+  border-right: 1px solid black;
  .worker {
     float: left;
     width: 59px;
@@ -155,20 +155,38 @@
     font-size: 11px;
     font-family: Helvetica;
     text-align: center;
-    border-right: 1px solid black;
+    border-left: 1px solid black;
     padding-top: 3px;
   }
 }
 
 #day-calendar {
+  position: relative;
+  #shift-right,#shift-left {
+    width: 10px;
+    height: 10px;
+    background-color: black;
+  }
+  #shift-right { 
+    position: absolute;
+    top: 10px;
+    right: -15px;
+  }
+  #shift-left {
+    position: absolute;
+    top: 10px;
+    left: -15px;
+  }
   #time {
+    background-color: transparent;
     width: 60px;
-    margin-left: -59px;
-    margin-top: -1px;
+    position: absolute;
+    left: -59px;
+    top: 33px;
     float: left;
     .top {
       border: 1px solid black;
-      background: transparent url("/img/workschedule/calendar/Tick_Marks.png") no-repeat bottom right; 
+      background: transparent url("/img/workschedule/calendar/Tick_Marks.png") no-repeat bottom right;
     }
     .hour {
       width: 43px;
@@ -181,6 +199,18 @@
       padding-right: 15px;
       padding-top: 4px;
     }
+  }
+  .view {
+    width: 421px;
+    overflow: hidden;
+    position: relative;
+    margin-left: 0px;
+    float: left;
+  }
+  .holder {
+    position: absolute;
+    margin-left: 1px;
+    left: 0px;
   }
   .column {
     float: left;

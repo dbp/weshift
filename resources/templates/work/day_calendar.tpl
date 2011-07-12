@@ -9,26 +9,31 @@
         <dayName/> 
         <a-async href="$(placeRoot)/day/$(nextYear)/$(nextMonth)/$(nextDay)" id="next"></a-async></h1>
   </div> <!-- #month-heading -->
-  <div id="day-workernames">
-    <dayWorkers>
-      <div class="worker"><name/></div>
-    </dayWorkers>
-  </div> <!-- #month-daynames -->
 
   <div id="day-calendar">
     <div id="time"><timeColumn/></div>
-    
-    <dayWorkers>
-      <div class="column h-$(columnHeight)">
-        <shifts>
-          <div class="shift o-$(offset) h-$(length) $(classes)">
-            <div class="time">
-              <time/>
-            </div>
+    <div class="shift-right" id="shift-right" data-shift-ammount="60" data-shift-target="#day-calendar .view .holder"/>
+    <div class="shift-left" id="shift-left" data-shift-ammount="61" data-shift-target="#day-calendar .view .holder"/>   
+    <div class="view h-$(columnHeight)">
+      <div class="holder h-$(columnHeight)">
+      <div id="day-workernames">
+        <dayWorkers>
+          <div class="worker"><name/></div>
+        </dayWorkers>
+      </div> <!-- #month-daynames -->
+        <dayWorkers>
+          <div class="column h-$(columnHeight)">
+            <shifts>
+              <div class="shift o-$(offset) h-$(length) $(classes)">
+                <div class="time">
+                  <time/>
+                </div>
+              </div>
+            </shifts>
           </div>
-        </shifts>
+        </dayWorkers>
       </div>
-    </dayWorkers>
+    </div>
   </div>
   
 </div-async>
