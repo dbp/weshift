@@ -65,18 +65,26 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     nextShift <- getNextShift u p
                     let nextShiftSplice = spliceMBS "nextShift" $ Just $ fromMaybe "No Next Shift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
                     coworkers <- getCoworkers u p
-                    let day = maybe today (\(y,m) -> fromGregorian y m 1) savedMonth
-                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices u p day) ++ (commonSplices today) ++ (coworkersSplice coworkers))) $ renderWS "place"
+                    let monthday = maybe today (\(y,m) -> fromGregorian y m 1) savedMonth
+                    let dayday = maybe today (\(y,m,d) -> fromGregorian y m d) savedDay
+                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices u p monthday) ++ (commonSplices today) ++ (coworkersSplice coworkers) ++ (daySplices u p dayday))) $ renderWS "place"
       where mList Nothing = []
             mList (Just xs) = xs
-            view = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."
+            monthV = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."
             savedMonth = 
-              case map TE.encodeUtf8 (mList view) of
+              case map TE.encodeUtf8 (mList monthV) of
                 (y:m:[]) -> do month <- maybeRead m
                                year <- maybeRead y
                                return (year,month)
                 _ -> Nothing
-              
+            dayV = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.day."
+            savedDay = 
+              case map TE.encodeUtf8 (mList dayV) of
+                (y:m:d:[]) -> do year <- maybeRead y
+                                 month <- maybeRead m
+                                 day <- maybeRead d
+                                 return (year,month,day)
+                _ -> Nothing
 
 monthDayLargeH user place = do mmonth <- getParam "month"
                                myear  <- getParam "year"

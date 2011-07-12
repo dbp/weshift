@@ -33,7 +33,7 @@
        <view has="work.month">
          <apply template="work/month_calendar"/>
        </view>
-       <view is="work.day">
+       <view has="work.day">
          <apply template="work/day_calendar"/>
        </view>
        <view is="work.timesheet">
