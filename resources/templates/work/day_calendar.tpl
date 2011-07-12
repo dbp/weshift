@@ -12,15 +12,16 @@
 
   <div id="day-calendar">
     <div id="time"><timeColumn/></div>
-    <div class="shift-right" id="shift-right" data-shift-ammount="60" data-shift-target="#day-calendar .view .holder"/>
-    <div class="shift-left" id="shift-left" data-shift-ammount="61" data-shift-target="#day-calendar .view .holder"/>   
-    <div class="view h-$(columnHeight)">
-      <div class="holder h-$(columnHeight)">
-      <div id="day-workernames">
+    <div class="shift-right" id="shift-right" data-shift-ammount="60" data-shift-target="#day-calendar .view .holder" data-shift-width="421"/>
+    <div class="shift-left" id="shift-left" data-shift-ammount="61" data-shift-target="#day-calendar .view .holder" data-shift-width="421"/>   
+    <div class="view h-$(viewHeight)">
+      <div class="holder h-$(viewHeight)">
+      <div id="day-workernames" style="width: $(workersWidth)px;">
         <dayWorkers>
           <div class="worker"><name/></div>
         </dayWorkers>
       </div> <!-- #month-daynames -->
+      <div class="columns">
         <dayWorkers>
           <div class="column h-$(columnHeight)">
             <shifts>
@@ -32,6 +33,7 @@
             </shifts>
           </div>
         </dayWorkers>
+        </div>
       </div>
     </div>
   </div>

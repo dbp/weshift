@@ -9,6 +9,7 @@ import Snap.Extension.Heist
 import qualified Text.XmlHtml as X
 
 import Data.Maybe (fromJust, fromMaybe)
+import Data.List (nub)
 
 import Text.Digestive.Types
 import Text.Digestive.Snap.Heist
@@ -42,7 +43,9 @@ daySplices u p shifts day =
   [("dayName", textSplice $ T.pack (formatTime defaultTimeLocale "%A, %B %-d" day))
   ,("dayWorkers", dayView u p shifts year month d)
   ,("timeColumn", timeColumn startTime dayLength)
-  ,("columnHeight", textSplice $ T.pack $ show dayLength)
+  ,("columnHeight", textSplice $ T.pack $ show timeColumnHeight)
+  ,("viewHeight", textSplice $ T.pack $ show $ timeColumnHeight + 5)
+  ,("workersWidth", textSplice $ T.pack $ show $ 60 * (length $ nub $ map sUser shifts))
   ,("nextYear",  textSplice $ T.pack $ show nextYear)
   ,("nextMonth", textSplice $ T.pack $ show nextMonth)
   ,("nextDay", textSplice $ T.pack $ show nextDay)
@@ -56,9 +59,10 @@ daySplices u p shifts day =
           startTime =  minimum $ (24*4) : (map (timePeriod . localTimeOfDay . sStart) shifts)
           endTime = maximum $ 0 : (map (timePeriod . localTimeOfDay . sStop) shifts)
           dayLength = endTime - startTime
+          timeColumnHeight = dayLength + (4 - (dayLength `mod` 4)) + (4 - (startTime `mod` 4))
           
 timeColumn start length = return $
-                            (X.Element "div" [("class", T.append "top h-" (T.pack $ show $ 4 - (start `mod` 4)))] [])
+                            (X.Element "div" [("class", T.append "top t-" (T.pack $ show $ 4 - (start `mod` 4)))] [])
                             :(map (\n -> X.Element "div" [("class","h-4 hour")] [X.TextNode (T.pack $ (show  (if n > 12 then n - 12 else n)) ++ ":00" ++ (if n > 12 then "pm" else "am"))]) 
                             $ take ((length `div` 4)  + 1) (iterate (+1) (start `div` 4 + (if start `mod` 4 == 0 then 0 else 1))))
 

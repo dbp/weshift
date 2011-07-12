@@ -112,7 +112,9 @@ checkPlaceLogin' redr (Just org) (Just place) handler =
                            (\pl -> redr (BS.concat ["/login?redirectTo=", uri, "&pl=", pId pl]))
                            p
      case (userHasPlace org place u, p, u) of
-       (True,Just pl, Just u) -> handler u $ if uSuper u then pl { pFac = True } else pl
+       (True,Just pl, Just u) -> do
+         setInSession "place" (pId pl)
+         handler u $ if uSuper u then pl { pFac = True } else pl
        _ -> loginPage
        
   where userHasPlace org place (Just (User _ _ _ super places _)) = super || any (\p -> pName p == place && pOrg p == org) places

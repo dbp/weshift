@@ -15,7 +15,7 @@
 
     <div class="other-wrap">
       <otherShifts>
-        <user-lookup id="$(user)"><name/></user-lookup> - <start/>-<stop/>
+        <user-lookup id="$(user)"><name/></user-lookup> - <start/>-<stop/><br>
       </otherShifts>
 
       
