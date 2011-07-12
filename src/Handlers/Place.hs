@@ -59,6 +59,7 @@ placeSite = do
         , ("/settings",                       checkPlaceLoginAsync orgName placeName settingsH)
         , ("/shift",                          checkPlaceLoginAsync orgName placeName shiftH)
         , ("/messages",                       checkPlaceLoginAsync orgName placeName messagesH)
+        , ("/blank",                          checkPlaceLoginAsync orgName placeName (\_ _ -> renderWS "profile/blank"))
         ]
 
 placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
