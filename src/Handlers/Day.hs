@@ -58,9 +58,9 @@ daySplices u p shifts day =
           dayLength = endTime - startTime
           
 timeColumn start length = return $
-                            (X.Element "div" [("class", T.append "h-" (T.pack $ show $ start `mod` 4))] [])
-                            :(map (\n -> X.Element "div" [("class","h-4")] [X.TextNode (T.pack $ show  n)]) 
-                            $ take (length `div` 4) (iterate (+1) (start `div` 4)))
+                            (X.Element "div" [("class", T.append "top h-" (T.pack $ show $ 4 - (start `mod` 4)))] [])
+                            :(map (\n -> X.Element "div" [("class","h-4 hour")] [X.TextNode (T.pack $ (show  (if n > 12 then n - 12 else n)) ++ ":00" ++ (if n > 12 then "pm" else "am"))]) 
+                            $ take ((length `div` 4)  + 1) (iterate (+1) (start `div` 4 + (if start `mod` 4 == 0 then 0 else 1))))
 
 dayView :: User -> UserPlace -> [Shift] -> Integer -> Int -> Int -> Splice Application
 dayView u p shifts year month day = do
@@ -71,22 +71,26 @@ dayView u p shifts year month day = do
   let shiftUsers = map sUser shifts
   let dayLaborers = filter (\w -> (uId w) `elem` shiftUsers) workers
   let startTime = timePeriod $ localTimeOfDay $ minimum $ map sStart shifts
-  renderDayVD startTime shifts uncoveredShifts dayLaborers
+  renderDayVD u startTime shifts uncoveredShifts dayLaborers
 
 timePeriod tod = (todHour tod) * 4 + (todMin tod `div` 15)
   
-renderDayVD start s us ds = mapSplices (workerDay start s us) ds
+renderDayVD self start s us ds = mapSplices (workerDay self start s us) ds
 
-workerDay start ss us dl = 
+workerDay self start ss us dl = 
   runChildrenWith [("name", textSplice $ TE.decodeUtf8 $ uName dl)
                   ,("shifts", mapSplices sS $ reverse $ snd $ foldr buildSs (start,[]) (filter (\s -> sUser s == uId dl) ss))
                   ]        
     where buildSs s (offset,acc) = let start = timePeriod (localTimeOfDay (sStart s))
                                        offset' = start - offset
                                        stop = timePeriod (localTimeOfDay (sStop s))
-                                       length = stop - start in
-                                       (stop, (offset',length):acc)
-          sS (offset,length) = runChildrenWith [("offset", textSplice $ T.pack $ show offset)
-                                               ,("length", textSplice $ T.pack $ show length)
-                                               ]
+                                       length = stop - start
+                                       classes = if (uId self) == (sUser s) then "self" else "other"
+                                       time = (formatTime defaultTimeLocale "%-I:%M%P" (sStart s)) ++ "-" ++ (formatTime defaultTimeLocale "%-I:%M%P" (sStop s)) in
+                                       (stop, (offset',length,classes,time):acc)
+          sS (offset,length,classes,time) = runChildrenWith [("offset", textSplice $ T.pack $ show offset)
+                                                            ,("length", textSplice $ T.pack $ show length)
+                                                            ,("classes", textSplice $ classes)
+                                                            ,("time", textSplice $ T.pack time)
+                                                            ]
     

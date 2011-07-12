@@ -1,0 +1,307 @@
+#month-heading, #day-heading {
+  height: 43px;
+  background-color: black;
+  h1 {
+    /*  color: #00AEEF;*/
+    color: #44B9DE;
+    font-weight: normal;
+    text-align: right;
+    padding: 10px;
+  }
+ #next, #prev {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+  #next {
+    background: transparent url("/img/workschedule/calendar/Arrow_right.png");
+    &:hover { background: url("/img/workschedule/calendar/Arrow_right_mo.png"); }
+  }
+  #prev {
+    background: transparent url("/img/workschedule/calendar/Arrow_left.png");
+    &:hover { background: url("/img/workschedule/calendar/Arrow_left_mo.png"); }
+  }
+}
+
+
+#month-daynames {
+  height: 20px;
+  border-bottom: 1px solid black;
+  border-left: 1px solid black;
+ .dayname {
+    float: left;
+    width: 59px;
+    height: 17px;
+    font-size: 14px;
+    font-family: Helvetica;
+    text-align: center;
+    border-right: 1px solid black;
+    padding-top: 3px;
+    text-transform: uppercase;
+  }
+}
+
+#month-days {
+  width: 420px;
+  padding-left: 1px;
+  padding-top: 10px;
+ .daybox {
+    float: left;
+    position: relative;
+    width: 59px;
+    height: 59px;
+    border-bottom: 1px solid #A3E5EF;
+    border-right: 1px solid #A3E5EF;
+    &.end { border-right: 0; }
+    &.bottom { border-bottom: 0; }
+    .large {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 240px;
+      height: 240px;
+      margin-right: -185px; 
+      margin-bottom: -185px; 
+      background-color: black;
+      color: white;
+      z-index: 10;
+      border-bottom: 2px solid white;
+      border-right: 2px solid white;
+      .user-wrap { float: right; }
+      .day {
+        width: 58px;
+        height: 53px;
+        position: relative;
+        color: white;
+        font-size: 40px;
+        line-height: 30px;
+        border-bottom: 2px solid white;
+        border-right: 2px solid white;
+        button {
+          display: block;
+          width: 58px;
+          height: 53px;
+          color: white;
+          font-size: 40px;
+          background-image: none;
+        }
+        &.self, &.other  {
+          border-bottom: 2px solid #44B9DE;
+          border-right: 2px solid #44B9DE;
+        }
+        .expand {
+          position: absolute;
+          top: 0px;
+          left: 0px;
+          display: block;
+          width: 20px;
+          height: 20px;
+          background: transparent url("/img/workschedule/calendar/Expand.png") no-repeat center right;
+          &:hover { background-image: url("/img/workschedule/calendar/Expand_mo.png") }
+        }
+      }
+      .user-wrap {
+        width: 180px;
+        height: 55px;
+      }
+    }
+    .day {
+      width: 25px;
+      height: 20px;
+      background-color: black;
+      font-weight: normal;
+      font-size: 14px;
+      text-align: center;
+      padding-top: 5px;
+      a {
+        display: block;
+        text-decoration: none;
+        color: white;
+      }
+      &:hover { cursor: pointer; }
+      &.none { background-color: #ADADAD; }
+      &.self { background-color: #44B9DE; }
+      &.other {
+        border-right: 1px solid #A3E5EF;
+        border-bottom: 1px solid #A3E5EF;
+        background-color: white;
+        button,a {
+          color: #44B9DE;
+        }
+      }
+    }
+    &.start .day.other {
+      width: 23px;
+      border-left: 1px solid #A3E5EF;
+    }
+    &.top .day.other {
+      border-top: 1px solid #A3E5EF;
+      padding-top: 4px;
+    }
+  }
+}
+
+#day-workernames {
+  height: 33px;
+  border-bottom: 1px solid black;
+  border-left: 1px solid black;
+ .worker {
+    float: left;
+    width: 59px;
+    height: 30px;
+    font-size: 11px;
+    font-family: Helvetica;
+    text-align: center;
+    border-right: 1px solid black;
+    padding-top: 3px;
+  }
+}
+
+#day-calendar {
+  #time {
+    width: 60px;
+    margin-left: -59px;
+    margin-top: -1px;
+    float: left;
+    .top {
+      border: 1px solid black;
+      background: transparent url("/img/workschedule/calendar/Tick_Marks.png") no-repeat bottom right; 
+    }
+    .hour {
+      width: 43px;
+      height: 23px;
+      background: transparent url("/img/workschedule/calendar/Tick_Marks.png") no-repeat center right;
+      border: 1px solid black;
+      border-top: 0;
+      text-align: right;
+      font-size: 14px;
+      padding-right: 15px;
+      padding-top: 4px;
+    }
+  }
+  .column {
+    float: left;
+    width: 59px;
+    border-right: 1px solid #44B9DE + #333;
+    border-bottom: 1px solid #44B9DE + #333;
+  }
+  .shift.self {
+    background-color: #44B9DE;
+  }
+  .shift.other {
+    background-color: #44B9DE + #222;
+  }
+  .shift {
+    position: relative;
+  }
+  .shift .time {
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    position: absolute;
+    bottom: 5px;
+  }
+  .h-0 { height: 0px; }
+  .h-1 { height: 7px * 1; }
+  .h-2 { height: 7px * 2; }
+  .h-3 { height: 7px * 3; }
+  .h-4 { height: 7px * 4; }
+  .h-5 { height: 7px * 5; }
+  .h-6 { height: 7px * 6; }
+  .h-7 { height: 7px * 7; }
+  .h-8 { height: 7px * 8; }
+  .h-9 { height: 7px * 9; }
+  .h-10 { height: 7px * 10; }
+  .h-11 { height: 7px * 11; }
+  .h-12 { height: 7px * 12; }
+  .h-13 { height: 7px * 13; }
+  .h-14 { height: 7px * 14; }
+  .h-15 { height: 7px * 15; }
+  .h-16 { height: 7px * 16; }
+  .h-17 { height: 7px * 17; }
+  .h-18 { height: 7px * 18; }
+  .h-19 { height: 7px * 19; }
+  .h-20 { height: 7px * 20; }
+  .h-21 { height: 7px * 21; }
+  .h-22 { height: 7px * 22; }
+  .h-23 { height: 7px * 23; }
+  .h-24 { height: 7px * 24; }
+  .h-25 { height: 7px * 25; }
+  .h-26 { height: 7px * 26; }
+  .h-27 { height: 7px * 27; }
+  .h-28 { height: 7px * 28; }
+  .h-29 { height: 7px * 29; }
+  .h-30 { height: 7px * 30; }
+  .h-31 { height: 7px * 31; }
+  .h-32 { height: 7px * 32; }
+  .h-33 { height: 7px * 33; }
+  .h-34 { height: 7px * 34; }
+  .h-35 { height: 7px * 35; }
+  .h-36 { height: 7px * 36; }
+  .h-37 { height: 7px * 37; }
+  .h-38 { height: 7px * 38; }
+  .h-39 { height: 7px * 39; }
+  .h-40 { height: 7px * 40; }
+  .h-41 { height: 7px * 41; }
+  .h-42 { height: 7px * 42; }
+  .h-43 { height: 7px * 43; }
+  .h-44 { height: 7px * 44; }
+  .h-45 { height: 7px * 45; }
+  .h-46 { height: 7px * 46; }
+  .h-47 { height: 7px * 47; }
+  .h-48 { height: 7px * 48; }
+  .h-49 { height: 7px * 49; }
+  .o-0 { margin-top: 0px; }
+  .o-1 { margin-top: 7px * 1; }
+  .o-2 { margin-top: 7px * 2; }
+  .o-3 { margin-top: 7px * 3; }
+  .o-4 { margin-top: 7px * 4; }
+  .o-5 { margin-top: 7px * 5; }
+  .o-6 { margin-top: 7px * 6; }
+  .o-7 { margin-top: 7px * 7; }
+  .o-8 { margin-top: 7px * 8; }
+  .o-9 { margin-top: 7px * 9; }
+  .o-10 { margin-top: 7px * 10; }
+  .o-11 { margin-top: 7px * 11; }
+  .o-12 { margin-top: 7px * 12; }
+  .o-13 { margin-top: 7px * 13; }
+  .o-14 { margin-top: 7px * 14; }
+  .o-15 { margin-top: 7px * 15; }
+  .o-16 { margin-top: 7px * 16; }
+  .o-17 { margin-top: 7px * 17; }
+  .o-18 { margin-top: 7px * 18; }
+  .o-19 { margin-top: 7px * 19; }
+  .o-20 { margin-top: 7px * 20; }
+  .o-21 { margin-top: 7px * 21; }
+  .o-22 { margin-top: 7px * 22; }
+  .o-23 { margin-top: 7px * 23; }
+  .o-24 { margin-top: 7px * 24; }
+  .o-25 { margin-top: 7px * 25; }
+  .o-26 { margin-top: 7px * 26; }
+  .o-27 { margin-top: 7px * 27; }
+  .o-28 { margin-top: 7px * 28; }
+  .o-29 { margin-top: 7px * 29; }
+  .o-30 { margin-top: 7px * 30; }
+  .o-31 { margin-top: 7px * 31; }
+  .o-32 { margin-top: 7px * 32; }
+  .o-33 { margin-top: 7px * 33; }
+  .o-34 { margin-top: 7px * 34; }
+  .o-35 { margin-top: 7px * 35; }
+  .o-36 { margin-top: 7px * 36; }
+  .o-37 { margin-top: 7px * 37; }
+  .o-38 { margin-top: 7px * 38; }
+  .o-39 { margin-top: 7px * 39; }
+  .o-40 { margin-top: 7px * 40; }
+  .o-41 { margin-top: 7px * 41; }
+  .o-42 { margin-top: 7px * 42; }
+  .o-43 { margin-top: 7px * 43; }
+  .o-44 { margin-top: 7px * 44; }
+  .o-45 { margin-top: 7px * 45; }
+  .o-46 { margin-top: 7px * 46; }
+  .o-47 { margin-top: 7px * 47; }
+  .o-48 { margin-top: 7px * 48; }
+  .o-49 { margin-top: 7px * 49; }
+}

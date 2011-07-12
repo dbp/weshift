@@ -10,12 +10,15 @@
   
     <div class="$(dayClasses)">
       <button class="close2"><dayNum/></button>
+      <a-async href="$(placeRoot)/day/$(currYear)/$(currMonth)/$(dayNum)" data-loading-div="#center .main" class="expand" title="Day View"></a-async>
     </div>
 
     <div class="other-wrap">
       <otherShifts>
         <user-lookup id="$(user)"><name/></user-lookup> - <start/>-<stop/>
       </otherShifts>
+
+      
     </div>
   </div-async>
 </day>

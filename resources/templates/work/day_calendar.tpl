@@ -11,7 +11,7 @@
   </div> <!-- #month-heading -->
   <div id="day-workernames">
     <dayWorkers>
-      <div class="dayname"><name/></div>
+      <div class="worker"><name/></div>
     </dayWorkers>
   </div> <!-- #month-daynames -->
 
@@ -21,7 +21,11 @@
     <dayWorkers>
       <div class="column h-$(columnHeight)">
         <shifts>
-          <div class="shift o-$(offset) h-$(length)"/>
+          <div class="shift o-$(offset) h-$(length) $(classes)">
+            <div class="time">
+              <time/>
+            </div>
+          </div>
         </shifts>
       </div>
     </dayWorkers>
