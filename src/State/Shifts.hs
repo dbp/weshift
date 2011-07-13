@@ -27,6 +27,11 @@ insertShift :: Shift -> Application (Either Shift BS.ByteString)
 insertShift s@(Shift _ u p start stop _ recorder) = 
   fmap (\r -> if not (null r) && not (null $ head r) then Right (fromSql $ head $ head r) else Left s) $ withPGDB "INSERT INTO shifts (place, user_id, start, stop, recorder) (SELECT ? as place, ? as user_id, ? as start, ? as stop, ? as recorder WHERE NOT EXISTS (SELECT id, user_id, start, stop FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) UNION ALL select id, user_id, start, stop FROM obligations WHERE user_id = ? AND (? < stop AND ? > start))) RETURNING id;" [toSql p,toSql u, toSql start, toSql stop, toSql recorder, toSql u, toSql start, toSql stop, toSql u, toSql start, toSql stop]
 
+-- | note: this does not actually delete a shift, it merely marks it as deleted.
+deleteShift :: User -> Shift -> Application Bool
+deleteShift u s = fmap (not.null) $ withPGDB "INSERT INTO shiftdeletes (place, user_id, old_shift, recorder) VALUES (?, ?, ?, ?) RETURNING old_shift;" [toSql (sPlace s), toSql (sUser s), toSql (sId s), toSql (uId u)]
+
+
 checkShiftTime :: BS.ByteString -> LocalTime -> LocalTime -> Application Bool
 checkShiftTime uid start stop = fmap null $ withPGDB "SELECT id FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start)" [toSql uid, toSql start, toSql stop]
 
@@ -48,6 +53,10 @@ getOriginalShifts place start stop = fmap (catMaybes . (map buildShift)) $ withP
   
 getUserCurrentShifts :: UserPlace -> User -> Day -> Day -> Application [Shift]
 getUserCurrentShifts place user start stop = fmap (catMaybes . (map buildShift)) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder FROM shifts_current AS S WHERE S.place = ? AND S.user_id = ? AND S.start > ? AND S.stop < ?;" [toSql $ pId place, toSql $ uId user, toSql start, toSql stop]
+
+getUserShift :: User -> BS.ByteString -> Application (Maybe Shift)
+getUserShift user id' = fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder FROM shifts_current AS S WHERE S.id = ? AND S.user_id = ?;" [toSql $ id', toSql $ uId user]
+
   
 getShiftChanges :: Shift -> Application [Modification]
 getShiftChanges shift = fmap (catMaybes . (map buildChange)) $ withPGDB "SELECT U.name, start, stop, recorder, recorded FROM shiftchanges JOIN users AS U ON recorder = U.id WHERE old_shift = ?;" [toSql $ sId shift]

@@ -34,7 +34,7 @@ import Time
 shiftH :: User -> UserPlace -> Application ()
 shiftH u p = route [ ("/add",             shiftAddH u p)
                    , ("/edit/:id",        shiftEditH)
-                   , ("/delete/:id",      shiftDeleteH)
+                   , ("/delete",          method POST $ shiftDeleteH u p)
                    , ("/requestoff/:id",  requestOffH)
                    , ("/cover/:id",       coverH)
                    ]
@@ -81,7 +81,20 @@ newShiftForm = (`validate` notOverlapping)  $ (<++ errors) $ mkNS
   
   
 shiftEditH = undefined
-shiftDeleteH = undefined
+
+shiftDeleteH u p = do
+  mid <- getParam "shift"
+  case mid of
+    Nothing -> redirPlaceHomeAsync
+    Just id' -> do
+      s <- getUserShift u id'
+      case s of
+        Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/delete_error"
+        Just shift -> do
+          deleteShift u shift
+          (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
+          heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+       
 requestOffH = undefined
 coverH = undefined
 

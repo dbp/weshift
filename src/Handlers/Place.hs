@@ -66,11 +66,12 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     nextShift <- getNextShift u p
                     let nextShiftSplice = spliceMBS "nextShift" $ Just $ fromMaybe "No Next Shift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
                     workers <- getWorkers p
-                    let coworkers = filter (/= u) workers
+                    let coworkers = filter ((/= (uId u)) . uId) workers
                     let monthday = maybe today (\(y,m) -> fromGregorian y m 1) savedMonth
                     let dayday = maybe today (\(y,m,d) -> fromGregorian y m d) savedDay
                     shifts <- getShifts dayday (addDays 1 dayday) p
-                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday))) $ renderWS "place"
+                    timesheetSplice <- getTimesheet p u (addDays (-14) today) today
+                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday) ++ timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)])) $ renderWS "place"
       where mList Nothing = []
             mList (Just xs) = xs
             monthV = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."
@@ -160,26 +161,21 @@ timesheetH user place = do
   targetUser <- getParam "user"
   mstart <- getParam "start"
   mstop <- getParam "stop"
-
-  user' <- case targetUser of
+  
+  user' <- fmap fromJust $ case targetUser of
             Just tU -> if pFac place then fmap mkUser (getUser tU) else return $ Just user
             Nothing -> return $ Just user
-  
-  coworkers <- getCoworkers user place
-  let coworkersSplice = [("timesheetCoworkers", renderTSCoworkers user coworkers)]
+            
+  coworkers <- getCoworkers user' place
+  let coworkersSplice = [("timesheetCoworkers", renderTSCoworkers user' coworkers)]
   
   today <- liftM utctDay $ liftIO getCurrentTime
   
   timesheetSplice <- case (mstart >>= parseWSDate,mstop >>= parseWSDate) of
-                        (Just start, Just stop) -> getTimesheet place user start stop
-                        _ -> getTimesheet place user (addDays (-14) today) today
+                        (Just start, Just stop) -> getTimesheet place user' start stop
+                        _ -> getTimesheet place user' (addDays (-14) today) today
   
   setView user "work" "work.timesheet"
 
   heistLocal (bindSplices (commonSplices today ++ coworkersSplice ++ timesheetSplice)) $ renderWS "work/timesheet"
 
-    where renderTSCoworkers self coworkers = mapSplices (renderTSCoworker self) (self : coworkers)
-          renderTSCoworker self u = runChildrenWithText [ ("userId",   TE.decodeUtf8 $ uId u)
-                                                        , ("userName", TE.decodeUtf8 $ uName u)
-                                                        , ("selected", if u == self then "selected='selected'" else "")
-                                                        ]

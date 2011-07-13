@@ -3,8 +3,9 @@
 </apply>
 
 <div-async name="center-main" class="main" id="timesheet">
-  <h2>Timesheet | Total Hours: 14.</h2>
-    <form-async action="$(placeRoot)/timesheet"><div id="timesheet"><input type="hidden" name="place" value="1">
+  <h2>Timesheet | Total Hours: <totalHours/></h2>
+    <form-async action="$(placeRoot)/timesheet" method="POST">
+    <div id="timesheet">
       <input class="date" type="text" name="start" value="$(timesheetStart)"> 
       to 
       <input class="date" type="text" name="stop" value="$(timesheetStop)">

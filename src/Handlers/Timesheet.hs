@@ -47,23 +47,36 @@ getTimesheet place user start stop = do
   return [ ("timesheet", mapSplices renderEntry entries)
          , ("timesheetStart", textSplice $ renderDate start)
          , ("timesheetStop", textSplice $ renderDate stop)
+         , ("totalHours", textSplice $ T.pack $ show $ sum $ map entryHours entries)
          ]
 
 timesheetEntry shift = do
   tz <- liftIO getCurrentTimeZone
   let utcStart = localTimeToUTC tz $ sStart shift
   let utcEnd = localTimeToUTC tz $ sStop shift
-  let hoursWorked = floor $ (diffUTCTime utcEnd utcStart) / (60*60)
   changes <- getShiftChanges shift
   deletes <- getShiftDeletes shift
   covers  <- getShiftCovers shift
   let modifications = sortBy (\m1 m2 -> compare (mTime m1) (mTime m2)) (changes ++ deletes ++ covers)
+  let hoursWorked = case modifications of
+                      [] -> roundHours $ (diffUTCTime utcEnd utcStart) / (60*60)
+                      _ -> case last modifications of
+                            Cover _ _ -> roundHours $ (diffUTCTime utcEnd utcStart) / (60*60)
+                            Delete _ _ -> 0
+                            Change ns ne _ _ -> roundHours $ (diffUTCTime (localTimeToUTC tz ne) (localTimeToUTC tz ns)) / (60*60)
   return $ Entry hoursWorked (sStart shift) (sStop shift) modifications
+    where roundHours n = (/ 10) $ fromIntegral $ floor $ n * 10 
+
+renderTSCoworkers self coworkers = mapSplices (renderTSCoworker self) (self : coworkers)
+renderTSCoworker self u = runChildrenWithText [ ("userId",   TE.decodeUtf8 $ uId u)
+                                              , ("userName", TE.decodeUtf8 $ uName u)
+                                              , ("selected", if u == self then "selected='selected'" else "")
+                                              ]
 
 
+data Entry = Entry Double LocalTime LocalTime [Modification] -- hours worked, orig. start, orig. end, list of modifications
 
-data Entry = Entry Int LocalTime LocalTime [Modification] -- hours worked, orig. start, orig. end, list of modifications
-
+entryHours (Entry h _ _ _) = h
 
 renderChange (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
                                                 , ("changeDescription", "Deleted")

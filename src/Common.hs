@@ -122,7 +122,7 @@ checkPlaceLogin' redr (Just org) (Just place) handler =
 checkPlaceLogin' _ _ _ _ = mzero
 
 renderTime t = T.pack $ formatTime defaultTimeLocale "%-l:%M%P" t
-renderDate t = T.pack $ formatTime defaultTimeLocale "%m.%d.%Y" t
+renderDate t = T.pack $ formatTime defaultTimeLocale "%-m.%-d.%Y" t
 renderDateLong t = T.pack $ formatTime defaultTimeLocale "%B %e, %Y" t
 
 spliceMBS :: T.Text -> Maybe BS.ByteString -> [(T.Text, Splice Application)]
@@ -147,7 +147,7 @@ identitySplice = do node <- getParamNode
 blackHoleSplice :: Monad m => Splice m
 blackHoleSplice = return []
 
-parseWSDate s = parseTime defaultTimeLocale "%m.%d.%Y" $ B8.unpack s
+parseWSDate s = parseTime defaultTimeLocale "%-m.%-d.%Y" $ B8.unpack s
                          
 -- stolen from cgi:
 maybeRead :: Read a => ByteString -> Maybe a
