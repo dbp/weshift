@@ -38,14 +38,14 @@ import State.Coworkers
 import Handlers.Shifts
 import Common
 
-daySplices :: User -> UserPlace -> [Shift] -> Day -> [(T.Text, Splice Application)]
-daySplices u p shifts day = 
+daySplices :: User -> UserPlace -> [User] -> [Shift] -> Day -> [(T.Text, Splice Application)]
+daySplices u p workers shifts day = 
   [("dayName", textSplice $ T.pack (formatTime defaultTimeLocale "%A, %B %-d" day))
-  ,("dayWorkers", dayView u p shifts year month d)
+  ,("dayWorkers", dayView u p workers shifts year month d)
   ,("timeColumn", timeColumn startTime dayLength)
   ,("columnHeight", textSplice $ T.pack $ show timeColumnHeight)
   ,("viewHeight", textSplice $ T.pack $ show $ timeColumnHeight + 5)
-  ,("workersWidth", textSplice $ T.pack $ show $ 60 * (length $ nub $ map sUser shifts))
+  ,("workersWidth", textSplice $ T.pack $ show $ 60 * (length workers))
   ,("nextYear",  textSplice $ T.pack $ show nextYear)
   ,("nextMonth", textSplice $ T.pack $ show nextMonth)
   ,("nextDay", textSplice $ T.pack $ show nextDay)
@@ -58,28 +58,28 @@ daySplices u p shifts day =
           (prevYear,prevMonth,prevDay) = toGregorian $ addDays (-1) day
           startTime =  minimum $ (24*4) : (map (timePeriod . localTimeOfDay . sStart) shifts)
           endTime = maximum $ 0 : (map (timePeriod . localTimeOfDay . sStop) shifts)
-          dayLength = endTime - startTime
+          dayLength = (\n -> if n < 0 then 0 else n) $ endTime - startTime
           timeColumnHeight = dayLength + (4 - (dayLength `mod` 4)) + (4 - (startTime `mod` 4))
           
 timeColumn start length = return $
                             (X.Element "div" [("class", T.append "top t-" (T.pack $ show $ 4 - (start `mod` 4)))] [])
                             :(map (\n -> X.Element "div" [("class","h-4 hour")] [X.TextNode (T.pack $ (show  (if n > 12 then n - 12 else n)) ++ ":00" ++ (if n > 12 then "pm" else "am"))]) 
-                            $ take ((length `div` 4)  + 1) (iterate (+1) (start `div` 4 + (if start `mod` 4 == 0 then 0 else 1))))
+                            $ take (max 2 ((length `div` 4)  + 1)) (iterate (+1) (start `div` 4 + (if start `mod` 4 == 0 then 0 else 1))))
 
-dayView :: User -> UserPlace -> [Shift] -> Integer -> Int -> Int -> Splice Application
-dayView u p shifts year month day = do
+dayView :: User -> UserPlace -> [User] -> [Shift] -> Integer -> Int -> Int -> Splice Application
+dayView u p workers shifts year month day = do
   let start = fromGregorian year month day 
   let end = addDays 1 start
   uncoveredShifts <- lift $ getUncoveredShifts start end p
-  workers <- lift $ getWorkers p
   let shiftUsers = map sUser shifts
   let dayLaborers = filter (\w -> (uId w) `elem` shiftUsers) workers
+  let rest = filter (not . (flip elem dayLaborers)) workers
   let startTime = timePeriod $ localTimeOfDay $ minimum $ map sStart shifts
-  renderDayVD u startTime shifts uncoveredShifts dayLaborers
+  renderDayVD workers u startTime shifts uncoveredShifts (dayLaborers ++ rest)
 
 timePeriod tod = (todHour tod) * 4 + (todMin tod `div` 15)
   
-renderDayVD self start s us ds = mapSplices (workerDay self start s us) ds
+renderDayVD workers self start s us ds = mapSplices (workerDay self start s us) ds
 
 workerDay self start ss us dl = 
   runChildrenWith [("name", textSplice $ TE.decodeUtf8 $ uName dl)

@@ -65,11 +65,12 @@ placeSite = do
 placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     nextShift <- getNextShift u p
                     let nextShiftSplice = spliceMBS "nextShift" $ Just $ fromMaybe "No Next Shift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
-                    coworkers <- getCoworkers u p
+                    workers <- getWorkers p
+                    let coworkers = filter (/= u) workers
                     let monthday = maybe today (\(y,m) -> fromGregorian y m 1) savedMonth
                     let dayday = maybe today (\(y,m,d) -> fromGregorian y m d) savedDay
                     shifts <- getShifts dayday (addDays 1 dayday) p
-                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices u p monthday) ++ (commonSplices today) ++ (coworkersSplice coworkers) ++ (daySplices u p shifts dayday))) $ renderWS "place"
+                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices u p monthday) ++ (commonSplices today) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday))) $ renderWS "place"
       where mList Nothing = []
             mList (Just xs) = xs
             monthV = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."
@@ -156,7 +157,8 @@ dayH u p = do
                                             ,(maybe "" (T.append "." . T.pack . show) day)
                                             ]))
   shifts <- getShifts curday (addDays 1 curday) p
-  heistLocal (bindSplices ((commonSplices curday) ++ (daySplices u p shifts curday))) $ renderWS "work/day_calendar"
+  workers <- getWorkers p
+  heistLocal (bindSplices ((commonSplices curday) ++ (daySplices u p workers shifts curday))) $ renderWS "work/day_calendar"
 
 
 timesheetH user place = do
