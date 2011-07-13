@@ -120,6 +120,7 @@ dayLargeSplices place user (year, month, day) = do
              ,("stop-value", textSplice "5:00pm")
              ,("start-errors", blackHoleSplice)
              ,("stop-errors", blackHoleSplice)
+             ,("id-errors", blackHoleSplice)
              ,("selfShifts", renderShifts selfShifts)
              ,("otherShifts", renderShifts otherShifts)
              ,("selfClasses", textSplice $ selfClasses)

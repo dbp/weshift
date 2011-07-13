@@ -31,9 +31,15 @@ insertShift s@(Shift _ u p start stop _ recorder) =
 deleteShift :: User -> Shift -> Application Bool
 deleteShift u s = fmap (not.null) $ withPGDB "INSERT INTO shiftdeletes (place, user_id, old_shift, recorder) VALUES (?, ?, ?, ?) RETURNING old_shift;" [toSql (sPlace s), toSql (sUser s), toSql (sId s), toSql (uId u)]
 
+-- | note: this does not actually change a shift in place, it merely adds a change to the database.
+changeShift :: User -> Shift -> LocalTime -> LocalTime -> Application Bool
+changeShift u s ns ne = fmap (not.null) $ withPGDB "INSERT INTO shiftchanges (place, user_id, old_shift, start, stop, recorder) (SELECT ? as place, ? as user_id, ? as old_shift, ? as start, ? as stop, ? as recorder WHERE NOT EXISTS (SELECT id, user_id, start, stop FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) AND id != ?)) RETURNING id;" [toSql (sPlace s), toSql (sUser s), toSql (sId s), toSql ns, toSql ne, toSql (uId u), toSql (sUser s), toSql ns, toSql ne, toSql (sId s)]
 
 checkShiftTime :: BS.ByteString -> LocalTime -> LocalTime -> Application Bool
 checkShiftTime uid start stop = fmap null $ withPGDB "SELECT id FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start)" [toSql uid, toSql start, toSql stop]
+
+checkShiftTimeExcept :: BS.ByteString -> BS.ByteString -> LocalTime -> LocalTime -> Application Bool
+checkShiftTimeExcept skip uid start stop = fmap null $ withPGDB "SELECT id FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) AND id != ?;" [toSql uid, toSql start, toSql stop, toSql skip]
 
 getNextShift :: User -> UserPlace -> Application (Maybe Shift)
 getNextShift u p =

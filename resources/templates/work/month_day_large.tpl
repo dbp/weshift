@@ -27,12 +27,11 @@
           <div class="buttons">
             <button class="change toggle" data-toggle-target=".change-form-$(id)">Change Shift</button>
           </div>
-          <div class="change-form-$(id) change-form" style="display: none;">
-            <form-async action="$(placeRoot)/shift/change" method="POST">
-              <input type="hidden" name="shift" value="$(id)"/>
-              <input type="text" name="start" value="$(start)"/> to <input type="text" name="stop" value="$(stop)"/><button type="submit"/>
-            </form-async>
-          </div>
+          <apply template="shift/edit">
+            <bind tag="disp">none</bind>
+            <bind tag="start-value"><start/></bind>
+            <bind tag="stop-value"><stop/></bind>
+          </apply>
         </div>
       </selfShifts>
     </div>
