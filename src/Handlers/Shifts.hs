@@ -37,8 +37,9 @@ shiftH :: User -> UserPlace -> Application ()
 shiftH u p = route [ ("/add",             shiftAddH u p)
                    , ("/edit",            shiftEditH u p)
                    , ("/delete",          method POST $ shiftDeleteH u p)
-                   , ("/requestoff/:id",  requestOffH)
-                   , ("/cover/:id",       coverH)
+                   , ("/requestoff",      method POST $ requestOffH u p)
+                   , ("/unrequestoff",    method POST $ unRequestOffH u p)
+                   , ("/cover",           method POST $ coverH u p)
                    ]
 
 shiftAddH u p = do
@@ -95,7 +96,7 @@ shiftEditH u p = do
         Left splices' -> do
           heistLocal (bindSplices (splices' ++ [("disp", textSplice "block")])) $ renderWS "work/shift/edit"
         Right (id', ShiftTime start stop) -> do
-          s <- getUserShift u id'
+          s <- getUserShift (uId u) id'
           case s of
             Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/edit_error"
             Just shift -> do
@@ -118,7 +119,7 @@ shiftDeleteH u p = do
   case mid of
     Nothing -> redirPlaceHomeAsync
     Just id' -> do
-      s <- getUserShift u id'
+      s <- getUserShift (uId u) id'
       case s of
         Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/delete_error"
         Just shift -> do
@@ -126,6 +127,53 @@ shiftDeleteH u p = do
           (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
           heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
        
-requestOffH = undefined
-coverH = undefined
+requestOffH u p = do
+  mid <- getParam "shift"
+  case mid of
+    Nothing -> redirPlaceHomeAsync
+    Just id' -> do
+      s <- getUserShift (uId u) id'
+      case s of
+        Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/request_error"
+        Just shift -> do
+          requestShift u shift
+          (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
+          heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
 
+unRequestOffH u p = do
+  mid <- getParam "shift"
+  mreq <- getParam "reqid"
+  case (mid,mreq) of
+    (Just id',Just reqid) -> do
+      r <- getShiftRequest (uId u) id'
+      s <- getUserShift (uId u) id'
+      case (r,s) of
+        (Just req,Just shift) -> do
+          unRequestShift req
+          (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
+          heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+        _ -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/unrequest_error"
+        
+    _ -> redirPlaceHomeAsync
+
+       
+coverH u p = do
+  muid <- getParam "user"
+  mid <- getParam "shift"
+  mreq <- getParam "req"
+  case (muid,mid,mreq) of
+    (Just uid,Just id',Just reqid) -> do
+      r <- getShiftRequest uid id'
+      s <- getUserShift uid id'
+      case (r,s) of
+        (Just req,Just shift) -> do
+          result <- coverShift (uId u) shift req 
+          case result of
+            False -> err id' "Shift overlaps with one of yours."
+            True -> do 
+              unRequestShift req
+              (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
+              heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+        _ -> err id' "Could not find shift."
+    _ -> redirPlaceHomeAsync
+ where err i msg = heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 i), ("disp", textSplice "block"), ("message", textSplice msg)]) $ renderWS "work/shift/cover_error"

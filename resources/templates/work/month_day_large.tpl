@@ -12,15 +12,24 @@
             <start/>-<stop/>
           </div> 
           <div class="buttons">
-            <button class="request toggle" data-toggle-target=".request-form-$(id)">Request Off</button> 
+            <ifRequested>
+              <button class="unrequest toggle" data-toggle-target=".unrequest-form-$(id)">Stop Request</button>               
+            </ifRequested>
+            <notRequested>
+              <button class="request toggle" data-toggle-target=".request-form-$(id)">Request Off</button> 
+            </notRequested>
             <button class="delete toggle" data-toggle-target=".delete-form-$(id)">Delete Shift</button>
           </div>
-          <div class="request-form-$(id) request-form" style="display: none;">
-            <form-async target="$(placeRoot)/shift/request" method="POST">
-              <input type="hidden" name="shift" value="$(id)"/>
-              Ask someone to cover? <button type="submit"/>
-            </form-async>
-          </div>
+          <ifRequested>
+            <apply template="shift/unrequest">
+              <bind tag="disp">none</bind>
+            </apply>
+          </ifRequested>
+          <notRequested>
+            <apply template="shift/request">
+              <bind tag="disp">none</bind>
+            </apply>  
+          </notRequested>        
           <apply template="shift/delete">
             <bind tag="disp">none</bind>
           </apply>
@@ -45,7 +54,15 @@
 
     <div class="other-wrap">
       <otherShifts>
+        <ifRequested>
+          <button class="cover toggle" data-toggle-target=".cover-form-$(id)"/>               
+        </ifRequested>
         <user-lookup id="$(user)"><name/></user-lookup> - <start/>-<stop/><br>
+        <ifRequested>
+          <apply template="shift/cover">
+            <bind tag="disp">none</bind>
+          </apply>
+        </ifRequested>
       </otherShifts>
 
       

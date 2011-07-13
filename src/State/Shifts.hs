@@ -35,6 +35,18 @@ deleteShift u s = fmap (not.null) $ withPGDB "INSERT INTO shiftdeletes (place, u
 changeShift :: User -> Shift -> LocalTime -> LocalTime -> Application Bool
 changeShift u s ns ne = fmap (not.null) $ withPGDB "INSERT INTO shiftchanges (place, user_id, old_shift, start, stop, recorder) (SELECT ? as place, ? as user_id, ? as old_shift, ? as start, ? as stop, ? as recorder WHERE NOT EXISTS (SELECT id, user_id, start, stop FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) AND id != ?)) RETURNING id;" [toSql (sPlace s), toSql (sUser s), toSql (sId s), toSql ns, toSql ne, toSql (uId u), toSql (sUser s), toSql ns, toSql ne, toSql (sId s)]
 
+requestShift :: User -> Shift -> Application Bool
+requestShift u shift = fmap (not.null) $ withPGDB "INSERT INTO shiftrequests (shift_id, requester) VALUES (?, ?) RETURNING id,shift_id,recorded,requester;" [toSql (sId shift), toSql (uId u)]
+
+unRequestShift :: BS.ByteString -> Application Bool
+unRequestShift reqid = fmap (not.null) $ withPGDB "DELETE FROM shiftrequests WHERE id = ? RETURNING id;" [toSql reqid]
+
+getShiftRequest :: BS.ByteString -> BS.ByteString -> Application (Maybe BS.ByteString)
+getShiftRequest uid id' = fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "SELECT R.id FROM shiftrequests AS R JOIN shifts_current AS C ON R.shift_id = C.id WHERE R.shift_id = ? AND C.user_id = ?;" [toSql id', toSql uid]
+
+coverShift :: BS.ByteString -> Shift -> BS.ByteString -> Application Bool
+coverShift uid shift reqid = fmap (not.null) $ withPGDB "INSERT INTO shiftcovers (shift_id, coverer) (SELECT ? as shift_id, ? as coverer WHERE NOT EXISTS (SELECT id, user_id, start, stop FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) UNION ALL select id, user_id, start, stop FROM obligations WHERE user_id = ? AND (? < stop AND ? > start)) AND EXISTS (SELECT id FROM shiftrequests WHERE id = ?)) RETURNING id;" [toSql (sId shift), toSql uid, toSql uid, toSql (sStart shift), toSql (sStop shift), toSql uid, toSql (sStart shift), toSql (sStop shift), toSql reqid]
+
 checkShiftTime :: BS.ByteString -> LocalTime -> LocalTime -> Application Bool
 checkShiftTime uid start stop = fmap null $ withPGDB "SELECT id FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start)" [toSql uid, toSql start, toSql stop]
 
@@ -60,8 +72,8 @@ getOriginalShifts place start stop = fmap (catMaybes . (map buildShift)) $ withP
 getUserCurrentShifts :: UserPlace -> User -> Day -> Day -> Application [Shift]
 getUserCurrentShifts place user start stop = fmap (catMaybes . (map buildShift)) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder FROM shifts_current AS S WHERE S.place = ? AND S.user_id = ? AND S.start > ? AND S.stop < ?;" [toSql $ pId place, toSql $ uId user, toSql start, toSql stop]
 
-getUserShift :: User -> BS.ByteString -> Application (Maybe Shift)
-getUserShift user id' = fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder FROM shifts_current AS S WHERE S.id = ? AND S.user_id = ?;" [toSql $ id', toSql $ uId user]
+getUserShift :: BS.ByteString -> BS.ByteString -> Application (Maybe Shift)
+getUserShift uid id' = fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder FROM shifts_current AS S WHERE S.id = ? AND S.user_id = ?;" [toSql $ id', toSql uid]
 
   
 getShiftChanges :: Shift -> Application [Modification]

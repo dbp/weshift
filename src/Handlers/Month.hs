@@ -8,7 +8,7 @@ import Text.Templating.Heist
 import Snap.Extension.Heist
 import qualified Text.XmlHtml as X
 
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust, fromMaybe, isJust)
 
 import Text.Digestive.Types
 import Text.Digestive.Snap.Heist
@@ -127,16 +127,20 @@ dayLargeSplices place user (year, month, day) = do
              ])
 
 renderShift :: Shift -> Splice Application
-renderShift (Shift id' user place start stop recorded recorder) =
-  runChildrenWithText [("id", TE.decodeUtf8 id')
-                      ,("user", TE.decodeUtf8 user)
-                      ,("place", TE.decodeUtf8 place)
-                      ,("date", renderDate start)
-                      ,("start", renderTime start)
-                      ,("stop", renderTime stop)
-                      ,("recorded", renderTime recorded)
-                      ,("recorder", TE.decodeUtf8 recorder)
-                      ]
+renderShift (Shift id' user place start stop recorded recorder) = do
+  req <- lift $ getShiftRequest user id'
+  runChildrenWith [("id", textSplice $ TE.decodeUtf8 id')
+                  ,("user", textSplice $ TE.decodeUtf8 user)
+                  ,("place", textSplice $ TE.decodeUtf8 place)
+                  ,("date", textSplice $ renderDate start)
+                  ,("start", textSplice $ renderTime start)
+                  ,("stop", textSplice $ renderTime stop)
+                  ,("recorded", textSplice $ renderTime recorded)
+                  ,("recorder", textSplice $ TE.decodeUtf8 recorder)
+                  ,("ifRequested", if isJust req then identitySplice else blackHoleSplice)
+                  ,("notRequested", if isJust req then blackHoleSplice else identitySplice)
+                  ,("reqid", textSplice $ TE.decodeUtf8 $ fromMaybe "" req)
+                  ]
 
 renderShifts :: [Shift] -> Splice Application
 renderShifts ss = mapSplices renderShift ss                             

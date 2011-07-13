@@ -81,11 +81,12 @@
         button {
            width: 85px;
            display: inline-block;
-           font-size: 10px;
+           font-size: 9.5px;
            font-weight: bold;
            color: white;
            text-align: left;
            padding-left: 15px;
+           padding-right: 0;
            &.add {
              margin-left: 10px;
              width: 70px;
@@ -109,6 +110,10 @@
                 color: #e13635;
               }
             }
+            &.unrequest {
+              background: transparent url("/img/workschedule/icons/switch_sel.png") no-repeat center left;
+              color: #e13635;
+            }
             &.change {
               background: transparent url("/img/workschedule/icons/change.png") no-repeat center left;
               &:hover { background-image: url("/img/workschedule/icons/change_sel.png") }
@@ -128,7 +133,7 @@
             }
           }
         }
-        .add-form, .delete-form, .change-form, .request-form {
+        .add-form, .delete-form, .change-form, .request-form, .unrequest-form {
           color: white;
           form {
             margin: 0;
@@ -149,6 +154,29 @@
       }
       .other-wrap {
         padding: 5px;
+        button {
+          &.cover {
+            background: transparent url("/img/workschedule/icons/switch_sel.png") no-repeat center left;
+          }
+        }
+        .cover-form {
+          color: white;
+          form {
+            margin: 0;
+          }
+          input {
+            width: 60px;
+          }
+          button {
+            width: 17px;
+            padding-left: 0px;
+            margin-left: 5px;
+          }
+          .errors {
+            display: inline;
+            color: #e13635;
+          }
+        }
       }
       .day {
         width: 58px;
