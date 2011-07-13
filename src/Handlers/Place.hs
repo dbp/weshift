@@ -99,9 +99,12 @@ monthDayLargeH user place = do mmonth <- getParam "month"
                                                    shifts <- getShifts d (addDays 1 d) place
                                                    let selfShifts = filter ((== (uId user)) . sUser) shifts
                                                    let otherShifts = filter ((/= (uId user)) . sUser) shifts
+                                                   let selfClasses = if null selfShifts then "" else "shift"
                                                    return (d,[("day", renderDay $ formatDay year month shifts [] user (emptyDayFormat (Just day)))
+                                                             ,("closeDays", mapSplices (\n -> runChildrenWithText [("dayNum",T.pack $ show n)]) (filter (/= day) $ take (gregorianMonthLength year month) $ iterate (+1) 1))
                                                              ,("selfShifts", renderShifts selfShifts)
                                                              ,("otherShifts", renderShifts otherShifts)
+                                                             ,("selfClasses", textSplice $ selfClasses)
                                                              ])
                                                  _ -> do
                                                    today <- liftM utctDay $ liftIO getCurrentTime

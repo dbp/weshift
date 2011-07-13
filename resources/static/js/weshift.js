@@ -26,8 +26,19 @@ bean.add(document, 'DOMContentLoaded', function () {
       shift(qwery(elem.getAttribute("data-shift-target"))[0],1 - Number(elem.getAttribute("data-shift-ammount")), elem.getAttribute("data-shift-width"));
     });
   declare("click", ".shift-right", true, function (elem) {
-      shift(qwery(elem.getAttribute("data-shift-target"))[0],Number(elem.getAttribute("data-shift-ammount")),elem.getAttribute("data-shift-width"));
+    shift(qwery(elem.getAttribute("data-shift-target"))[0], Number(elem.getAttribute("data-shift-ammount")), elem.getAttribute("data-shift-width"));
     });
+    
+  declare("click",".toggle", true, function (elem){
+    m = bonzo(qwery(elem.getAttribute("data-toggle-target"))[0]);
+    if (m.css("display") === "none") {
+      m.css("display", "block");
+      bonzo(elem).addClass("toggled");
+    } else {
+      m.css("display", "none");
+      bonzo(elem).removeClass("toggled");
+    }
+  });
   
  
 });

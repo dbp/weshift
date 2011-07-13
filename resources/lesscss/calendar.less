@@ -71,7 +71,81 @@
       z-index: 10;
       border-bottom: 2px solid white;
       border-right: 2px solid white;
-      .user-wrap { float: right; }
+      .user-wrap { 
+        float: right; 
+        width: 175px;
+        min-height: 55px;
+        &.shift {
+         color: #44B9DE;
+        }
+        button {
+           width: 85px;
+           display: inline-block;
+           font-size: 10px;
+           font-weight: bold;
+           color: white;
+           text-align: left;
+           padding-left: 15px;
+           &.add {
+             margin-left: 10px;
+             width: 70px;
+             background: transparent url("/img/workschedule/icons/add.png") no-repeat center left;
+             &:hover { background-image: url("/img/workschedule/icons/add_sel.png") }
+             &.toggled {
+               background-image: url("/img/workschedule/icons/add_sel.png");
+               color: #44B9DE;
+             }
+           }
+        }
+        .shift {
+          color: #44B9DE;
+          border-bottom: 1px solid white;
+          .buttons button {
+            &.request {
+              background: transparent url("/img/workschedule/icons/switch.png") no-repeat center left;
+              &:hover { background-image: url("/img/workschedule/icons/switch_sel.png") }
+              &.toggled {
+                background-image: url("/img/workschedule/icons/switch_sel.png");
+                color: #e13635;
+              }
+            }
+            &.change {
+              background: transparent url("/img/workschedule/icons/change.png") no-repeat center left;
+              &:hover { background-image: url("/img/workschedule/icons/change_sel.png") }
+              width: 100px;
+              &.toggled {
+                background-image: url("/img/workschedule/icons/change_sel.png");
+                color: #44B9DE;
+              }
+            }
+            &.delete {
+              background: transparent url("/img/workschedule/icons/delete.png") no-repeat center left;
+              &:hover { background-image: url("/img/workschedule/icons/delete_sel.png") }
+              &.toggled {
+                background-image: url("/img/workschedule/icons/delete_sel.png");
+                color: #44B9DE;
+              }
+            }
+          }
+        }
+        .add-form, .delete-form, .change-form, .request-form {
+          color: white;
+          form {
+            margin: 0;
+          }
+          input {
+            width: 60px;
+          }
+          button {
+            width: 17px;
+            padding-left: 0px;
+            margin-left: 5px;
+          }
+        }
+      }
+      .other-wrap {
+        padding: 5px;
+      }
       .day {
         width: 58px;
         height: 53px;
@@ -103,10 +177,6 @@
           background: transparent url("/img/workschedule/calendar/Expand.png") no-repeat center right;
           &:hover { background-image: url("/img/workschedule/calendar/Expand_mo.png") }
         }
-      }
-      .user-wrap {
-        width: 180px;
-        height: 55px;
       }
     }
     .day {
@@ -225,12 +295,13 @@
     width: 59px;
     border-right: 1px solid #44B9DE + #333;
     border-bottom: 1px solid #44B9DE + #333;
+    background: transparent url("/img/workschedule/calendar/DayView_Column_line.png") repeat bottom center;
   }
   .shift.self {
-    background-color: #44B9DE;
+    background-color: rgba(99,200,230,0.9);
   }
   .shift.other {
-    background-color: #44B9DE + #222;
+    background-color: rgba(139,214,237,0.8);
   }
   .shift {
     position: relative;
