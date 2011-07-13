@@ -70,7 +70,7 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     let monthday = maybe today (\(y,m) -> fromGregorian y m 1) savedMonth
                     let dayday = maybe today (\(y,m,d) -> fromGregorian y m d) savedDay
                     shifts <- getShifts dayday (addDays 1 dayday) p
-                    heistLocal (bindSplices (nextShiftSplice ++ (monthSplices u p monthday) ++ (commonSplices today) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday))) $ renderWS "place"
+                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday))) $ renderWS "place"
       where mList Nothing = []
             mList (Just xs) = xs
             monthV = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."
@@ -135,10 +135,12 @@ monthH u p = do month <- fmap (maybeRead =<<) $ getParam "month"
             
 monthSplices u p day = [("monthName", textSplice $ T.pack (formatTime defaultTimeLocale "%B %Y" day))
                        ,("monthDays", monthView p u year month)
-                       ,("nextYear",  textSplice $ T.pack $ show nextYear)
-                       ,("nextMonth", textSplice $ T.pack $ show nextMonth)
-                       ,("prevYear",  textSplice $ T.pack $ show prevYear)
-                       ,("prevMonth", textSplice $ T.pack $ show prevMonth)
+                       ,("mNextYear",  textSplice $ T.pack $ show nextYear)
+                       ,("mNextMonth", textSplice $ T.pack $ show nextMonth)
+                       ,("mCurrYear",  textSplice $ T.pack $ show year)
+                       ,("mCurrMonth", textSplice $ T.pack $ show month)
+                       ,("mPrevYear",  textSplice $ T.pack $ show prevYear)
+                       ,("mPrevMonth", textSplice $ T.pack $ show prevMonth)
                        ,("day", identitySplice) -- this is to allow the same template to be used in other ways
                        ]
   where (year,month,_) = toGregorian day

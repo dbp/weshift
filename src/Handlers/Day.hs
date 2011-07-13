@@ -46,12 +46,12 @@ daySplices u p workers shifts day =
   ,("columnHeight", textSplice $ T.pack $ show timeColumnHeight)
   ,("viewHeight", textSplice $ T.pack $ show $ timeColumnHeight + 5)
   ,("workersWidth", textSplice $ T.pack $ show $ 60 * (length workers))
-  ,("nextYear",  textSplice $ T.pack $ show nextYear)
-  ,("nextMonth", textSplice $ T.pack $ show nextMonth)
-  ,("nextDay", textSplice $ T.pack $ show nextDay)
-  ,("prevYear",  textSplice $ T.pack $ show prevYear)
-  ,("prevMonth", textSplice $ T.pack $ show prevMonth)
-  ,("prevDay", textSplice $ T.pack $ show prevDay)
+  ,("dNextYear",  textSplice $ T.pack $ show nextYear)
+  ,("dNextMonth", textSplice $ T.pack $ show nextMonth)
+  ,("dNextDay", textSplice $ T.pack $ show nextDay)
+  ,("dPrevYear",  textSplice $ T.pack $ show prevYear)
+  ,("dPrevMonth", textSplice $ T.pack $ show prevMonth)
+  ,("dPrevDay", textSplice $ T.pack $ show prevDay)
   ]
     where (year,month,d) = toGregorian day
           (nextYear,nextMonth,nextDay) = toGregorian $ addDays 1 day
