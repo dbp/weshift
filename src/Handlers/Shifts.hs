@@ -2,39 +2,86 @@
 
 module Handlers.Shifts where
   
+import Snap.Extension.Heist
+  
 import Text.Templating.Heist
 import qualified Data.Text.Encoding as TE
+import qualified Data.Text as T
+import Data.Text  (Text)
+
+import Data.Time.Calendar
+import Data.Time.LocalTime
+
+import Text.Digestive.Types
+import Text.Digestive.Snap.Heist
+import Text.Digestive.Validate
+import Text.Digestive.Transform
+
+import Control.Monad.Trans (liftIO, lift)
+import Control.Applicative
+
+import Text.Parsec
   
 import Snap.Types
+import Snap.Auth
 import Application
 import State.Types
+import State.Shifts
+import Handlers.Month
 import Common
+import Time
 
 shiftH :: User -> UserPlace -> Application ()
-shiftH u p = route [ ("/add",             shiftAddH)
+shiftH u p = route [ ("/add",             shiftAddH u p)
                    , ("/edit/:id",        shiftEditH)
                    , ("/delete/:id",      shiftDeleteH)
                    , ("/requestoff/:id",  requestOffH)
                    , ("/cover/:id",       coverH)
                    ]
 
-shiftAddH = undefined
+shiftAddH u p = do
+  r <- eitherSnapForm newShiftForm "add-entry-form"
+  case r of
+      Left splices' -> do
+        heistLocal (bindSplices (splices' ++ [("disp", textSplice "block")])) $ renderWS "work/shift/add"
+      Right ns@(NewShift start stop) -> do
+        insertShift (emptyShift { sUser = (uId u), sPlace = (pId p), sStart = start, sStop = stop, sRecorder = (uId u)})
+        (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
+        heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+        
+        {-heistLocal (bindSplices [("dayNum", textSplice $ T.pack $ show $ trd $ toGregorian $ localDay start)]) $
+          renderWS "work/shift/add_success"-}
+ where trd (_,_,a) = a           
+
+
+data NewShift = NewShift LocalTime LocalTime deriving Show
+
+timeTransform = transformEither (\a -> either (const $ Left "Should be like 10:00am.") Right (parse parseHour "" a))
+
+notOverlapping :: Validator Application Text NewShift
+notOverlapping = checkM "Overlaps with another shift." $ \(NewShift start end) -> 
+  do muid <- authenticatedUserId
+     case muid of
+       Nothing -> return False -- no user
+       Just (UserId uid) -> checkShiftTime uid start end
+
+timeRangeForm = (`transform` goodTime) $ (,)
+  <$> input "start" Nothing `transform` timeTransform <++ errors 
+  <*> input "stop" Nothing `transform` timeTransform  <++ errors
+    where goodTime = transformEither (\(start,end) -> maybe (Left "End before start.") Right (guessTime start end))
+
+newShiftForm :: SnapForm Application Text HeistView NewShift
+newShiftForm = (`validate` notOverlapping)  $ (<++ errors) $ mkNS
+    <$> timeRangeForm
+    <*> inputRead "day" "Internal error. Email help@housetab.org" Nothing  <++ errors 
+    <*> inputRead "month" "Internal error. Email help@housetab.org" Nothing  <++ errors 
+    <*> inputRead "year" "Internal error. Email help@housetab.org" Nothing  <++ errors 
+  where mkNS (start,stop) d m y = NewShift (LocalTime day (timeToTimeOfDay start)) (LocalTime day (timeToTimeOfDay stop))
+          where day = fromGregorian y m d
+  
+  
 shiftEditH = undefined
 shiftDeleteH = undefined
 requestOffH = undefined
 coverH = undefined
 
-renderShift :: Shift -> Splice Application
-renderShift (Shift id' user place start stop recorded recorder) =
-  runChildrenWithText [("id", TE.decodeUtf8 id')
-                      ,("user", TE.decodeUtf8 user)
-                      ,("place", TE.decodeUtf8 place)
-                      ,("date", renderDate start)
-                      ,("start", renderTime start)
-                      ,("stop", renderTime stop)
-                      ,("recorded", renderTime recorded)
-                      ,("recorder", TE.decodeUtf8 recorder)
-                      ]
-
-renderShifts :: [Shift] -> Splice Application
-renderShifts ss = mapSplices renderShift ss 

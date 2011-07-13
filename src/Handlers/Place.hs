@@ -94,22 +94,12 @@ monthDayLargeH user place = do mmonth <- getParam "month"
                                mday   <- getParam "day"
                                (day,daySplice) <- 
                                     case (mmonth >>= maybeRead, myear >>= maybeRead, mday >>= maybeRead) of
-                                                 (Just month, Just year, Just day) -> do
-                                                   let d = (fromGregorian year month day)
-                                                   shifts <- getShifts d (addDays 1 d) place
-                                                   let selfShifts = filter ((== (uId user)) . sUser) shifts
-                                                   let otherShifts = filter ((/= (uId user)) . sUser) shifts
-                                                   let selfClasses = if null selfShifts then "" else "shift"
-                                                   return (d,[("day", renderDay $ formatDay year month shifts [] user (emptyDayFormat (Just day)))
-                                                             ,("closeDays", mapSplices (\n -> runChildrenWithText [("dayNum",T.pack $ show n)]) (filter (/= day) $ take (gregorianMonthLength year month) $ iterate (+1) 1))
-                                                             ,("selfShifts", renderShifts selfShifts)
-                                                             ,("otherShifts", renderShifts otherShifts)
-                                                             ,("selfClasses", textSplice $ selfClasses)
-                                                             ])
+                                                 (Just month, Just year, Just day) -> dayLargeSplices place user (year, month, day)
                                                  _ -> do
                                                    today <- liftM utctDay $ liftIO getCurrentTime
                                                    return (today,[])
                                heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+
 
 monthDaySmallH user place = do mmonth <- getParam "month"
                                myear  <- getParam "year"

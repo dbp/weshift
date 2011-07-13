@@ -27,6 +27,8 @@ insertShift :: Shift -> Application (Either Shift BS.ByteString)
 insertShift s@(Shift _ u p start stop _ recorder) = 
   fmap (\r -> if not (null r) && not (null $ head r) then Right (fromSql $ head $ head r) else Left s) $ withPGDB "INSERT INTO shifts (place, user_id, start, stop, recorder) (SELECT ? as place, ? as user_id, ? as start, ? as stop, ? as recorder WHERE NOT EXISTS (SELECT id, user_id, start, stop FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) UNION ALL select id, user_id, start, stop FROM obligations WHERE user_id = ? AND (? < stop AND ? > start))) RETURNING id;" [toSql p,toSql u, toSql start, toSql stop, toSql recorder, toSql u, toSql start, toSql stop, toSql u, toSql start, toSql stop]
 
+checkShiftTime :: BS.ByteString -> LocalTime -> LocalTime -> Application Bool
+checkShiftTime uid start stop = fmap null $ withPGDB "SELECT id FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start)" [toSql uid, toSql start, toSql stop]
 
 getNextShift :: User -> UserPlace -> Application (Maybe Shift)
 getNextShift u p =

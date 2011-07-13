@@ -106,4 +106,36 @@ monthView place user year month = do
   shifts <- lift $ getShifts start end place
   uncoveredShifts <- lift $ getUncoveredShifts start end place
   renderMonth $ concat $ formatMonth year month shifts uncoveredShifts user $ buildMonth year month
-                            
+ 
+ 
+dayLargeSplices place user (year, month, day) = do
+   let d = (fromGregorian year month day)
+   shifts <- getShifts d (addDays 1 d) place
+   let selfShifts = filter ((== (uId user)) . sUser) shifts
+   let otherShifts = filter ((/= (uId user)) . sUser) shifts
+   let selfClasses = if null selfShifts then "" else "shift"
+   return (d,[("day", renderDay $ formatDay year month shifts [] user (emptyDayFormat (Just day)))
+             ,("closeDays", mapSplices (\n -> runChildrenWithText [("dayNum",T.pack $ show n)]) (filter (/= day) $ take (gregorianMonthLength year month) $ iterate (+1) 1))
+             ,("start-value", textSplice "9:00am")
+             ,("stop-value", textSplice "5:00pm")
+             ,("start-errors", blackHoleSplice)
+             ,("stop-errors", blackHoleSplice)
+             ,("selfShifts", renderShifts selfShifts)
+             ,("otherShifts", renderShifts otherShifts)
+             ,("selfClasses", textSplice $ selfClasses)
+             ])
+
+renderShift :: Shift -> Splice Application
+renderShift (Shift id' user place start stop recorded recorder) =
+  runChildrenWithText [("id", TE.decodeUtf8 id')
+                      ,("user", TE.decodeUtf8 user)
+                      ,("place", TE.decodeUtf8 place)
+                      ,("date", renderDate start)
+                      ,("start", renderTime start)
+                      ,("stop", renderTime stop)
+                      ,("recorded", renderTime recorded)
+                      ,("recorder", TE.decodeUtf8 recorder)
+                      ]
+
+renderShifts :: [Shift] -> Splice Application
+renderShifts ss = mapSplices renderShift ss                             

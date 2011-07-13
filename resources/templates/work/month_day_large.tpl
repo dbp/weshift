@@ -3,11 +3,9 @@
   <div-async name="day-$(dayNum)" class="large">
     <div class="user-wrap $(selfClasses)">
       <userName/> <button class="add toggle" data-toggle-target=".add-form-$(dayNum)">Add Shift</button>
-      <div class="add-form-$(dayNum) add-form" style="display: none;">
-        <form-async target="$(placeRoot)/shift/add" method="POST">
-          <input type="text" name="start" value="9:00am"/> to <input type="text" name="stop" value="5:00pm"/><button type="submit"/>
-        </form-async>
-      </div>
+        <apply template="shift/add">
+          <bind tag="disp">none</bind>
+        </apply>
       <selfShifts>
         <div class="shift">
           <div class="time">
@@ -19,11 +17,13 @@
           </div>
           <div class="request-form-$(dayNum) request-form" style="display: none;">
             <form-async target="$(placeRoot)/shift/request" method="POST">
-             Ask someone to cover? <button type="submit"/>
+              <input type="hidden" name="shift" value="$(id)"/>
+              Ask someone to cover? <button type="submit"/>
             </form-async>
           </div>
           <div class="delete-form-$(dayNum) delete-form" style="display: none;">
             <form-async target="$(placeRoot)/shift/delete" method="POST">
+              <input type="hidden" name="shift" value="$(id)"/>
               Really delete this shift? <button type="submit"/>
             </form-async>
           </div>
@@ -32,6 +32,7 @@
           </div>
           <div class="change-form-$(dayNum) change-form" style="display: none;">
             <form-async target="$(placeRoot)/shift/change" method="POST">
+              <input type="hidden" name="shift" value="$(id)"/>
               <input type="text" name="start" value="$(start)"/> to <input type="text" name="stop" value="$(stop)"/><button type="submit"/>
             </form-async>
           </div>
