@@ -16,6 +16,9 @@
         <view is="profile.settings.email">
           <apply template="profile/usersettings/email"></apply>
         </view>
+        <view is="profile.settings.remove">
+          <apply template="profile/usersettings/remove"></apply>
+        </view>
         <view is="profile.coworkers">
           <apply template="profile/coworkers/default"></apply>
         </view>

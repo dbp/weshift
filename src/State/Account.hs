@@ -25,6 +25,9 @@ getUser uid = do
 getUserEmails u =
   fmap (mapMaybe buildEmail) $ withPGDB "SELECT id,user_id,email,confirmed FROM useremails WHERE user_id = ?;" [toSql (uId u)]
 
+setUserPassword u pw = 
+  fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql pw, toSql (uId u)]
+  
 addUserEmail u e = 
   fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "INSERT INTO useremails (user_id, email) VALUES (?, ?) RETURNING token;" [toSql (uId u), toSql e]
 
@@ -33,6 +36,24 @@ confirmUserEmail u t =
 
 deleteUserEmail u e = 
   fmap (not.null) $ withPGDB "DELETE FROM useremails WHERE id = ? AND user_id = ? RETURNING id;" [toSql e, toSql (uId u)]
+
+-- | this erases all personally identifiable info (ie, emails and their name) and replaces their password with an activation token
+-- so that they can re-activate it later if they want. They must have an active email acount (which will be deleted in the process).
+disableAccount u = do
+  em <- fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "SELECT email FROM useremails WHERE user_id = ? AND confirmed = true;" [toSql (uId u)]
+  case em of
+    Nothing -> return Nothing -- if they have NO emails, we can't disable, because we wouldn't be able to send them a message
+    Just email -> do
+      token <- fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "UPDATE users SET name = 'Unknown Person', password = substring(md5((random())::text), 1, 10), active = false WHERE id = ? RETURNING password;" [toSql (uId u)]
+      case token of 
+        Nothing -> return Nothing
+        Just t -> do withPGDB "DELETE FROM useremails WHERE user_id = ?;" [toSql (uId u)]
+                     return $ Just (email, t)
+  
+-- | we set their password, restore their name, and set it to open to their email settings so they can,
+-- if they want, set their email.
+enableAccount u n pw = 
+  fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')), name = ?, view = 'work.month;profile.settings.email;messages' WHERE id = ? RETURNING id;" [toSql pw, toSql n, toSql (uId u)]
   
 
 buildEmail (i:u:e:c:[]) = Just (Email (fromSql i) (fromSql u) (fromSql e) (fromSql c))

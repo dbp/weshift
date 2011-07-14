@@ -31,7 +31,8 @@ settingsH :: User -> UserPlace -> Application ()
 settingsH u p = route [ ("/",                 ifTop $ settingsHome u)
                       , ("/name",             changeNameH u p)
                       , ("/password",         changePasswordH u p)
-                      , ("/remove",           removeAccountH u p)
+                      , ("/remove",           method POST $ removeAccountPostH u p)
+                      , ("/remove",           method GET $ removeAccountH u p)
                       , ("/email",            emailH u p)
                       , ("/email/add",        addEmailH u p)
                       , ("/email/delete/:id", deleteEmailH u p)
@@ -79,12 +80,17 @@ checkPassword = checkM "Current password not correct:" fn
 data NewPassword = NewPassword String String String deriving (Eq,Show)
 
 passwordForm :: SnapForm Application Text HeistView NewPassword
-passwordForm = (`validate` matchingPasswords) $ (<++ errors) $ NewPassword
+passwordForm = mkNP
     <$> input "current" Nothing  `validate` checkPassword <++ errors
-    <*> input "new"     Nothing  `validate` nonEmpty      <++ errors 
-    <*> input "confirm" Nothing  `validate` nonEmpty      <++ errors 
-  where matchingPasswords = check "New passwords do not match:" $ \(NewPassword _ p1 p2) -> p1 == p2
+    <*> newPasswordForm <++ errors
+  where mkNP c (n,p) = NewPassword c n p
 
+newPasswordForm  :: SnapForm Application Text HeistView (String,String)
+newPasswordForm = (`validate` matchingPasswords) $ (<++ errors) $ (,) 
+    <$> input "new"     Nothing  `validate` nonEmpty      <++ errors 
+    <*> input "confirm" Nothing  `validate` nonEmpty      <++ errors 
+  where matchingPasswords = check "New passwords do not match:" $ \(p1,p2) -> p1 == p2
+  
 
 changePasswordH u p = do r <- eitherSnapForm passwordForm "change-password-form"
                          setView u "profile" "profile.settings.password"
@@ -99,7 +105,19 @@ changePasswordH u p = do r <- eitherSnapForm passwordForm "change-password-form"
                                      True  -> renderWS "profile/usersettings/password_updated"
                                      False -> renderWS "profile/usersettings/password_couldntupdate"
 
-removeAccountH u p = undefined
+removeAccountH u p = do
+  setView u "profile" "profile.settings.email"
+  renderWS "profile/usersettings/remove"
+
+removeAccountPostH :: User -> UserPlace -> Application ()
+removeAccountPostH u p = do
+  mtok <- disableAccount u
+  case mtok of
+    Just (email, token) -> do
+      mailDisabling (uId u) email (uName u) token (pId p)
+      redirectAsync "/logout"
+    Nothing -> heistLocal (bindSplices [("msg", textSplice "Could not disable account.")]) $ renderWS "profile/usersettings/remove"
+  
 
 emailH u p = do
   setView u "profile" "profile.settings.email"
@@ -150,6 +168,27 @@ activateEmail = do
         Nothing -> redirect "/" -- not sure how this could happen. I guess if they muck with the URL
     _ -> pass
 
+activateDisabled = do
+  acc <- getParam "account"
+  emtok <- getParam "token"
+  pl <- getParam "pl"
+  nam <- getParam "n"
+  muser <- maybe (return Nothing) (getUser) acc 
+  mplace <- maybe (return Nothing) getPlaceFromId pl
+  wsPerformLogout -- make sure they aren't signed in as anyone else
+  case (mkUser muser,fmap urlDecode nam,emtok,mplace) of
+    (Just u, Just name, Just token, Just place) -> do 
+      r <- eitherSnapForm newPasswordForm "change-password-form"
+      case r of
+          Left splices' -> do
+            heistLocal (bindSplices (splices' ++ [("current-value", textSplice $ TE.decodeUtf8 token)])) $ renderWS "activate/disabled"
+          Right (p,_) -> do
+            success <- enableAccount u name p
+            case success of
+              True  -> redirect $ placeRoot place
+              False -> -- don't know how this happened. Let's show the form again.
+                      renderWS "activate/disabled"
+    _ -> pass
                  
                          
 -- | regex validation sucks, so don't even try.

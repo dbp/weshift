@@ -39,7 +39,7 @@ import            Auth
 
 import Handlers.Place (placeSite)
 import Handlers.Account
-import Handlers.Settings (activateEmail)
+import Handlers.Settings (activateEmail, activateDisabled)
 
 site :: Application ()                 
 site = route [ ("/",                      ifTop $ renderWS "index")
@@ -47,6 +47,7 @@ site = route [ ("/",                      ifTop $ renderWS "index")
              , ("/css",                   serveDirectory "resources/static/css")
              , ("/img",                   serveDirectory "resources/static/img")
              , ("/activate/email",        activateEmail)
+             , ("/activate/disabled",     activateDisabled)
              , ("/:organization/:place",  placeSite)
              , ("/signup",                signupH)
              , ("/login",                 method GET $ loginGetH ())

@@ -82,6 +82,11 @@ performLogin euid = do
       {-liftIO $ putStrLn "logging in"-}
       return (Right x)
 
+wsPerformLogout :: Application ()
+wsPerformLogout = do
+  deleteFromSession "place"
+  performLogout
+
 getCurrentUser = do au <- currentAuthUser
                     let u = mkUser au
                     return u
