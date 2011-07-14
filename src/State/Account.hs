@@ -44,7 +44,7 @@ disableAccount u = do
   case em of
     Nothing -> return Nothing -- if they have NO emails, we can't disable, because we wouldn't be able to send them a message
     Just email -> do
-      token <- fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "UPDATE users SET name = 'Unknown Person', password = substring(md5((random())::text), 1, 10), active = false WHERE id = ? RETURNING password;" [toSql (uId u)]
+      token <- fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "UPDATE users SET name = '', password = substring(md5((random())::text), 1, 10), active = false WHERE id = ? RETURNING password;" [toSql (uId u)]
       case token of 
         Nothing -> return Nothing
         Just t -> do withPGDB "DELETE FROM useremails WHERE user_id = ?;" [toSql (uId u)]

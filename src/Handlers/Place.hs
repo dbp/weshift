@@ -49,6 +49,7 @@ placeSite = do
   liftIO $ putStrLn $ show h-}
   route [ ("/",                               ifTop $ checkPlaceLogin orgName placeName placeHomeH)
         , ("/month/:year/:month/:day/large",  checkPlaceLoginAsync orgName placeName monthDayLargeH)
+        , ("/month/:year/:month/:day/small",  checkPlaceLoginAsync orgName placeName monthDaySmallH)
         , ("/month/:year/:month",             checkPlaceLoginAsync orgName placeName monthH)
         , ("/day/:year/:month/:day",          checkPlaceLoginAsync orgName placeName dayH)
         , ("/timesheet",                      checkPlaceLoginAsync orgName placeName timesheetH)
@@ -97,6 +98,26 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                                  day <- maybeRead d
                                  return (year,month,day)
                 _ -> Nothing
+
+monthDaySmallH user place = do mmonth <- getParam "month"
+                               myear  <- getParam "year"
+                               mday   <- getParam "day"
+                               (day, daySplice) <- 
+                                  case (mmonth >>= maybeRead, myear >>= maybeRead, mday >>= maybeRead) of
+                                    (Just month, Just year, Just day) -> do
+                                      let d = (fromGregorian year month day)
+                                      shifts <- getShifts d (addDays 1 d) place
+                                      setView user "work" (TE.encodeUtf8 (T.concat ["work.month." 
+                                                                                   ,T.pack $ show year
+                                                                                   ,"."
+                                                                                   ,T.pack $ show month
+                                                                                   ]))
+                                      
+                                      return (d,[("day", renderDay user Nothing [] $ formatDay year month shifts [] user (emptyDayFormat (Just day)))])
+                                    _ -> do 
+                                      today <- liftM utctDay $ liftIO getCurrentTime
+                                      return (today, [])
+                               heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_small"
 
 monthDayLargeH user place = do mmonth <- getParam "month"
                                myear  <- getParam "year"

@@ -8,6 +8,11 @@ bean.add(document, 'DOMContentLoaded', function () {
       bonzo(elem.parentNode.parentNode).hide();
     });
     
+  // version that doesnt prevent propogation
+  declare("click", ".close2-p", false, function (elem) {
+      bonzo(elem.parentNode.parentNode).hide();
+    });
+    
   function shift(elem,ammount,width) {
     e = bonzo(elem);
     cur = e.css("left");
