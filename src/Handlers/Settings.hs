@@ -14,21 +14,27 @@ import Database.HDBC
 
 import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
+import qualified Data.ByteString.Char8 as B8
 import Control.Applicative
 import "mtl" Control.Monad.Trans (liftIO)
 
 import Application
 import Auth
 import State.Types
+import State.Account
+import State.Place
 import Common
+import Mail
 import Control.Concurrent (threadDelay)
 
 settingsH :: User -> UserPlace -> Application ()
-settingsH u p = route [ ("/",         ifTop $ settingsHome u)
-                      , ("/name",     changeNameH u p)
-                      , ("/password", changePasswordH u p)
-                      , ("/remove",   removeAccountH u p)
-                      , ("/email",    emailH u p)
+settingsH u p = route [ ("/",                 ifTop $ settingsHome u)
+                      , ("/name",             changeNameH u p)
+                      , ("/password",         changePasswordH u p)
+                      , ("/remove",           removeAccountH u p)
+                      , ("/email",            emailH u p)
+                      , ("/email/add",        addEmailH u p)
+                      , ("/email/delete/:id", deleteEmailH u p)
                       ]
 
 settingsHome :: User -> Application ()
@@ -94,4 +100,62 @@ changePasswordH u p = do r <- eitherSnapForm passwordForm "change-password-form"
                                      False -> renderWS "profile/usersettings/password_couldntupdate"
 
 removeAccountH u p = undefined
-emailH u p = undefined
+
+emailH u p = do
+  setView u "profile" "profile.settings.email"
+  emails <- getUserEmails u
+  heistLocal (bindSplices [("emails", renderEmails emails)]) $ renderWS "profile/usersettings/email"
+
+renderEmails = mapSplices (\(Email i u a c) -> runChildrenWith [("id", textSplice $ TE.decodeUtf8 i)
+                                                               ,("user", textSplice $ TE.decodeUtf8 u)
+                                                               ,("address", textSplice $ TE.decodeUtf8 a)
+                                                               ,("confirmed", booleanSplice c)
+                                                               ])
+
+addEmailH u p = do r <- eitherSnapForm emailForm "add-email-form"
+                   case r of
+                       Left splices' -> do
+                         heistLocal (bindSplices splices') $ renderWS "profile/usersettings/email_add"
+                       Right email' -> do
+                         token <- addUserEmail u email'
+                         case token of
+                           Just t  -> do
+                             mailActivation (uId u) (B8.pack email') t (pId p)
+                             emails <- getUserEmails u
+                             heistLocal (bindSplices [("emails", renderEmails emails),("msg",textSplice "Confirmation email sent.")]) $ renderWS "profile/usersettings/email" 
+                           Nothing -> renderWS "profile/usersettings/email_error"
+
+deleteEmailH u p = do 
+  mid <- getParam "id"
+  case mid of
+    Just eid -> do deleteUserEmail u eid
+                   emails <- getUserEmails u
+                   heistLocal (bindSplices [("emails", renderEmails emails),("msg",textSplice "Deleted address.")]) $ renderWS "profile/usersettings/email"
+    Nothing -> do emails <- getUserEmails u
+                  heistLocal (bindSplices [("emails", renderEmails emails)]) $ renderWS "profile/usersettings/email"
+
+activateEmail = do
+  acc <- getParam "account"
+  emtok <- getParam "token"
+  pl <- getParam "pl"
+  case (acc,emtok,pl) of
+    (Just uid, Just token, Just pid) -> do 
+      res <- confirmUserEmail uid token
+      -- it actually doesn't matter for now, we'll redirect the same place,
+      -- regardless of whether the email was succesfully activated
+      mplace <- getPlaceFromId pid
+      case mplace of
+        Just place -> redirect $ placeRoot place -- now this should end them up at the email panel, 
+                                                 -- if they haven't gone anywhere since
+        Nothing -> redirect "/" -- not sure how this could happen. I guess if they muck with the URL
+    _ -> pass
+
+                 
+                         
+-- | regex validation sucks, so don't even try.
+validEmail :: Validator Application Text String
+validEmail = check "Must be a valid email, like help@weshift.org" $ \e -> '@' `elem` e && '.' `elem` e
+
+emailForm :: SnapForm Application Text HeistView String
+emailForm = input "address" Nothing  `validate` validEmail <++ errors 
+                  

@@ -38,6 +38,13 @@ data UserPlace = UserPlace { pId    :: BS.ByteString
 
 emptyUserPlace = UserPlace "" "" "" False "" 
 
+data Email = Email { emId :: BS.ByteString
+                   , emUser :: BS.ByteString
+                   , emAddress :: BS.ByteString
+                   , emConfirmed :: Bool
+                   }
+      deriving (Eq, Show)
+      
 data Attrs = Attrs Bool Bool [UserPlace] BS.ByteString
       deriving (Eq, Show)
 

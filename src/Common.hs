@@ -147,6 +147,9 @@ identitySplice = do node <- getParamNode
 blackHoleSplice :: Monad m => Splice m
 blackHoleSplice = return []
 
+booleanSplice :: Monad m => Bool -> Splice m
+booleanSplice b = if b then identitySplice else blackHoleSplice
+
 parseWSDate s = parseTime defaultTimeLocale "%-m.%-d.%Y" $ B8.unpack s
                          
 -- stolen from cgi:

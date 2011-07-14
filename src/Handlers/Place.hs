@@ -71,7 +71,10 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     let dayday = maybe today (\(y,m,d) -> fromGregorian y m d) savedDay
                     shifts <- getShifts dayday (addDays 1 dayday) p
                     timesheetSplice <- getTimesheet p u (addDays (-14) today) today
-                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday) ++ timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)])) $ renderWS "place"
+                    emails <- getUserEmails u
+                    let emailsSplice = [("emails", renderEmails emails)]
+                    
+                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday) ++ timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)] ++ emailsSplice)) $ renderWS "place"
       where mList Nothing = []
             mList (Just xs) = xs
             monthV = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."

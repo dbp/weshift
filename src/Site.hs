@@ -36,14 +36,17 @@ import qualified  Utils as U
 import            Common
 import            Auth
 
+
 import Handlers.Place (placeSite)
 import Handlers.Account
+import Handlers.Settings (activateEmail)
 
 site :: Application ()                 
 site = route [ ("/",                      ifTop $ renderWS "index")
              , ("/js",                    serveDirectory "resources/static/js")
              , ("/css",                   serveDirectory "resources/static/css")
              , ("/img",                   serveDirectory "resources/static/img")
+             , ("/activate/email",        activateEmail)
              , ("/:organization/:place",  placeSite)
              , ("/signup",                signupH)
              , ("/login",                 method GET $ loginGetH ())
