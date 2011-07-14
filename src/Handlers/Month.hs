@@ -43,13 +43,14 @@ data DayFormat = DayFormat { dNumber :: Maybe Int -- what day of the month is it
                            }
 
 emptyDayFormat n = DayFormat n False False False False False False False
-                           
-renderDay :: DayFormat -> Splice Application
-renderDay (DayFormat num myshifts shifts top start end bottom request) =
-  runChildrenWithText [ ("boxClasses", boxclasses)
-                      , ("dayClasses", dayclasses)
-                      , ("dayNum", (maybe " " (T.pack . show) num))
-                      ]
+
+-- | the first three params are just for the case that a large day should alse be rendered within.         
+renderDay :: User -> Maybe Int -> [Shift] -> DayFormat -> Splice Application
+renderDay u day' shifts (DayFormat num myshifts othershifts top start end bottom request) =
+  runChildrenWith $ [ ("boxClasses", textSplice boxclasses)
+                    , ("dayClasses", textSplice dayclasses)
+                    , ("dayNum", textSplice (maybe " " (T.pack . show) num))
+                    ] ++ extra
       where boxclasses = T.concat (["daybox"] ++ 
                                   (if start then [" start"] else []) ++ 
                                   (if end then [" end"] else []) ++ 
@@ -57,11 +58,31 @@ renderDay (DayFormat num myshifts shifts top start end bottom request) =
                                   (if bottom then [" bottom"] else []) ++
                                   (if request then [" request"] else []))
             dayclasses = T.concat (["day"] ++
-                                  (if myshifts then [" self"] else if shifts then [" other"] else []) ++
+                                  (if myshifts then [" self"] else if othershifts then [" other"] else []) ++
                                   maybe [" none"] (const []) num)
+            -- this means that we are also showing the big day.
+            selfShifts = filter (\s -> ((uId u) == (sUser s)) && onToday s) shifts
+            otherShifts = filter (\s -> ((uId u) /= (sUser s)) && onToday s) shifts
+            onToday s = Just (trd (toGregorian (localDay (sStart s)))) == day'
+            trd (_,_,a) = a 
+            extra = case day' of
+                      Just d | Just d == num ->
+                        [("notLarge", blackHoleSplice)
+                        ,("large", identitySplice)
+                        ,("start-value", textSplice "9:00am")
+                        ,("stop-value", textSplice "5:00pm")
+                        ,("start-errors", blackHoleSplice)
+                        ,("stop-errors", blackHoleSplice)
+                        ,("id-errors", blackHoleSplice)
+                        ,("selfShifts",  renderShifts selfShifts)
+                        ,("otherShifts", renderShifts otherShifts)
+                        ,("selfClasses", textSplice $ if null selfShifts then "" else "shift")
+                        ]
+                      _ -> []
+                    
                        
-renderMonth :: [DayFormat] -> Splice Application
-renderMonth days = mapSplices renderDay days
+renderMonth :: User -> Maybe Int -> [Shift] -> [DayFormat] -> Splice Application
+renderMonth u d' ss days = mapSplices (renderDay u d' ss) days
 
 buildMonth :: Integer -> Int -> [[DayFormat]]
 buildMonth year month = splitEvery 7 $ map emptyDayFormat $ 
@@ -99,13 +120,13 @@ formatMonth :: Integer -> Int -> [Shift] -> [Shift] -> User -> [[DayFormat]] -> 
 formatMonth y m s c u weeks = map (formatWeek y m s c u) $ 
                                 (map top (head weeks)) : ((init $ tail weeks) ++ [map bottom (last weeks)])
 
-monthView :: UserPlace -> User -> Integer -> Int -> Splice Application
-monthView place user year month = do 
+monthView :: UserPlace -> User -> Integer -> Int -> Maybe Int -> Splice Application
+monthView place user year month day' = do 
   let start = fromGregorian year month 1
   let end = addDays (toInteger $ gregorianMonthLength year month) start
   shifts <- lift $ getShifts start end place
   uncoveredShifts <- lift $ getUncoveredShifts start end place
-  renderMonth $ concat $ formatMonth year month shifts uncoveredShifts user $ buildMonth year month
+  renderMonth user day' shifts $ concat $ formatMonth year month shifts uncoveredShifts user $ buildMonth year month
  
  
 dayLargeSplices place user (year, month, day) = do
@@ -114,7 +135,7 @@ dayLargeSplices place user (year, month, day) = do
    let selfShifts = filter ((== (uId user)) . sUser) shifts
    let otherShifts = filter ((/= (uId user)) . sUser) shifts
    let selfClasses = if null selfShifts then "" else "shift"
-   return (d,[("day", renderDay $ formatDay year month shifts [] user (emptyDayFormat (Just day)))
+   return (d,[("day", renderDay user Nothing [] $ formatDay year month shifts [] user (emptyDayFormat (Just day)))
              ,("closeDays", mapSplices (\n -> runChildrenWithText [("dayNum",T.pack $ show n)]) (filter (/= day) $ take (gregorianMonthLength year month) $ iterate (+1) 1))
              ,("start-value", textSplice "9:00am")
              ,("stop-value", textSplice "5:00pm")
