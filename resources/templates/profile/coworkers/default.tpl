@@ -6,9 +6,9 @@
   </div>
 </coworkers>
 
-<ifFacilitator>
+<isFacilitator>
   <h4>Add New Coworker</h4>
   <apply template="add"/>
-</ifFacilitator>
+</isFacilitator>
 
 </apply>
