@@ -202,6 +202,12 @@ commonSplices today = [("currYear",  textSplice $ T.pack $ show year)
                       ]
   where (year,month,_) = toGregorian today  
 
+renderPlaces :: Monad m => [UserPlace] -> Splice m
+renderPlaces = mapSplices (\p -> runChildrenWithText [("name", TE.decodeUtf8 (pName p))
+                                                     ,("org", TE.decodeUtf8 (pOrg p))
+                                                     ,("root", TE.decodeUtf8 (placeRoot p))
+                                                     ])
+
 renderWS :: ByteString -> Application ()
 renderWS t = do mup <- getCurrentUserAndPlace
                 let userSplices = do (u,p) <- mup
@@ -209,6 +215,7 @@ renderWS t = do mup <- getCurrentUserAndPlace
                                             ,("placeName", bTS $ placeName p)
                                             ,("userName", bTS $ uName u)
                                             ,("view", viewSplice (uView u))
+                                            ,("userPlaces", renderPlaces (uPlaces u))
                                             ]
                 let permissionSplices = [("isFacilitator", facilitatorSplice $ fmap snd mup)
                                         ,("isNormalUser", normalUserSplice $ fmap snd mup)

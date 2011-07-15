@@ -10,8 +10,3 @@ import qualified Data.Text as T
 import State.Types
 import Common
 
-renderPlaces :: Monad m => [UserPlace] -> Splice m
-renderPlaces = mapSplices (\p -> runChildrenWithText [("name", TE.decodeUtf8 (pName p))
-                                                     ,("org", TE.decodeUtf8 (pOrg p))
-                                                     ,("root", TE.decodeUtf8 (placeRoot p))
-                                                     ])

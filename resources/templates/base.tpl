@@ -28,8 +28,20 @@
   <body>
     <div id="top">
       <div id="top-holder">
-        <a href="/"><img src="/img/logo.png" /></a>
-      </div>
+        <div id="logo">
+          <a href="/"><img src="/img/logo.png" /></a>
+          <h2><placeName/></h2>
+        </div>
+        <div id="top-right">
+          <ifLoggedIn>
+          <userName/><br>
+          <userPlaces>
+            <a href="$(root)"><org/>, <name/></a> - 
+          </userPlaces>
+          <a href="/logout">Logout</a>
+          </ifLoggedIn>
+        </div>
+      </div> <!-- #top-holder -->
     </div> <!-- #top -->
     <div id="middle">
       <div-async name="middle-left" id="left">
