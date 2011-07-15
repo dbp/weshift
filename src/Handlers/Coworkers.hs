@@ -41,25 +41,27 @@ renderCoworkers coworkers = mapSplices renderCoworker coworkers
 
 
 coworkersH :: User -> UserPlace -> Application ()
-coworkersH user place = route [("/", ifTop $ listCoworkers user place)
-                              ,("/add", if pFac place then addCoworkerH user place else pass)
-                              ]
+coworkersH user place = 
+  route [("/", ifTop $ listCoworkers user place)
+        ,("/add", if pFac place then addCoworkerH user place else pass)
+        ]
   
 listCoworkers user place = do 
   coworkers <- getCoworkers user place  -- Note: this gives back incomplete place lists, just the current place
   setView user "profile" "profile.coworkers"
   heistLocal (bindSplices (coworkersSplice coworkers)) $ renderWS "profile/coworkers/default"
 
-addCoworkerH u p = route [("/", ifTop $ addCW u p)
-                         ,("/exists", addCWexists u p)
-                         ,("/new", addCWnew u p)
-                         ]
+addCoworkerH u p = do
+  route [("/", ifTop $ addCW u p)
+        ,("/exists", addCWexists u p)
+        ,("/new", addCWnew u p)
+        ]
 
 userNotIn place = checkM "Another user with this name already exists at this place." $ \n -> fmap not $ userExists place n
 
 newUserForm p = nameForm `validate` (userNotIn p)
 
-addCW u p = do
+addCW u p = do  
   r <- eitherSnapForm (newUserForm p) "add-user-form"
   case r of
     Left splices' -> do

@@ -32,6 +32,8 @@ newUser n p =
 
 addUserPlace p i = fmap (not.null) $ withPGDB "INSERT INTO placeusers (user_id, place) VALUES (?, ?) RETURNING user_id;" [toSql i, toSql (pId p)]
 
+addFacilitatorPlace p i = fmap (not.null) $ withPGDB "INSERT INTO placeusers (user_id, place, facilitator) VALUES (?, ?, true) RETURNING user_id;" [toSql i, toSql (pId p)]
+
 userExists p n = 
   fmap (not.null) $ withPGDB "SELECT P.id FROM places AS P JOIN placeusers AS PU ON PU.place = P.id JOIN users AS U ON PU.user_id = U.id WHERE U.name = ? AND P.id = ?" [toSql n, toSql (pId p)]
 
@@ -70,7 +72,7 @@ enableAccount u n pw =
   fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')), name = ?, view = 'work.month;profile.settings.email;messages' WHERE id = ? RETURNING id;" [toSql pw, toSql n, toSql (uId u)]
 
 activateAccount u p =
-  fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql p, toSql (uId u)]
+  fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')), active = true WHERE id = ? RETURNING id;" [toSql p, toSql (uId u)]
   
   
 

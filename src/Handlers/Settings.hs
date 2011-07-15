@@ -63,9 +63,6 @@ changeNameH u p = do r <- eitherSnapForm nameForm "change-name-form"
                                  False -> renderWS "profile/usersettings/name_couldntupdate"
 
 
-nonEmpty :: Validator Application Text String
-nonEmpty = check "Field must not be empty:" $ \s -> not $ null s
-
 checkPassword :: Validator Application Text String
 checkPassword = checkM "Current password not correct:" fn
   where fn p = do mUs <- getCurrentUser
@@ -85,12 +82,6 @@ passwordForm = mkNP
     <*> newPasswordForm <++ errors
   where mkNP c (n,p) = NewPassword c n p
 
-newPasswordForm  :: SnapForm Application Text HeistView (String,String)
-newPasswordForm = (`validate` matchingPasswords) $ (<++ errors) $ (,) 
-    <$> input "new"     Nothing  `validate` nonEmpty      <++ errors 
-    <*> input "confirm" Nothing  `validate` nonEmpty      <++ errors 
-  where matchingPasswords = check "New passwords do not match:" $ \(p1,p2) -> p1 == p2
-  
 
 changePasswordH u p = do r <- eitherSnapForm passwordForm "change-password-form"
                          setView u "profile" "profile.settings.password"

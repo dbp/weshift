@@ -17,11 +17,15 @@ import Snap.Extension.Session.CookieSession
 import Snap.Extension.Heist
 import "mtl" Control.Monad.Trans (lift, liftIO)
 import Heist.Splices.Async (heistAsyncSplices)
-import Data.Maybe (fromMaybe, maybeToList, listToMaybe, fromJust)
+import Data.Maybe (fromMaybe, maybeToList, listToMaybe, fromJust, isNothing)
 import Control.Monad (liftM, mzero, unless)
+import Control.Applicative
 import Data.List (find)
 import Data.List.Split
 import Snap.Types
+import Text.Digestive.Types
+import Text.Digestive.Snap.Heist
+import Text.Digestive.Validate
 
 import Data.Time.Format
 import Data.Time.Clock
@@ -111,14 +115,14 @@ checkPlaceLogin' redr (Just org) (Just place) handler =
      let loginPage = maybe (redr "/")
                            (\pl -> redr (BS.concat ["/login?redirectTo=", uri, "&pl=", pId pl]))
                            p
-     case (userHasPlace org place u, p, u) of
-       (True,Just pl, Just u) -> do
+     case (userPlace p u, u) of
+       (Just pl, Just u) -> do
          setInSession "place" (pId pl)
-         handler u $ if uSuper u then pl { pFac = True } else pl
+         handler u pl
        _ -> loginPage
        
-  where userHasPlace org place (Just (User _ _ _ super places _)) = super || any (\p -> pName p == place && pOrg p == org) places
-        userHasPlace _ _ Nothing = False
+  where userPlace (Just pl) (Just (User _ _ _ super places _)) = if super then Just (pl {pFac = True}) else find (\p -> pName pl == pName p && pOrg pl == pOrg p) places
+        userPlace _ _ = Nothing
 checkPlaceLogin' _ _ _ _ = mzero
 
 renderTime t = T.pack $ formatTime defaultTimeLocale "%-l:%M%P" t
@@ -155,6 +159,18 @@ parseWSDate s = parseTime defaultTimeLocale "%-m.%-d.%Y" $ B8.unpack s
 -- stolen from cgi:
 maybeRead :: Read a => ByteString -> Maybe a
 maybeRead = fmap fst . listToMaybe . reads . B8.unpack
+
+nonEmpty :: Validator Application T.Text String
+nonEmpty = check "Field must not be empty:" $ \s -> not $ null s
+
+nonEmptyIfNothing :: Maybe a -> Validator Application T.Text String
+nonEmptyIfNothing m = check "Field must not be empty:" $ \s -> if isNothing m then (not $ null s) else True 
+
+newPasswordForm  :: SnapForm Application T.Text HeistView (String,String)
+newPasswordForm = (`validate` matchingPasswords) $ (<++ errors) $ (,) 
+    <$> input "new"     Nothing  `validate` nonEmpty      <++ errors 
+    <*> input "confirm" Nothing  `validate` nonEmpty      <++ errors 
+  where matchingPasswords = check "New passwords do not match:" $ \(p1,p2) -> p1 == p2
 
 
 userLookup :: M.Map BS.ByteString User -> Splice Application

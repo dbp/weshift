@@ -25,3 +25,16 @@ getUserPlaces uid = withPGDB "SELECT P.id, P.name, P.token, P.organization, PU.f
 
 getAllPlaces :: Application [UserPlace]
 getAllPlaces = fmap (mapMaybe buildPlace) $ withPGDB "SELECT id, name, token, organization FROM places;" []
+
+organizationExists :: BS.ByteString -> Application Bool
+organizationExists orgname = fmap (not.null) $ withPGDB "SELECT name FROM organizations WHERE name = ?;" [toSql orgname]
+
+-- | takes the org name and place name
+placeExists :: BS.ByteString -> BS.ByteString -> Application Bool
+placeExists orgname placename = fmap (not.null) $ withPGDB "SELECT id FROM places WHERE organization = ? AND name = ?;" [toSql orgname, toSql placename]
+
+createOrganizationIfNotExists :: BS.ByteString -> Application Bool
+createOrganizationIfNotExists orgname = fmap (not.null) $ withPGDB "INSERT INTO organizations (name) (SELECT ? as name WHERE NOT EXISTS (SELECT name FROM organizations WHERE name = ?)) RETURNING name;" [toSql orgname, toSql orgname]
+
+createPlace :: BS.ByteString -> BS.ByteString -> Application (Maybe BS.ByteString)
+createPlace org place = fmap ((fmap fromSql).(>>= listToMaybe).listToMaybe) $ withPGDB "INSERT INTO places (name, organization) VALUES (?, ?) RETURNING id;" [toSql place, toSql org]

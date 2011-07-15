@@ -14,14 +14,7 @@
   </bind>
   
   <bind tag="right">
-    <h2>Sign up</h2>
-    <div-async name="signup-form">
-      <form-async target="/signup" method="POST">
-        Org: <input type="text" name="org"/><br>
-        Place: <input type="text" name="place"/><br>
-        Name: <input type="text" name="name"/>
-        <button type="submit"/>
-      </form-async>
-    </div-async>
+    <h2>Create New Place</h2>
+    <apply template="signup_form"/>
   </bind> 
 </apply>

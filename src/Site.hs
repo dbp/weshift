@@ -60,4 +60,8 @@ site = route [ ("/",                      ifTop indexH)
 
 indexH = do
   places <- getAllPlaces
-  heistLocal (bindSplices [("places", renderPlaces places)]) $ renderWS "index"
+  heistLocal (bindSplices [("places", renderPlaces places)
+                          ,("organization-errors", blackHoleSplice)
+                          ,("place-errors", blackHoleSplice)
+                          ,("name-errors", blackHoleSplice)
+                          ]) $ renderWS "index"
