@@ -12,6 +12,10 @@ import Application
 import Auth
 import State.Types
 import State.Place
+import State.Account
+import Handlers.Settings
+import Text.Digestive.Snap.Heist
+
 import Text.Templating.Heist
 import Snap.Extension.Heist
 import Control.Monad
@@ -39,3 +43,30 @@ loginPostH loginFailure loginSuccess = do
     either loginFailure (const loginSuccess) mMatch
 
 signupH = undefined
+
+
+activateAccountH = do
+  i <- getParam "id"
+  tok <- getParam "token"
+  pl <- getParam "pl"
+  em <- getParam "em"
+  muser <- maybe (return Nothing) (getUser) i 
+  mplace <- maybe (return Nothing) getPlaceFromId pl
+  wsPerformLogout -- make sure they aren't signed in as anyone else
+  case (mkUser muser,tok,mplace) of
+    (Just u, Just token, Just place) -> do 
+      r <- eitherSnapForm newPasswordForm "change-password-form"
+      case r of
+          Left splices' -> do
+            heistLocal (bindSplices splices') $ renderWS "activate/account"
+          Right (p,_) -> do
+            success <- activateAccount u p
+            case success of
+              True  -> do
+                case em of
+                  Nothing -> return False
+                  Just email -> addUserEmail' u email
+                redirect $ placeRoot place
+              False -> -- don't know how this happened. Let's show the form again.
+                      renderWS "activate/account"
+    _ -> pass

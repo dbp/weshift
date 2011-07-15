@@ -22,7 +22,18 @@ import Snap.Types hiding (POST)
 
 import Network.Mail.Postmark
 
-mailActivation account email token place = do
+mailAccountActivation name email link = do
+  liftIO $ postmark (B8.unpack postmarkToken) "messages@weshift.org" (BS.concat ["Please activate your account with WeShift, ",name,"."]) "activate" (BS.concat $ msg link name) email
+    where msg l n = [ "Welcome to WeShift, "
+                    ,n
+                    ,".\n\n"
+                    , "To activate your account, please visit "
+                    , l
+                    , " .\n\nThanks! - The WeShift Team"
+                    ]
+                  
+
+mailEmailActivation account email token place = do
   server  <- liftM rqServerName getRequest
   portNum <- liftM rqServerPort getRequest
   liftIO $ postmark (B8.unpack postmarkToken) "messages@weshift.org" "Please confirm your email with WeShift." "confirm" (BS.concat $ msg server portNum token place) email

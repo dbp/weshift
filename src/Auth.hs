@@ -29,7 +29,6 @@ import            Application
 import            State.Types
 import            State.Place
 import            State.Account
-import            Mail (mailActivation)
 import qualified  Utils as U
 
 repSpaces = B8.map (\c -> if c == '_' then ' ' else c)

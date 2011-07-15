@@ -138,7 +138,7 @@ addEmailH u p = do r <- eitherSnapForm emailForm "add-email-form"
                          token <- addUserEmail u email'
                          case token of
                            Just t  -> do
-                             mailActivation (uId u) (B8.pack email') t (pId p)
+                             mailEmailActivation (uId u) (B8.pack email') t (pId p)
                              emails <- getUserEmails u
                              heistLocal (bindSplices [("emails", renderEmails emails),("msg",textSplice "Confirmation email sent.")]) $ renderWS "profile/usersettings/email" 
                            Nothing -> renderWS "profile/usersettings/email_error"
@@ -181,7 +181,7 @@ activateDisabled = do
       r <- eitherSnapForm newPasswordForm "change-password-form"
       case r of
           Left splices' -> do
-            heistLocal (bindSplices (splices' ++ [("current-value", textSplice $ TE.decodeUtf8 token)])) $ renderWS "activate/disabled"
+            heistLocal (bindSplices splices') $ renderWS "activate/disabled"
           Right (p,_) -> do
             success <- enableAccount u name p
             case success of

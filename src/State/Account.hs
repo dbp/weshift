@@ -25,14 +25,28 @@ getUser uid = do
 getUserEmails u =
   fmap (mapMaybe buildEmail) $ withPGDB "SELECT id,user_id,email,confirmed FROM useremails WHERE user_id = ?;" [toSql (uId u)]
 
+newUser n p =
+  fmap ((>>= mkRet) . listToMaybe) $ withPGDB "INSERT INTO users (SELECT nextval('users_id_seq'), ? AS name, md5(random()::text) AS password WHERE NOT EXISTS (SELECT P.id FROM places AS P JOIN placeusers AS PU ON PU.place = P.id JOIN users AS U ON PU.user_id = U.id WHERE U.name = ? AND P.id = ?) AND EXISTS (SELECT id FROM places WHERE id = ?)) RETURNING id, password;" [toSql n, toSql n, toSql (pId p), toSql (pId p)]
+    where mkRet (i:t:[]) = Just (fromSql t, fromSql i)
+          mkRet _ = Nothing
+
+addUserPlace p i = fmap (not.null) $ withPGDB "INSERT INTO placeusers (user_id, place) VALUES (?, ?) RETURNING user_id;" [toSql i, toSql (pId p)]
+
+userExists p n = 
+  fmap (not.null) $ withPGDB "SELECT P.id FROM places AS P JOIN placeusers AS PU ON PU.place = P.id JOIN users AS U ON PU.user_id = U.id WHERE U.name = ? AND P.id = ?" [toSql n, toSql (pId p)]
+
 setUserPassword u pw = 
   fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql pw, toSql (uId u)]
   
 addUserEmail u e = 
   fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "INSERT INTO useremails (user_id, email) VALUES (?, ?) RETURNING token;" [toSql (uId u), toSql e]
 
+addUserEmail' u e =
+  fmap (not.null) $ withPGDB "INSERT INTO useremails (user_id, email, confirmed) VALUES (?, ?, true) RETURNING token;" [toSql (uId u), toSql e]
+
 confirmUserEmail u t =
   fmap (not.null) $ withPGDB "UPDATE useremails SET confirmed = true WHERE token = ? AND user_id = ? RETURNING id;" [toSql t, toSql u]
+
 
 deleteUserEmail u e = 
   fmap (not.null) $ withPGDB "DELETE FROM useremails WHERE id = ? AND user_id = ? RETURNING id;" [toSql e, toSql (uId u)]
@@ -54,6 +68,10 @@ disableAccount u = do
 -- if they want, set their email.
 enableAccount u n pw = 
   fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')), name = ?, view = 'work.month;profile.settings.email;messages' WHERE id = ? RETURNING id;" [toSql pw, toSql n, toSql (uId u)]
+
+activateAccount u p =
+  fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql p, toSql (uId u)]
+  
   
 
 buildEmail (i:u:e:c:[]) = Just (Email (fromSql i) (fromSql u) (fromSql e) (fromSql c))
