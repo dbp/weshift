@@ -40,9 +40,11 @@ import            Auth
 import Handlers.Place (placeSite)
 import Handlers.Account
 import Handlers.Settings (activateEmail, activateDisabled)
+import State.Place
+import Splices.Place
 
 site :: Application ()                 
-site = route [ ("/",                      ifTop $ renderWS "index")
+site = route [ ("/",                      ifTop indexH)
              , ("/js",                    serveDirectory "resources/static/js")
              , ("/css",                   serveDirectory "resources/static/css")
              , ("/img",                   serveDirectory "resources/static/img")
@@ -56,6 +58,6 @@ site = route [ ("/",                      ifTop $ renderWS "index")
              , ("/logout",                method GET $ logoutHandler redirTo)
              ]
 
-{-  This is going to work by having just about everything via ajax. Digestive-functors via ajax. 
-    So all forms are fetched when needed, and then posted and redisplayed if errors. 
--}
+indexH = do
+  places <- getAllPlaces
+  heistLocal (bindSplices [("places", renderPlaces places)]) $ renderWS "index"

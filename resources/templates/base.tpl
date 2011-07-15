@@ -28,7 +28,7 @@
   <body>
     <div id="top">
       <div id="top-holder">
-        <a href="$(placeRoot)/"><img src="/img/logo.png" /></a>
+        <a href="/"><img src="/img/logo.png" /></a>
       </div>
     </div> <!-- #top -->
     <div id="middle">
