@@ -17,12 +17,12 @@
     }
   }
   #next {
-    background: transparent url("/img/workschedule/calendar/Arrow_right.png");
-    &:hover { background: url("/img/workschedule/calendar/Arrow_right_mo.png"); }
+    background: transparent url("/img/cal_arrow_right.png");
+    &:hover { background: url("/img/cal_arrow_right_sel.png"); }
   }
   #prev {
-    background: transparent url("/img/workschedule/calendar/Arrow_left.png");
-    &:hover { background: url("/img/workschedule/calendar/Arrow_left_mo.png"); }
+    background: transparent url("/img/cal_arrow_left.png");
+    &:hover { background: url("/img/cal_arrow_left_sel.png"); }
   }
 }
 
@@ -279,9 +279,8 @@
 #day-calendar {
   position: relative;
   #shift-right,#shift-left {
-    width: 10px;
-    height: 10px;
-    background-color: black;
+    width: 13px;
+    height: 13px;
     &:hover {
       cursor: pointer;
     }
@@ -290,11 +289,15 @@
     position: absolute;
     top: 10px;
     left: -15px;
+    background-image: url("/img/dv_arrow_left.png");
+    &:hover { background-image: url("/img/dv_arrow_left_sel.png") }
   }
   #shift-left {
     position: absolute;
     top: 10px;
     right: -15px;
+    background-image: url("/img/dv_arrow_right.png");
+    &:hover { background-image: url("/img/dv_arrow_right_sel.png") }
   }
   #time {
     background-color: transparent;
