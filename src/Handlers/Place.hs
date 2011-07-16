@@ -40,6 +40,7 @@ import Handlers.Month
 import Handlers.Day
 import Handlers.Timesheet
 import Handlers.Bulk
+import Handlers.Messages
 
 placeSite :: Application ()
 placeSite = do
@@ -76,8 +77,8 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                                     Just (_,_,Just d) -> Just d
                                     _ -> Nothing
                     let emailsSplice = [("emails", renderEmails emails)]
-                    
-                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday showDay) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday) ++ timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)] ++ emailsSplice)) $ renderWS "place"
+                    messagesSplice <- messagesPageSplices p 1
+                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday showDay) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday) ++ timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)] ++ emailsSplice ++ messagesSplice)) $ renderWS "place"
       where mList Nothing = []
             mList (Just xs) = xs
             monthV = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."

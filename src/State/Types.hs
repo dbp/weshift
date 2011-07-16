@@ -68,3 +68,14 @@ buildPlace _ = Nothing
 buildShift (si:su:sp:ss:st:sr:sb:[]) = 
   Just $ Shift (fromSql si) (fromSql su) (fromSql sp) (fromSql ss) (fromSql st) (fromSql sr) (fromSql sb)
 buildShift _ = Nothing
+
+data Message = Message { mId :: BS.ByteString
+                       , mContents :: BS.ByteString
+                       , mUps :: Int
+                       , mDowns :: Int
+                       , mFlags :: Int
+                       , mCreated :: LocalTime
+                       }
+                       
+buildMessage (i:c:u:d:f:r:[]) = Just $ Message (fromSql i) (fromSql c) (fromSql u) (fromSql d) (fromSql f) (fromSql r)
+buildMessage _ = Nothing

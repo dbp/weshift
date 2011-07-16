@@ -36,7 +36,7 @@
           <ifLoggedIn>
           <userName/><br>
           <userPlaces>
-            <a href="$(root)"><org/>, <name/></a> - 
+            <a href="$(root)"><name/>, <org/></a> - 
           </userPlaces>
           <a href="/logout">Logout</a>
           </ifLoggedIn>
