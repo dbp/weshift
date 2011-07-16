@@ -38,7 +38,7 @@
           <userPlaces>
             <a href="$(root)"><name/>, <org/></a> - 
           </userPlaces>
-          <a href="/logout">Logout</a>
+          <a href="/logout?redirectTo=$(placeRoot)">Logout</a>
           </ifLoggedIn>
         </div>
       </div> <!-- #top-holder -->
