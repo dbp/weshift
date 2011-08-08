@@ -1,0 +1,175 @@
+Description: Set up base schema
+Created: 2011-01-01 20:30:47.217814 UTC
+Depends: 
+Apply:
+  CREATE TABLE activations (
+    token character varying(32) DEFAULT md5((random())::text) NOT NULL,
+    user_id integer NOT NULL
+  );
+  CREATE TABLE configuration (
+    user_id integer NOT NULL,
+    receive_messages boolean DEFAULT true NOT NULL
+  );
+  CREATE TABLE message_downs (
+    message integer NOT NULL,
+    user_hash text NOT NULL
+  );
+  CREATE TABLE message_flags (
+    message integer NOT NULL,
+    user_hash text NOT NULL
+  );
+  CREATE TABLE message_ups (
+    message integer NOT NULL,
+    user_hash text NOT NULL
+  );
+  ALTER TABLE ONLY message_downs
+    ADD CONSTRAINT message_downs_pkey PRIMARY KEY (message, user_hash);
+  ALTER TABLE ONLY message_flags
+    ADD CONSTRAINT message_flags_pkey PRIMARY KEY (message, user_hash);
+  ALTER TABLE ONLY message_ups
+    ADD CONSTRAINT message_ups_pkey PRIMARY KEY (message, user_hash);
+
+  CREATE TABLE messages (
+    id serial PRIMARY KEY,
+    parent integer,
+    contents character varying(140) NOT NULL,
+    place integer NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL
+  );
+
+  CREATE TABLE shifts (
+    id serial PRIMARY KEY,
+    user_id integer NOT NULL,
+    place integer NOT NULL,
+    start timestamp without time zone NOT NULL,
+    stop timestamp without time zone NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL,
+    recorder integer NOT NULL,
+    master boolean DEFAULT true NOT NULL
+  );
+
+  CREATE TABLE obligations (
+    id integer DEFAULT nextval('shifts_id_seq'::regclass) NOT NULL PRIMARY KEY,
+    user_id integer NOT NULL,
+    start timestamp without time zone NOT NULL,
+    stop timestamp without time zone NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL
+  );
+  CREATE TABLE organizations (
+    name character varying(30) NOT NULL
+  );
+  ALTER TABLE ONLY organizations
+    ADD CONSTRAINT organizations_pkey PRIMARY KEY (name);
+
+  CREATE TABLE places (
+    id serial PRIMARY KEY,
+    name character varying(30) NOT NULL,
+    token character varying(10) DEFAULT "substring"(md5((random())::text), 1, 10) NOT NULL,
+    organization character varying(30) NOT NULL
+  );
+  CREATE TABLE placeusers (
+    user_id integer,
+    place integer,
+    facilitator boolean DEFAULT false NOT NULL
+  );
+
+  CREATE TABLE shiftchanges (
+    user_id integer NOT NULL,
+    place integer NOT NULL,
+    old_shift integer NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL,
+    recorder integer NOT NULL,
+    start timestamp without time zone NOT NULL,
+    stop timestamp without time zone NOT NULL,
+    id serial PRIMARY KEY
+  );
+  CREATE TABLE shiftdeletes (
+    user_id integer NOT NULL,
+    place integer NOT NULL,
+    old_shift integer NOT NULL,
+    recorded timestamp without time zone DEFAULT now() NOT NULL,
+    recorder integer NOT NULL
+  );
+  ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_pkey PRIMARY KEY (old_shift);
+
+  CREATE TABLE users (
+    id serial PRIMARY KEY,
+    name character varying(50) NOT NULL,
+    password text NOT NULL,
+    active boolean DEFAULT false NOT NULL,
+    super boolean DEFAULT false NOT NULL
+  );
+
+  ALTER TABLE ONLY activations
+    ADD CONSTRAINT activations_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+  ALTER TABLE ONLY configuration
+    ADD CONSTRAINT configuration_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+  ALTER TABLE ONLY message_downs
+    ADD CONSTRAINT message_downs_message_fkey FOREIGN KEY (message) REFERENCES messages(id);
+  ALTER TABLE ONLY message_flags
+    ADD CONSTRAINT message_flags_message_fkey FOREIGN KEY (message) REFERENCES messages(id);
+  ALTER TABLE ONLY message_ups
+    ADD CONSTRAINT message_ups_message_fkey FOREIGN KEY (message) REFERENCES messages(id);
+
+  ALTER TABLE ONLY messages
+    ADD CONSTRAINT messages_parent_fkey FOREIGN KEY (parent) REFERENCES messages(id);
+  ALTER TABLE ONLY messages
+    ADD CONSTRAINT messages_place_fkey FOREIGN KEY (place) REFERENCES places(id) ON DELETE CASCADE;
+
+  ALTER TABLE ONLY shifts
+    ADD CONSTRAINT shifts_place_fkey FOREIGN KEY (place) REFERENCES places(id) ON DELETE CASCADE;
+  ALTER TABLE ONLY shifts
+    ADD CONSTRAINT shifts_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id);
+  ALTER TABLE ONLY shifts
+    ADD CONSTRAINT shifts_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+
+  ALTER TABLE ONLY obligations
+    ADD CONSTRAINT obligations_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+
+  ALTER TABLE ONLY places
+    ADD CONSTRAINT places_organization_fkey FOREIGN KEY (organization) REFERENCES organizations(name);
+
+  ALTER TABLE ONLY placeusers
+    ADD CONSTRAINT placeusers_place_fkey FOREIGN KEY (place) REFERENCES places(id);
+  ALTER TABLE ONLY placeusers
+    ADD CONSTRAINT placeusers_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+  ALTER TABLE ONLY shiftchanges
+    ADD CONSTRAINT shiftchanges_old_shift_fkey FOREIGN KEY (old_shift) REFERENCES shifts(id);
+  ALTER TABLE ONLY shiftchanges
+    ADD CONSTRAINT shiftchanges_place_fkey FOREIGN KEY (place) REFERENCES places(id) ON DELETE CASCADE;
+  ALTER TABLE ONLY shiftchanges
+    ADD CONSTRAINT shiftchanges_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id);
+  ALTER TABLE ONLY shiftchanges
+    ADD CONSTRAINT shiftchanges_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+  ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_old_shift_fkey FOREIGN KEY (old_shift) REFERENCES shifts(id);
+  ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_place_fkey FOREIGN KEY (place) REFERENCES places(id) ON DELETE CASCADE;
+  ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_recorder_fkey FOREIGN KEY (recorder) REFERENCES users(id);
+  ALTER TABLE ONLY shiftdeletes
+    ADD CONSTRAINT shiftdeletes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+
+
+Revert:
+  DROP TABLE activations;
+  DROP TABLE configuration;
+  DROP TABLE message_downs;
+  DROP TABLE message_flags;
+  DROP TABLE message_ups;
+  DROP TABLE messages;
+  DROP TABLE shifts;
+  DROP TABLE obligations;
+  DROP TABLE organizations;
+  DROP TABLE places;
+  DROP TABLE placeusers;
+  DROP TABLE shiftchanges;
+  DROP TABLE shiftdeletes;
+  DROP TABLE users;
+
+

@@ -54,13 +54,11 @@ changeNameH u p = do r <- eitherSnapForm nameForm "change-name-form"
                            heistLocal (bindString "name" name ) $ 
                             heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name"
                          Right name' -> do
-                           case u of
-                             (User id' _ _ _ _ _) -> do
-                               success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql id']
-                               {-liftIO $ threadDelay 200000-}
-                               case success of
-                                 True  -> renderWS "profile/usersettings/name_updated"
-                                 False -> renderWS "profile/usersettings/name_couldntupdate"
+                            success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql (uId u)]
+                            {-liftIO $ threadDelay 200000-}
+                            case success of
+                              True  -> renderWS "profile/usersettings/name_updated"
+                              False -> renderWS "profile/usersettings/name_couldntupdate"
 
 
 checkPassword :: Validator Application Text String
@@ -68,10 +66,10 @@ checkPassword = checkM "Current password not correct:" fn
   where fn p = do mUs <- getCurrentUser
                   case mUs of
                     Nothing -> return False
-                    Just (User id' _ _ _ _ _) ->
+                    Just u ->
                       fmap (not.null) $ withPGDB 
                         "SELECT id FROM users WHERE id = ? AND password = crypt(?, password) LIMIT 1;" 
-                        [toSql id', toSql p]                  
+                        [toSql (uId u), toSql p]                  
 
 
 data NewPassword = NewPassword String String String deriving (Eq,Show)
@@ -89,12 +87,10 @@ changePasswordH u p = do r <- eitherSnapForm passwordForm "change-password-form"
                              Left splices' -> do
                                heistLocal (bindSplices splices') $ renderWS "profile/usersettings/password"
                              Right (NewPassword _ new _) -> do
-                               case u of
-                                 (User id' _ _ _ _ _) -> do
-                                   success <- fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql new, toSql id']
-                                   case success of
-                                     True  -> renderWS "profile/usersettings/password_updated"
-                                     False -> renderWS "profile/usersettings/password_couldntupdate"
+                               success <- fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql new, toSql (uId u)]
+                               case success of
+                                 True  -> renderWS "profile/usersettings/password_updated"
+                                 False -> renderWS "profile/usersettings/password_couldntupdate"
 
 removeAccountH u p = do
   setView u "profile" "profile.settings.email"

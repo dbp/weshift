@@ -34,8 +34,8 @@ getUsersByName n = do
   {-liftIO $ putStrLn $ show users
   liftIO $ putStrLn $ show users'-}
   return $ catMaybes users'
-    where buildUS (i:n:a:s:v:[]) = do places <- fmap (mapMaybe buildPl) $ getUserPlaces (fromSql i)
-                                      return $ Just $ (User (fromSql i) (fromSql n) (fromSql a) (fromSql s) places (fromSql v))
+    where buildUS (i:n:a:s:v:[]) = do places <- fmap (mapMaybe buildPl) $ getUserPlaces (fromSql i) -- :t
+                                      return $ Just $ (User (fromSql i) (fromSql n) (fromSql a) (fromSql s) places (fromSql v) {-(fromSql t)-})
           buildUS _ = return Nothing
           buildPl (pi:pn:pt:po:pf:[]) = Just $ UserPlace (fromSql pi) (fromSql pn) (fromSql po) (fromSql pf) (fromSql pt) 
           buildPl _ = Nothing

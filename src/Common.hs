@@ -121,7 +121,7 @@ checkPlaceLogin' redr (Just org) (Just place) handler =
          handler u pl
        _ -> loginPage
        
-  where userPlace (Just pl) (Just (User _ _ _ super places _)) = if super then Just (pl {pFac = True}) else find (\p -> pName pl == pName p && pOrg pl == pOrg p) places
+  where userPlace (Just pl) (Just u) = if (uSuper u) then Just (pl {pFac = True}) else find (\p -> pName pl == pName p && pOrg pl == pOrg p) (uPlaces u)
         userPlace _ _ = Nothing
 checkPlaceLogin' _ _ _ _ = mzero
 

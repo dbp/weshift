@@ -1,6 +1,6 @@
 Description: (Description here.)
 Created: 2011-04-12 17:14:30.526661 UTC
-Depends: 
+Depends: base_schema
 Apply:
   ALTER TABLE shifts DROP COLUMN master;
 

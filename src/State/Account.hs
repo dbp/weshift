@@ -18,7 +18,7 @@ import State.Place
 import qualified Utils as U
 
 getUser uid = do 
-  user   <- withPGDB "SELECT id, name, active, super, view FROM users WHERE id = ? LIMIT 1;" [toSql uid]
+  user   <- withPGDB "SELECT id, name, active, super, view FROM users WHERE id = ? LIMIT 1;" [toSql uid] -- ,token
   places <- getUserPlaces uid
   return $ U.bind2 buildUser (listToMaybe user) (Just places)
 
@@ -27,6 +27,7 @@ getUserEmails u =
 
 newUser n p =
   fmap ((>>= mkRet) . listToMaybe) $ withPGDB "INSERT INTO users (SELECT nextval('users_id_seq'), ? AS name, md5(random()::text) AS password WHERE NOT EXISTS (SELECT P.id FROM places AS P JOIN placeusers AS PU ON PU.place = P.id JOIN users AS U ON PU.user_id = U.id WHERE U.name = ? AND P.id = ?) AND EXISTS (SELECT id FROM places WHERE id = ?)) RETURNING id, password;" [toSql n, toSql n, toSql (pId p), toSql (pId p)]
+  -- , substring(md5(random()::text) from 0 for 10) AS token
     where mkRet (i:t:[]) = Just (fromSql t, fromSql i)
           mkRet _ = Nothing
 
@@ -84,13 +85,13 @@ updateUserView user = do
   res <- withPGDB "UPDATE users SET view = ? WHERE id = ? RETURNING id;" [toSql (uView user), toSql (uId user)]
   return $ not (null res)
 
-mkUser au = do (Attrs active super places view) <- liftM snd au
+mkUser au = do (Attrs active super places view) <- liftM snd au -- token
                auth <- liftM fst au
                (UserId id')   <- userId auth
-               name <- userEmail auth 
-               return $ User id' name active super places view
+               name <- userEmail auth
+               return $ User id' name active super places view -- token
 
-buildUser (ui:un:ua:us:uv:[]) places = 
+buildUser (ui:un:ua:us:uv:[]) places =  -- :ut
   Just (emptyAuthUser { userId = Just $ UserId (fromSql ui) 
                       , userEmail = fromSql un
                       , userPassword = Just (Encrypted "")
@@ -100,7 +101,8 @@ buildUser (ui:un:ua:us:uv:[]) places =
                 (map (\(pi:pn:pt:po:pf:[]) -> 
                   UserPlace (fromSql pi) (fromSql pn) (fromSql po) (fromSql pf) (fromSql pt)) 
                 places)
-                (fromSql uv))
+                (fromSql uv)
+                {-(fromSql ut)-})
                 
 buildUser _ _ = Nothing
 

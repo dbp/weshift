@@ -40,6 +40,9 @@
           </userPlaces>
           <a href="/logout?redirectTo=$(placeRoot)">Logout</a>
           </ifLoggedIn>
+          <ifGuest>
+            <apply template="login-form"></apply>
+          </ifGuest>
         </div>
       </div> <!-- #top-holder -->
     </div> <!-- #top -->

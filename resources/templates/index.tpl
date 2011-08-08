@@ -1,9 +1,6 @@
 <apply template="base">
   <bind tag="left">
-    <h2>Places</h2>
-    <places>
-      <a href="$(root)"><name/>, <org/></a><br>
-    </places>
+    <h2>Placeholder</h2>
   </bind>
 
   <bind tag="center">

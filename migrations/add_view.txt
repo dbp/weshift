@@ -1,0 +1,10 @@
+Description: Add view column to users table
+Created: 2011-07-11 20:30:47.217814 UTC
+Depends: base_schema add_organization_key
+Apply:
+  ALTER TABLE users ADD COLUMN view TEXT NOT NULL DEFAULT 'work.month;profile;messages';
+
+Revert:
+  ALTER TABLE users DROP COLUMN view;
+
+

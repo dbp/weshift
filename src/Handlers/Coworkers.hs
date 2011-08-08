@@ -29,7 +29,7 @@ import Handlers.Settings (nameForm)
 import Splices.Place
 
 renderCoworker :: User -> Splice Application
-renderCoworker (User uid uname uact usuper uplaces uview) = do
+renderCoworker (User uid uname uact usuper uplaces uview) = do -- utoken
   runChildrenWith [("id",         textSplice $ TE.decodeUtf8 uid)
                   ,("name",       textSplice $ TE.decodeUtf8 uname)
                   ,("classes",    textSplice $ T.concat (["member"] ++ if pFac (head uplaces) then [" facilitator"] else []))

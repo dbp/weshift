@@ -82,9 +82,9 @@ addShiftForm = (`validate` notOverlapping)  $ (<++ childErrors) $ newShiftForm
 newShiftForm :: SnapForm Application Text HeistView ShiftTime
 newShiftForm = mkNS
     <$> timeRangeForm
-    <*> inputRead "day" "Internal error D. Email help@housetab.org" Nothing
-    <*> inputRead "month" "Internal error M. Email help@housetab.org" Nothing 
-    <*> inputRead "year" "Internal error Y. Email help@housetab.org" Nothing
+    <*> inputRead "day" "Internal error D. Email help@weshift.org" Nothing
+    <*> inputRead "month" "Internal error M. Email help@weshift.org" Nothing 
+    <*> inputRead "year" "Internal error Y. Email help@weshift.org" Nothing
   where mkNS (start,stop) d m y = ShiftTime (LocalTime day (timeToTimeOfDay start)) (LocalTime day (timeToTimeOfDay stop))
           where day = fromGregorian y m d
 
@@ -108,7 +108,7 @@ shiftEditH u p = do
 
 changeShiftForm :: SnapForm Application Text HeistView (BS.ByteString, ShiftTime)
 changeShiftForm = (`validate` notOverlappingChange)  $ (<++ childErrors) $ mkS
-    <$> inputRead "id" "Internal error S. Email help@housetab.org" Nothing
+    <$> inputRead "id" "Internal error S. Email help@weshift.org" Nothing
     <*> newShiftForm
   where mkS i st = (B8.pack $ show (i :: Int), st)
 

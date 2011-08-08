@@ -1,1 +1,0 @@
-ALTER TABLE users ADD COLUMN view TEXT NOT NULL DEFAULT "work.month;profile;messages";

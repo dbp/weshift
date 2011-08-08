@@ -1,6 +1,6 @@
 Description: (Description here.)
 Created: 2011-04-23 18:59:30.082809 UTC
-Depends: add_email add_shift_requests_covers
+Depends: base_schema add_email add_shift_requests_covers
 Apply:
   alter table shifts drop constraint shifts_recorder_fkey;
   alter table shifts drop constraint shifts_user_id_fkey;
