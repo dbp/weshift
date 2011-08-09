@@ -97,7 +97,7 @@ instance MonadAuthUser Application Attrs where
   getUserExternal (EUId params) = do
     let ps = fmap (map (toSql . B8.concat)) $ sequence [M.lookup "name" params, M.lookup "pl" params, M.lookup "password" params]
     resp <- maybe (return []) 
-                  (withPGDB "SELECT id, name, active, super, view FROM users JOIN placeusers ON placeusers.user_id = users.id WHERE users.name = ? AND placeusers.place = ? AND password = crypt(?, password) LIMIT 1;") 
+                  (withPGDB "SELECT id, name, active, super, view, token FROM users JOIN placeusers ON placeusers.user_id = users.id WHERE users.name = ? AND placeusers.place = ? AND password = crypt(?, password) LIMIT 1;") 
                   ps
     places <- maybe (return []) (getUserPlaces . fromSql . head) (listToMaybe resp)
     {-liftIO $ putStrLn "Logging in user"
