@@ -24,7 +24,7 @@ getCoworkers u p = do us <- getWorkers p
 getWorkers :: UserPlace -> Application [User]
 getWorkers p = do
   -- don't send back users who have name "" - that means they have been disabled
-  users <- withPGDB "SELECT PU.facilitator, U.id, U.name, U.active, U.super, U.view FROM users AS U JOIN placeusers AS PU ON PU.user_id = U.id WHERE PU.place = ? AND U.name != '' ORDER BY name ASC;" [toSql $ pId p]
+  users <- withPGDB "SELECT PU.facilitator, U.id, U.name, U.active, U.super, U.view, U.token FROM users AS U JOIN placeusers AS PU ON PU.user_id = U.id WHERE PU.place = ? AND U.name != '' ORDER BY name ASC;" [toSql $ pId p]
   return $ catMaybes $ map mkUser $ map (\su -> buildUser (tail su) [[toSql (""::String), toSql (""::String), toSql (""::String), toSql (""::String), head su]]) users
 
 getUsersByName :: BS.ByteString -> Application [User]

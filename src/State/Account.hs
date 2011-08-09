@@ -22,6 +22,13 @@ getUser uid = do
   places <- getUserPlaces uid
   return $ U.bind2 buildUser (listToMaybe user) (Just places)
 
+getUserFromToken token = do
+  user  <- withPGDB "SELECT id, name, active, super, view, token FROM users WHERE token = ? LIMIT 1;" [toSql token]
+  let userId = ((fmap (fromSql.head)).listToMaybe) user
+  places <- maybe (return []) getUserPlaces userId
+  return $ mkUser (U.bind2 buildUser (listToMaybe user) (Just places))
+
+
 getUserEmails u =
   fmap (mapMaybe buildEmail) $ withPGDB "SELECT id,user_id,email,confirmed FROM useremails WHERE user_id = ?;" [toSql (uId u)]
 

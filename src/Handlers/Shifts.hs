@@ -29,9 +29,11 @@ import Snap.Auth
 import Application
 import State.Types
 import State.Shifts
+import State.Account
 import Handlers.Month
 import Common
 import Time
+import Mail (mailRequestOff)
 
 shiftH :: User -> UserPlace -> Application ()
 shiftH u p = route [ ("/add",             shiftAddH u p)
@@ -134,11 +136,19 @@ requestOffH u p = do
     Just id' -> do
       s <- getUserShift (uId u) id'
       case s of
-        Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/request_error"
+        Nothing -> err id' "Could not find shift."
         Just shift -> do
-          requestShift u shift
-          (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
-          heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+          mreqid <- requestShift u shift
+          case mreqid of
+            (Just reqid) -> do
+              -- now email anyone who can cover the shift
+              aus <- getAvailableUsers shift p -- ie, people who don't have another shift at that time
+              tokensEmails <- mapM (\u -> getUserEmails u >>= (\ems -> return (uToken u, map emAddress $ filter emConfirmed ems))) aus
+              mailRequestOff reqid (uName u) p tokensEmails
+              (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
+              heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+            Nothing -> err id' "Couldn't request off, try again or contact help@weshift.org"
+ where err id' m = heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice m)]) $ renderWS "work/shift/request_error"
 
 unRequestOffH u p = do
   mid <- getParam "shift"
@@ -155,6 +165,26 @@ unRequestOffH u p = do
         _ -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/unrequest_error"
         
     _ -> redirPlaceHomeAsync
+
+-- | this is the non-ajax handler that is accessible without being logged it, suitable for emailing
+coverShiftH = do
+  mutok <- getParam "t" -- the user's token
+  mreqid <- getParam "r" -- the id of the shift request
+  muser <- maybe (return Nothing) getUserFromToken mutok
+  case (muser, mreqid) of
+    (Just u, Just reqid) -> do
+      mshift <- getShiftByRequest reqid
+      case mshift of
+        (Just shift) -> do
+          result <- coverShift (uId u) shift reqid 
+          case result of
+            False -> err "Shift overlaps with one of yours."
+            True -> do 
+              unRequestShift reqid
+              err "Successfully covered shift. If they have an email address, we've contacted them, but you should do so anyway!"
+        Nothing -> err "Could not find shift."
+    _ -> pass
+ where err m = heistLocal (bindSplices [("message", textSplice m)]) $ renderWS "generic_error"
 
        
 coverH u p = do

@@ -22,6 +22,8 @@ import Snap.Types hiding (POST)
 
 import Network.Mail.Postmark
 
+import State.Types (UserPlace(pName))
+
 mailAccountActivation name email link = do
   liftIO $ postmark (B8.unpack postmarkToken) "messages@weshift.org" (BS.concat ["Please activate your account with WeShift, ",name,"."]) "activate" (BS.concat $ msg link name) email
     where msg l n = [ "Welcome to WeShift, "
@@ -73,5 +75,39 @@ mailDisabling account email name token place = do
                         , " .\n\nThanks! - The WeShift Team"
                         ]
 
+--mailRequestOff :: BS.ByteString -> BS.ByteString -> BS.ByteString -> [(BS.ByteString, [BS.ByteString])] -> Application ()
+mailRequestOff reqid name place tokenemails = do
+  server  <- liftM rqServerName getRequest
+  portNum <- liftM rqServerPort getRequest
+  liftIO $ mapM_ (\(m,e) -> postmark 
+                                (B8.unpack postmarkToken) 
+                                "messages@weshift.org" 
+                                (BS.concat ["Could you cover a shift for ",name,"?"]) 
+                                "request" 
+                                m 
+                                e) 
+    (concat $ map (\(t,es) -> map ((,) (BS.concat (msg server portNum name place t))) es) tokenemails)
+ where msg s p n pl t =
+                        [ "Could you cover a shift for "
+                        , n
+                        , " at "
+                        , pName place
+                        , "?\n\n"
+                        , "If so, click "
+                        , "http://"
+                        , s
+                        , if p /= 80 then (B8.pack $ ':' : (show p)) else ""
+                        , "/cover?t="
+                        , t
+                        , "&r="
+                        , reqid
+                        --, "&pl="
+                        --, pl
+                        , " and we'll let them know and put it on your schedule."
+                        , "\n\nThanks! - The WeShift Team"
+                        ]
+
+mailCoveredShift account email name token place = do
+    undefined
 
 resetPassword email token = undefined

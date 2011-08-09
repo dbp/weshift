@@ -40,6 +40,7 @@ import            Auth
 import Handlers.Place (placeSite)
 import Handlers.Account
 import Handlers.Settings (activateEmail, activateDisabled)
+import Handlers.Shifts (coverShiftH)
 import State.Place
 import Splices.Place
 
@@ -51,6 +52,7 @@ site = route [ ("/",                      ifTop indexH)
              , ("/activate/account",      activateAccountH)
              , ("/activate/email",        activateEmail)
              , ("/activate/disabled",     activateDisabled)
+             , ("/cover",                 coverShiftH)
              , ("/:organization/:place",  placeSite)
              , ("/signup",                signupH)
              , ("/login",                 method GET $ loginGetH ())
