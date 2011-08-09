@@ -22,7 +22,8 @@ import Snap.Types hiding (POST)
 
 import Network.Mail.Postmark
 
-import State.Types (UserPlace(pName))
+import State.Types (User(uName),UserPlace(pName), Shift(..))
+import Utils (wsFormatDay, wsFormatTime)
 
 mailAccountActivation name email link = do
   liftIO $ postmark (B8.unpack postmarkToken) "messages@weshift.org" (BS.concat ["Please activate your account with WeShift, ",name,"."]) "activate" (BS.concat $ msg link name) email
@@ -75,14 +76,13 @@ mailDisabling account email name token place = do
                         , " .\n\nThanks! - The WeShift Team"
                         ]
 
---mailRequestOff :: BS.ByteString -> BS.ByteString -> BS.ByteString -> [(BS.ByteString, [BS.ByteString])] -> Application ()
-mailRequestOff reqid name place tokenemails = do
+mailRequestOff shift reqid name place tokenemails = do
   server  <- liftM rqServerName getRequest
   portNum <- liftM rqServerPort getRequest
   liftIO $ mapM_ (\(m,e) -> postmark 
                                 (B8.unpack postmarkToken) 
                                 "messages@weshift.org" 
-                                (BS.concat ["Could you cover a shift for ",name,"?"]) 
+                                (BS.concat ["Could you cover a shift for ",name," on ", wsFormatDay (sStart shift), "?"]) 
                                 "request" 
                                 m 
                                 e) 
@@ -90,6 +90,12 @@ mailRequestOff reqid name place tokenemails = do
  where msg s p n pl t =
                         [ "Could you cover a shift for "
                         , n
+                        , " from "
+                        , wsFormatTime (sStart shift)
+                        , " to "
+                        , wsFormatTime (sStop shift)
+                        , " on "
+                        , wsFormatDay (sStart shift)
                         , " at "
                         , pName place
                         , "?\n\n"
@@ -107,7 +113,28 @@ mailRequestOff reqid name place tokenemails = do
                         , "\n\nThanks! - The WeShift Team"
                         ]
 
-mailCoveredShift account email name token place = do
-    undefined
+mailShiftCovered coverer shift emails = do
+  server  <- liftM rqServerName getRequest
+  portNum <- liftM rqServerPort getRequest
+  liftIO $ mapM_ (postmark 
+                     (B8.unpack postmarkToken) 
+                     "messages@weshift.org" 
+                     (BS.concat [uName coverer," can cover your shift on ", wsFormatDay (sStart shift), "!"]) 
+                     "cover" 
+                     (BS.concat (msg server portNum)))
+                emails
+ where msg s p =
+                        [ uName coverer
+                        , " can cover your shift from "
+                        , wsFormatTime (sStart shift)
+                        , " to "
+                        , wsFormatTime (sStop shift)
+                        , " on "
+                        , wsFormatDay (sStart shift)
+                        , "!\n\n"
+                        , "It might be good to get in touch with them, just to be safe. We've already switched the shift from your schedule to theirs, so it should show up on your WeShift generated timesheets correctly."
+                        , "\n\nThanks! - The WeShift Team"
+                        ]
+ 
 
 resetPassword email token = undefined

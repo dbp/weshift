@@ -3,6 +3,13 @@ module Utils where
 import Data.List (null, elemIndex)
 import Test.QuickCheck
 import Control.Monad
+import Data.Time.Clock
+import Data.Time.Format
+import Data.Time.Calendar
+import Data.Time.LocalTime
+import System.Locale (defaultTimeLocale)
+import qualified Data.ByteString.Char8 as B8
+import Data.ByteString (ByteString)
 
 eitherToMaybe = either (const Nothing) Just
 
@@ -21,6 +28,12 @@ prop_findreplace_index l = if null l then True else elemIndex fl newL >= elemInd
         rotate l = (drop half l) ++ (take half l)
         half = (length l `div` 2)
 
+
+wsFormatDay :: LocalTime -> ByteString
+wsFormatDay = B8.pack . (formatTime defaultTimeLocale "%D")
+
+wsFormatTime :: LocalTime -> ByteString
+wsFormatTime  =  B8.pack . (formatTime defaultTimeLocale "%-I:%M%P")
 
 bind2 :: Monad m => (a -> b -> m c) -> m a -> m b -> m c
 bind2 = ((join .) .) . liftM2
