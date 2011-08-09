@@ -9,6 +9,6 @@
     </form-async>
   </users>
   <br><br>
-  If this is a new person, optionally enter an email address:<br>
+  If this is a new person:<br>
   <apply template="add_new_form"/>
 </div-async>
