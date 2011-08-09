@@ -26,6 +26,9 @@ getUserPlaces uid = withPGDB "SELECT P.id, P.name, P.token, P.organization, PU.f
 getAllPlaces :: Application [UserPlace]
 getAllPlaces = fmap (mapMaybe buildPlace) $ withPGDB "SELECT id, name, token, organization FROM places;" []
 
+getPlacesForName :: BS.ByteString -> Application [UserPlace]
+getPlacesForName name = fmap (mapMaybe buildPlace) $ withPGDB "SELECT P.id, P.name, P.token, P.organization FROM places AS P JOIN placeusers AS PU ON P.id = PU.place JOIN users AS U on U.id = PU.user_id WHERE U.name = ?;" [toSql name]
+
 organizationExists :: BS.ByteString -> Application Bool
 organizationExists orgname = fmap (not.null) $ withPGDB "SELECT name FROM organizations WHERE name = ?;" [toSql orgname]
 

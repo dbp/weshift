@@ -203,7 +203,8 @@ commonSplices today = [("currYear",  textSplice $ T.pack $ show year)
   where (year,month,_) = toGregorian today  
 
 renderPlaces :: Monad m => [UserPlace] -> Splice m
-renderPlaces = mapSplices (\p -> runChildrenWithText [("name", TE.decodeUtf8 (pName p))
+renderPlaces = mapSplices (\p -> runChildrenWithText [("id", TE.decodeUtf8 (pId p))
+                                                     ,("name", TE.decodeUtf8 (pName p))
                                                      ,("org", TE.decodeUtf8 (pOrg p))
                                                      ,("root", TE.decodeUtf8 (placeRoot p))
                                                      ])

@@ -2,7 +2,7 @@
 
 module Handlers.Account where
 
-import Data.Maybe (isNothing, fromJust, listToMaybe)  
+import Data.Maybe (isNothing, fromJust, listToMaybe, fromMaybe)  
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.Text.Encoding as TE
@@ -16,6 +16,7 @@ import State.Types
 import State.Place
 import State.Account
 import Handlers.Settings
+import Splices.Place
 import Text.Digestive.Snap.Heist
 import Text.Digestive.Types
 import Text.Digestive.Validate
@@ -40,12 +41,41 @@ loginGetH _ = do pl <- getParam "pl" -- this is the place
                                     
 
 loginPostH loginFailure loginSuccess = do
-    euid <- getParams
-    password <- getParam "password"
-    mMatch <- case password of
-      Nothing -> return $ Left A.PasswordFailure
-      Just p  -> performLogin euid
-    either loginFailure (const loginSuccess) mMatch
+    pl <- getParam "pl" -- this is the id of the place. If missing, this is a frontpage login,
+                        -- which means we either guess the place (if name is unique and there is
+                        -- only one place for them), or present a list to pick from.
+    case pl of
+      Nothing -> do
+        pl' <- getParam "pl-ajax"
+        case pl' of
+          Nothing -> do
+            name <- getParam "name"
+            password <- getParam "password"
+            places <- maybe (return []) getPlacesForName name
+            case places of
+              [] -> doLogin loginFailAjax (redirectAsync "/") -- nothing to do, this should error out on it's own
+              (p:[]) -> do modifyRequest (rqSetParam "pl" [pId p]) -- only one place, so use it
+                           doLogin loginFailAjax (redirectAsync (placeRoot p))
+              _ -> do -- many places, which may be all of theirs, or may belong to multiple people with the same name; it doesnt matter.
+                heistLocal (bindSplices [("name-value", textSplice $ TE.decodeUtf8 $ fromMaybe "" name)
+                                        ,("password-value", textSplice $ TE.decodeUtf8 $ fromMaybe "" password)
+                                        ,("places", renderPlaces places)
+                                        ,("ifPlaces", identitySplice)
+                                        ]) $ renderWS "login-form"
+          Just pid -> do -- this is the case where they selected the place on the front page
+            modifyRequest (rqSetParam "pl" [pid])
+            mplace <- getPlaceFromId pid
+            doLogin loginFailAjax (redirectAsync (maybe "/" placeRoot mplace))
+      Just _ -> do
+        doLogin loginFailure loginSuccess
+  where doLogin failure success = do
+          euid <- getParams
+          password <- getParam "password"
+          mMatch <- case password of
+            Nothing -> return $ Left A.PasswordFailure
+            Just p  -> performLogin euid
+          either failure (const success) mMatch
+        loginFailAjax = const $ heistLocal (bindSplices [("ifPlaces", blackHoleSplice), ("message", textSplice "Invalid username or password.")]) $ renderWS "login-form"
 
 signupH = do
   u <- getCurrentUser

@@ -41,7 +41,9 @@
           <a href="/logout?redirectTo=$(placeRoot)">Logout</a>
           </ifLoggedIn>
           <ifGuest>
-            <apply template="login-form"></apply>
+            <apply template="login-form">
+              <bind tag="ifPlaces"></bind>
+            </apply>
           </ifGuest>
         </div>
       </div> <!-- #top-holder -->
