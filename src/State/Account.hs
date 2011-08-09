@@ -18,7 +18,7 @@ import State.Place
 import qualified Utils as U
 
 getUser uid = do 
-  user   <- withPGDB "SELECT id, name, active, super, view FROM users WHERE id = ? LIMIT 1;" [toSql uid] -- ,token
+  user   <- withPGDB "SELECT id, name, active, super, view, token FROM users WHERE id = ? LIMIT 1;" [toSql uid]
   places <- getUserPlaces uid
   return $ U.bind2 buildUser (listToMaybe user) (Just places)
 
@@ -85,13 +85,13 @@ updateUserView user = do
   res <- withPGDB "UPDATE users SET view = ? WHERE id = ? RETURNING id;" [toSql (uView user), toSql (uId user)]
   return $ not (null res)
 
-mkUser au = do (Attrs active super places view) <- liftM snd au -- token
+mkUser au = do (Attrs active super places view token) <- liftM snd au
                auth <- liftM fst au
                (UserId id')   <- userId auth
                name <- userEmail auth
-               return $ User id' name active super places view -- token
+               return $ User id' name active super places view  token
 
-buildUser (ui:un:ua:us:uv:[]) places =  -- :ut
+buildUser (ui:un:ua:us:uv:ut:[]) places =  
   Just (emptyAuthUser { userId = Just $ UserId (fromSql ui) 
                       , userEmail = fromSql un
                       , userPassword = Just (Encrypted "")
@@ -102,7 +102,7 @@ buildUser (ui:un:ua:us:uv:[]) places =  -- :ut
                   UserPlace (fromSql pi) (fromSql pn) (fromSql po) (fromSql pf) (fromSql pt)) 
                 places)
                 (fromSql uv)
-                {-(fromSql ut)-})
+                (fromSql ut))
                 
 buildUser _ _ = Nothing
 
