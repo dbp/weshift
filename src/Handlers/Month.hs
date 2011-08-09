@@ -103,14 +103,16 @@ othershift df = df { dShifts = True }
 request df = df { dRequest = True }
 
 formatDay :: Integer -> Int -> [Shift] -> [Shift] -> User -> DayFormat -> DayFormat 
-formatDay y m shifts uncovered user day = (if myShiftsToday then myshift else if otherShiftToday then othershift else id) $
-                                                 (if requestsToday then request else id) $
-                                                 day
+formatDay y m shifts uncovered user day | isJust (dNumber day) = 
+        (if myShiftsToday then myshift else if otherShiftToday then othershift else id) $
+        (if requestsToday then request else id) $
+        day
     where currDay = addDays (toInteger $ fromMaybe 1 (dNumber day) - 1) (fromGregorian y m 1)
           shiftsToday = filter (\s -> (localDay $ sStart s) == currDay) shifts
           myShiftsToday = elem (uId user) $ map sUser $ shiftsToday
           otherShiftToday = not $ null shiftsToday
           requestsToday = not $ null $ filter (\s -> (localDay $ sStart s) == currDay) uncovered
+formatDay _ _ _ _ _ day = day
 
 formatWeek :: Integer -> Int -> [Shift] -> [Shift] -> User -> [DayFormat]  -> [DayFormat]
 formatWeek y m s c u week = map (formatDay y m s c u) $ 
