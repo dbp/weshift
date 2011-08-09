@@ -1,5 +1,5 @@
 <div-async name="add-coworker">
-	We use email to contact people about covering shifts. The address can be removed anytime, and we won't ever give it out.
+	We use email to contact people about covering shifts. The address can be removed anytime, and we won't ever give it out. Enter coworker's email below:
   <form-async method="POST" action="$(placeRoot)/coworkers/add/new">
   <input type="hidden" name="name" value="$(name)"/>
   <table>
