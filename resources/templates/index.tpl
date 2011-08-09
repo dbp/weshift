@@ -1,6 +1,6 @@
 <apply template="base">
   <bind tag="left">
-    <h2>Placeholder</h2>
+    <h2></h2>
   </bind>
 
   <bind tag="center">
