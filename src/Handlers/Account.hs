@@ -59,7 +59,7 @@ loginPostH loginFailure loginSuccess = do
               _ -> do -- many places, which may be all of theirs, or may belong to multiple people with the same name; it doesnt matter.
                 heistLocal (bindSplices [("name-value", textSplice $ TE.decodeUtf8 $ fromMaybe "" name)
                                         ,("password-value", textSplice $ TE.decodeUtf8 $ fromMaybe "" password)
-                                        ,("places", renderPlaces places)
+                                        ,("places", renderPlaces Nothing places)
                                         ,("ifPlaces", identitySplice)
                                         ]) $ renderWS "login-form"
           Just pid -> do -- this is the case where they selected the place on the front page

@@ -1,6 +1,28 @@
 <apply template="base">
 
 <bind tag="left">
+      <div class="heading">
+         <div class="icon"><img src="/img/main/Profile.png" /></div>
+         <div class="content">
+           <h3><userName/></h3>
+           <h5>
+            <form action="$(placeRoot)">
+              <select onchange="this.parentNode.action = this.value;">
+               <userPlaces>
+                <show selected="$(current)">
+                  <option value="$(root)" selected="selected"><name/>, <org/></option>
+                </show>
+                <show notselected="$(current)">
+                  <option value="$(root)"><name/>, <org/></option>
+                </show>
+              </userPlaces>
+              </select>
+              <button type="submit" value=""/>
+            </form>
+          </h5>
+         </div>
+       </div> <!-- .heading -->
+
         <view is="profile">
           <apply template="profile/blank"></apply>
         </view>

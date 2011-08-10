@@ -202,12 +202,13 @@ commonSplices today = [("currYear",  textSplice $ T.pack $ show year)
                       ]
   where (year,month,_) = toGregorian today  
 
-renderPlaces :: Monad m => [UserPlace] -> Splice m
-renderPlaces = mapSplices (\p -> runChildrenWithText [("id", TE.decodeUtf8 (pId p))
-                                                     ,("name", TE.decodeUtf8 (pName p))
-                                                     ,("org", TE.decodeUtf8 (pOrg p))
-                                                     ,("root", TE.decodeUtf8 (placeRoot p))
-                                                     ])
+renderPlaces :: Monad m => Maybe UserPlace -> [UserPlace] -> Splice m
+renderPlaces curPlace = mapSplices (\p -> runChildrenWithText [("id", TE.decodeUtf8 (pId p))
+                                                              ,("name", TE.decodeUtf8 (pName p))
+                                                              ,("org", TE.decodeUtf8 (pOrg p))
+                                                              ,("root", TE.decodeUtf8 (placeRoot p))
+                                                              ,("current", if (Just p) == curPlace then "selected" else "notselected")
+                                                              ])
 
 renderWS :: ByteString -> Application ()
 renderWS t = do mup <- getCurrentUserAndPlace
@@ -216,7 +217,7 @@ renderWS t = do mup <- getCurrentUserAndPlace
                                             ,("placeName", bTS $ placeName p)
                                             ,("userName", bTS $ uName u)
                                             ,("view", viewSplice (uView u))
-                                            ,("userPlaces", renderPlaces (uPlaces u))
+                                            ,("userPlaces", renderPlaces (Just p) (uPlaces u))
                                             ]
                 let permissionSplices = [("isFacilitator", facilitatorSplice $ fmap snd mup)
                                         ,("isNormalUser", normalUserSplice $ fmap snd mup)

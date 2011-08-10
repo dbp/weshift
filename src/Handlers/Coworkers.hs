@@ -33,7 +33,7 @@ renderCoworker (User uid uname uact usuper uplaces uview utoken) = do
   runChildrenWith [("id",         textSplice $ TE.decodeUtf8 uid)
                   ,("name",       textSplice $ TE.decodeUtf8 uname)
                   ,("classes",    textSplice $ T.concat (["member"] ++ if pFac (head uplaces) then [" facilitator"] else []))
-                  ,("places",     renderPlaces uplaces)
+                  ,("places",     renderPlaces Nothing uplaces)
                   ]
                        
 renderCoworkers :: [User] -> Splice Application

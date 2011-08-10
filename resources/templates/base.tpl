@@ -30,15 +30,11 @@
       <div id="top-holder">
         <div id="logo">
           <a href="/"><img src="/img/logo.png" /></a>
-          <h2><placeName/></h2>
+          <h2><a href="$(placeRoot)"><placeName/></a></h2>
         </div>
         <div id="top-right">
           <ifLoggedIn>
-          <userName/><br>
-          <userPlaces>
-            <a href="$(root)"><name/>, <org/></a> - 
-          </userPlaces>
-          <a href="/logout?redirectTo=$(placeRoot)">Logout</a>
+            <userName/> - <a href="/logout?redirectTo=$(placeRoot)">Logout</a>
           </ifLoggedIn>
           <ifGuest>
             <apply template="login-form">
