@@ -67,7 +67,7 @@
     <div id="footer-wrap">
       <div id="footer">
         <a href="mailto:help@weshift.org/">Contact Us</a>
-        <a href="http://positionstudios.com/"><img src="/img/position.png" alt="WeShift by Position Studios"></a>
+        <a target="_blank" href="http://positionstudios.com/"><img src="/img/position.png" alt="WeShift by Position Studios"></a>
       </div>
     </div>
     </div> <!-- #bottom -->
