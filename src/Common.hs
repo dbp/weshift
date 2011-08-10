@@ -203,14 +203,16 @@ commonSplices today = [("currYear",  textSplice $ T.pack $ show year)
   where (year,month,_) = toGregorian today  
 
 renderPlaces :: Monad m => Maybe UserPlace -> [UserPlace] -> Splice m
-renderPlaces curPlace = mapSplices (\p -> runChildrenWithText [("id", TE.decodeUtf8 (pId p))
-                                                              ,("name", TE.decodeUtf8 (pName p))
-                                                              ,("org", TE.decodeUtf8 (pOrg p))
-                                                              ,("shortname", TE.decodeUtf8 $ shorten $ BS.concat [pName p,", ",pOrg p])
-                                                              ,("root", TE.decodeUtf8 (placeRoot p))
-                                                              ,("current", if (Just p) == curPlace then "selected" else "notselected")
-                                                              ])
-    where shorten s = if BS.length s > 20 then BS.append (BS.take 17 s) "..." else s
+renderPlaces curPlace places =
+      mapSplices (\p -> runChildrenWithText [("id", TE.decodeUtf8 (pId p))
+                                            ,("name", TE.decodeUtf8 (pName p))
+                                            ,("org", TE.decodeUtf8 (pOrg p))
+                                            ,("shortname", TE.decodeUtf8 $ shorten $ BS.concat [pName p,", ",pOrg p])
+                                            ,("root", TE.decodeUtf8 (placeRoot p))
+                                            ,("current", if (Just p) == curPlace then "selected" else "notselected")
+                                            ])
+                  places
+    where shorten s = if (BS.length s > 20) then (BS.append (BS.take 17 s) "...") else s
 
 renderWS :: ByteString -> Application ()
 renderWS t = do mup <- getCurrentUserAndPlace

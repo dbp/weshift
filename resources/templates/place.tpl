@@ -13,7 +13,7 @@
                   <option value="$(root)" selected="selected"><shortname/></option>
                 </show>
                 <show notselected="$(current)">
-                  <option value="$(root)"><name/>, <org/></option>
+                  <option value="$(root)"><shortname/></option>
                 </show>
               </userPlaces>
               </select>
