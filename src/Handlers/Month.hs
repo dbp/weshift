@@ -151,7 +151,7 @@ dayLargeSplices place user (year, month, day) = do
 
 renderShift :: Shift -> Splice Application
 renderShift (Shift id' user place start stop recorded recorder) = do
-  req <- lift $ getShiftRequest user id'
+  req <- lift $ maybe (return Nothing) (getShiftRequest user) (if id' == "" then Nothing else Just id')
   runChildrenWith [("id", textSplice $ TE.decodeUtf8 id')
                   ,("user", textSplice $ TE.decodeUtf8 user)
                   ,("place", textSplice $ TE.decodeUtf8 place)
