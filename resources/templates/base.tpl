@@ -1,5 +1,6 @@
 <html>
   <head>
+    <link rel="stylesheet" href="/css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
     <link rel="stylesheet" href="/css/place.css" type="text/css" media="screen" title="no title" charset="utf-8">
     <link rel="stylesheet" href="/css/calendar.css" type="text/css" media="screen" title="no title" charset="utf-8">
     <link rel="stylesheet" href="/css/index.css" type="text/css" media="screen" title="no title" charset="utf-8">
@@ -63,7 +64,12 @@
       </div> <!-- #right -->
     </div> <!-- #middle -->
     <div id="bottom">
-
+    <div id="footer-wrap">
+      <div id="footer">
+        <a href="mailto:help@weshift.org/">Contact Us</a>
+        <a href="http://positionstudios.com/"><img src="/img/position.png" alt="WeShift by Position Studios"></a>
+      </div>
+    </div>
     </div> <!-- #bottom -->
     <div id="preload">
       <img src="/img/messages/Message_post_mo.png" />
