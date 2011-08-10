@@ -2,6 +2,7 @@
   <head>
     <link rel="stylesheet" href="/css/place.css" type="text/css" media="screen" title="no title" charset="utf-8">
     <link rel="stylesheet" href="/css/calendar.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="/css/index.css" type="text/css" media="screen" title="no title" charset="utf-8">
     <!-- <link rel="stylesheet" href="/css/tipTip.css" type="text/css" media="screen" title="no title" charset="utf-8">
     <link rel="stylesheet" href="/css/jquery-ui-1.8.11.custom.css" type="text/css" media="screen" title="no title" charset="utf-8"> -->
     

@@ -1,6 +1,6 @@
 <div-async name="signup-form">
   <ifGuest>
-    <strong>If you already have an account at another place on WeShift, be sure to log in before creating a place here.</strong>
+    <strong>If you already have an account on WeShift, be sure to log in above first.</strong><br/><br/>
   </ifGuest>
   <form-async action="/signup" method="POST">
     Organization:<br> 
