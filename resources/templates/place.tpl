@@ -10,7 +10,7 @@
               <select onchange="this.parentNode.action = this.value;">
                <userPlaces>
                 <show selected="$(current)">
-                  <option value="$(root)" selected="selected"><name/>, <org/></option>
+                  <option value="$(root)" selected="selected"><shortname/></option>
                 </show>
                 <show notselected="$(current)">
                   <option value="$(root)"><name/>, <org/></option>
