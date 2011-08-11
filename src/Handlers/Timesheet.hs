@@ -39,18 +39,18 @@ import Common
 
 getTimesheet :: UserPlace -> User -> Day -> Day -> Application [(Text, Splice Application)]
 getTimesheet place user start stop = do
-  allOriginal <- getOriginalShifts place start stop
-  userCurrent <- getUserCurrentShifts place user start stop
+  allOriginal <- getOriginalShifts place start (addDays 1 stop) -- because they expect it to be inclusive of stop day
+  userCurrent <- getUserCurrentShifts place user start (addDays 1 stop)
   let userOriginal = filter ((==) (uId user) . sUser) allOriginal
   let othersOriginal = filter (\o -> sId o `elem` (map sId userCurrent) && sUser o /= uId user) allOriginal
-  entries <- mapM timesheetEntry $ sortBy (\s1 s2 -> compare (sStart s1) (sStart s2)) $ othersOriginal ++ userOriginal
+  entries <- mapM (timesheetEntry user) $ sortBy (\s1 s2 -> compare (sStart s1) (sStart s2)) $ othersOriginal ++ userOriginal
   return [ ("timesheet", mapSplices renderEntry entries)
          , ("timesheetStart", textSplice $ renderDate start)
          , ("timesheetStop", textSplice $ renderDate stop)
          , ("totalHours", textSplice $ T.pack $ show $ sum $ map entryHours entries)
          ]
 
-timesheetEntry shift = do
+timesheetEntry user shift = do
   tz <- liftIO getCurrentTimeZone
   let utcStart = localTimeToUTC tz $ sStart shift
   let utcEnd = localTimeToUTC tz $ sStop shift
@@ -61,7 +61,7 @@ timesheetEntry shift = do
   let hoursWorked = case modifications of
                       [] -> roundHours $ (diffUTCTime utcEnd utcStart) / (60*60)
                       _ -> case last modifications of
-                            Cover _ _ -> roundHours $ (diffUTCTime utcEnd utcStart) / (60*60)
+                            Cover coverer _ -> if (uId user) == (uId coverer) then roundHours $ (diffUTCTime utcEnd utcStart) / (60* 60) else 0
                             Delete _ _ -> 0
                             Change ns ne _ _ -> roundHours $ (diffUTCTime (localTimeToUTC tz ne) (localTimeToUTC tz ns)) / (60*60)
   return $ Entry hoursWorked (sStart shift) (sStop shift) modifications
@@ -74,7 +74,7 @@ renderTSCoworker self u = runChildrenWithText [ ("userId",   TE.decodeUtf8 $ uId
                                               ]
 
 
-data Entry = Entry Double LocalTime LocalTime [Modification] -- hours worked, orig. start, orig. end, list of modifications
+data Entry = Entry Double LocalTime LocalTime [Modification] deriving Show -- hours worked, orig. start, orig. end, list of modifications
 
 entryHours (Entry h _ _ _) = h
 

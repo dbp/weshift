@@ -96,7 +96,7 @@ getShiftDeletes shift = fmap (catMaybes . (map buildDelete)) $ withPGDB "SELECT 
         buildDelete _ = Nothing
   
 getShiftCovers :: Shift -> Application [Modification]
-getShiftCovers shift = fmap (catMaybes . (map buildCover)) $ withPGDB "SELECT U.name, coverer, recorded, U.name FROM shiftcovers JOIN users AS U ON coverer = U.id WHERE shift_id = ?;"  [toSql $ sId shift]
+getShiftCovers shift = fmap (catMaybes . (map buildCover)) $ withPGDB "SELECT U.name, coverer, recorded FROM shiftcovers JOIN users AS U ON coverer = U.id WHERE shift_id = ?;"  [toSql $ sId shift]
   where buildCover (n:c:r:[]) = Just $ Cover (emptyUser {uId = (fromSql c), uName = (fromSql n)}) (fromSql r)
         buildCover _ = Nothing
   
