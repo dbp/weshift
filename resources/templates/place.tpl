@@ -4,7 +4,7 @@
       <div class="heading">
          <div class="icon"><img src="/img/main/Profile.png" /></div>
          <div class="content">
-           <h3><userName/></h3>
+           <h3><div-async name="user-name"><userName/></div-async></h3>
            <h5>
             <form action="$(placeRoot)">
               <select onchange="this.parentNode.action = this.value;">
@@ -30,7 +30,7 @@
           <apply template="profile/usersettings/blank"></apply>
         </view>
         <view is="profile.settings.name">
-          <apply template="profile/usersettings/name"></apply>
+          <apply template="profile/usersettings/user"></apply>
         </view>
         <view is="profile.settings.password">
           <apply template="profile/usersettings/password"></apply>

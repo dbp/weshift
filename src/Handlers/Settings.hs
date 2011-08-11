@@ -23,13 +23,16 @@ import Auth
 import State.Types
 import State.Account
 import State.Place
+import State.Coworkers
 import Common
 import Mail
 import Control.Concurrent (threadDelay)
 
 settingsH :: User -> UserPlace -> Application ()
 settingsH u p = route [ ("/",                 ifTop $ settingsHome u)
-                      , ("/name",             changeNameH u p)
+                      , ("/user",             userSettingsH u p)
+                      , ("/name",             method POST $ changeNameH u p)
+                      , ("/facilitation",     method POST $ stopFacilitatingH u p)
                       , ("/password",         changePasswordH u p)
                       , ("/remove",           method POST $ removeAccountPostH u p)
                       , ("/remove",           method GET $ removeAccountH u p)
@@ -42,17 +45,20 @@ settingsHome :: User -> Application ()
 settingsHome u = do setView u "profile" "profile.settings"
                     renderWS "profile/usersettings/blank"
 
+userSettingsH u p = do setView u "profile" "profile.settings.name"
+                       renderWS "profile/usersettings/user"
+
+
 
 nameForm :: SnapForm Application Text HeistView String
 nameForm = input "name" Nothing  `validate` nonEmpty <++ errors 
                   
 changeNameH u p = do r <- eitherSnapForm nameForm "change-name-form"
                      let name = (TE.decodeUtf8 . uName) u
-                     setView u "profile" "profile.settings.name"
                      case r of
                          Left splices' -> do
                            heistLocal (bindString "name" name ) $ 
-                            heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name"
+                            heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name_form"
                          Right name' -> do
                             success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql (uId u)]
                             {-liftIO $ threadDelay 200000-}
@@ -60,6 +66,15 @@ changeNameH u p = do r <- eitherSnapForm nameForm "change-name-form"
                               True  -> renderWS "profile/usersettings/name_updated"
                               False -> renderWS "profile/usersettings/name_couldntupdate"
 
+stopFacilitatingH u p = do
+  numFacs <- getNumberFacilitators p
+  case numFacs of 
+    Nothing -> userSettingsH u p
+    -- can't be zero unless they are hacking, and so no need to give a user friendly message
+    Just 1 -> renderWS "profile/usersettings/facilitation_only_one"
+    Just _ -> do
+      if pFac p then setFacilitator (uId u) p False else return False
+      renderWS "profile/usersettings/facilitation_stopped"
 
 checkPassword :: Validator Application Text String
 checkPassword = checkM "Current password not correct:" fn

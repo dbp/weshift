@@ -42,3 +42,6 @@ getUsersByName n = do
 
 setFacilitator :: BS.ByteString -> UserPlace -> Bool -> Application Bool
 setFacilitator uid place setting = fmap (not.null) $ withPGDB "UPDATE placeusers SET facilitator = ? WHERE user_id = ? AND place = ? RETURNING user_id;" [toSql setting, toSql uid, toSql (pId place)]
+
+getNumberFacilitators :: UserPlace -> Application (Maybe Int)
+getNumberFacilitators p = fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "SELECT count(user_id) FROM placeusers WHERE place = ? AND facilitator = true;" [toSql (pId p)]
