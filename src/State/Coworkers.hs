@@ -39,3 +39,6 @@ getUsersByName n = do
           buildUS _ = return Nothing
           buildPl (pi:pn:pt:po:pf:[]) = Just $ UserPlace (fromSql pi) (fromSql pn) (fromSql po) (fromSql pf) (fromSql pt) 
           buildPl _ = Nothing
+
+setFacilitator :: BS.ByteString -> UserPlace -> Bool -> Application Bool
+setFacilitator uid place setting = fmap (not.null) $ withPGDB "UPDATE placeusers SET facilitator = ? WHERE user_id = ? AND place = ? RETURNING user_id;" [toSql setting, toSql uid, toSql (pId place)]

@@ -28,12 +28,16 @@ import Mail
 import Handlers.Settings (nameForm)
 import Splices.Place
 
+-- | important: the place that is passed is the place of the logged in user, so it's "pFac" will not be relevant.
 renderCoworker :: User -> Splice Application
 renderCoworker (User uid uname uact usuper uplaces uview utoken) = do
+  let place = head uplaces
   runChildrenWith [("id",         textSplice $ TE.decodeUtf8 uid)
                   ,("name",       textSplice $ TE.decodeUtf8 uname)
-                  ,("classes",    textSplice $ T.concat (["member"] ++ if pFac (head uplaces) then [" facilitator"] else []))
+                  ,("classes",    textSplice $ T.concat (["member"] ++ if pFac place then [" facilitator"] else []))
                   ,("places",     renderPlaces Nothing uplaces)
+                  ,("fac",        if pFac place then identitySplice else blackHoleSplice)
+                  ,("notfac",     if pFac place then blackHoleSplice else identitySplice)
                   ]
                        
 renderCoworkers :: [User] -> Splice Application
@@ -44,7 +48,17 @@ coworkersH :: User -> UserPlace -> Application ()
 coworkersH user place = 
   route [("/", ifTop $ listCoworkers user place)
         ,("/add", if pFac place then addCoworkerH user place else pass)
+        ,("/facilitate", facilitateH user place)
         ]
+
+-- | This allows a current facilitator to make another person into one.
+facilitateH u p = do
+  muid <- getParam "id"
+  case muid of
+    Nothing -> listCoworkers u p
+    Just uid -> do
+      if pFac p then setFacilitator uid p True else return False
+      listCoworkers u p
   
 listCoworkers user place = do 
   coworkers <- getCoworkers user place  -- Note: this gives back incomplete place lists, just the current place
