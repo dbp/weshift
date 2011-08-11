@@ -1,5 +1,5 @@
 <div class="subheading">
-  <a-async href="$(placeRoot)/settings/user" class="icon $(name_sel)" id="name" data-loading-div="#left .main .content" title="Change User"></a-async>
+  <a-async href="$(placeRoot)/settings/user" class="icon $(name_sel)" id="user" data-loading-div="#left .main .content" title="Change User"></a-async>
   <div class="icon-separator"></div>
   <a-async href="$(placeRoot)/settings/password" class="icon $(password_sel)" id="password" data-loading-div="#left .main .content" title="Change Password"></a-async>
   <div class="icon-separator"></div>
