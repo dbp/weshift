@@ -220,6 +220,7 @@ renderWS t = do mup <- getCurrentUserAndPlace
                                      return [("placeRoot", bTS $ placeRoot p)
                                             ,("placeName", bTS $ placeName p)
                                             ,("userName", bTS $ uName u)
+                                            ,("userId", bTS $ uId u)
                                             ,("view", viewSplice (uView u))
                                             ,("userPlaces", renderPlaces (Just p) (uPlaces u))
                                             ]
