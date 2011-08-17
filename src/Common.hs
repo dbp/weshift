@@ -228,10 +228,19 @@ renderWS t = do mup <- getCurrentUserAndPlace
                                         ,("ifLoggedIn", ifLoggedIn)
                                         ,("ifGuest", ifGuest)
                                         ]
-                workersSplice <- case fmap snd mup of
+                workersSplice <- case mup of
+                                    Just (cu, p) -> do 
+                                      us <- getWorkers p
+                                      return [("user-lookup", userLookup $ M.fromList $ map (\u -> (uId u, u)) us)
+                                             ,("allUsers", mapSplices (\w -> runChildrenWith 
+                                                 [("id", textSplice $ TE.decodeUtf8 (uId w))
+                                                 ,("name", textSplice $ TE.decodeUtf8 (uName w))
+                                                 ,("current", if (uId w) == (uId cu) then identitySplice else blackHoleSplice)
+                                                 ,("not-current", if (uId w) == (uId cu) then blackHoleSplice else identitySplice)
+                                                 ]) us)
+                                             ]
                                     Nothing -> return []
-                                    Just place -> do us <- getWorkers place
-                                                     return [("user-lookup", userLookup $ M.fromList $ map (\u -> (uId u, u)) us)]
+
                 (heistLocal $ (bindSplices (concat [fromMaybe [] userSplices
                                                    ,permissionSplices
                                                    ,workersSplice

@@ -46,13 +46,16 @@ shiftH u p = route [ ("/add",             shiftAddH u p)
 
 shiftAddH u p = do
   r <- eitherSnapForm addShiftForm "add-shift-form"
-  case r of
-      Left splices' -> do
-        heistLocal (bindSplices (splices' ++ [("disp", textSplice "block")])) $ renderWS "work/shift/add"
-      Right (ShiftTime start stop) -> do
-        insertShift (emptyShift { sUser = (uId u), sPlace = (pId p), sStart = start, sStop = stop, sRecorder = (uId u)})
+  muid <- getParam "user" 
+  case (r,muid) of
+      (Right (ShiftTime start stop), Just uid) -> do
+        -- if they are a facilitator, then accept whatever id they gave, otherwise, enforce it being theirs
+        let suser = if pFac p then uid else (uId u)
+        insertShift (emptyShift { sUser = suser, sPlace = (pId p), sStart = start, sStop = stop, sRecorder = (uId u)})
         (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
         heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+      (Left splices',_) -> do
+        heistLocal (bindSplices (splices' ++ [("disp", textSplice "block")])) $ renderWS "work/shift/add"
  where trd (_,_,a) = a           
 
 
