@@ -49,6 +49,7 @@ coworkersH user place =
   route [("/", ifTop $ listCoworkers user place)
         ,("/add", if pFac place then addCoworkerH user place else pass)
         ,("/facilitate", facilitateH user place)
+        ,("/delete", deleteH user place)
         ]
 
 -- | This allows a current facilitator to make another person into one.
@@ -59,6 +60,16 @@ facilitateH u p = do
     Just uid -> do
       if pFac p then setFacilitator uid p True else return False
       listCoworkers u p
+      
+-- | This allows a current facilitator to remove a user from the place.
+deleteH u p = do
+  muid <- getParam "id"
+  case muid of
+    Nothing -> listCoworkers u p
+    Just uid -> do
+      if pFac p then removeUser uid p else return False
+      listCoworkers u p
+
   
 listCoworkers user place = do 
   coworkers <- getCoworkers user place  -- Note: this gives back incomplete place lists, just the current place
