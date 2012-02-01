@@ -17,7 +17,7 @@
       <div class="delete-form-$(id)" style="display: none">
     		<form-async action="$(placeRoot)/coworkers/delete" class="delete-form">
     		<input type="hidden" name="id" value="$(id)"/>
-        Are you sure you want to delete this user?
+        Are you sure you want to remove this user?
     		<button type="submit" value=""/>
     		</form-async>
       </div>
