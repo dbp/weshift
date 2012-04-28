@@ -123,7 +123,7 @@ shiftDeleteH u p = do
   case mid of
     Nothing -> redirPlaceHomeAsync
     Just id' -> do
-      s <- getUserShift (uId u) id'
+      s <- if (pFac p) then getShift id' else getUserShift (uId u) id'
       case s of
         Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/delete_error"
         Just shift -> do

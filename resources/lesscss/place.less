@@ -1,0 +1,563 @@
+
+#preload {
+  display: none;
+}
+
+.loading {
+  width: 100%;
+  height: 100%;
+  background: transparent url("/img/Loading.gif") no-repeat 50% 10%;
+}
+
+#top {
+  height: 80px;
+  background-color: black;
+}
+
+#top #top-holder {
+  width: 960px;
+  margin: 0px auto;
+  position: relative;
+}
+
+#top #top-holder #logo {
+  width: 400px;
+  position: absolute;
+  left: 0px;
+  h2, h2 a {
+    display: inline-block;
+    color: white;
+    font-size: 18px;
+    margin-bottom: 10px;
+    text-decoration: none;
+  }
+}
+
+#top #top-holder #logo img {
+  margin-top: 30px;
+}
+
+#top #top-holder #top-right {
+  width: 560px;
+  color: white;
+  position: absolute;
+  right: 0;
+  top: 10px;
+  text-align: center;
+  a {
+    font-size: 14px;
+    color: white;
+  }
+}
+
+#middle {
+  padding-top: 15px;
+  width: 960px;
+  margin: 0px auto;
+}
+
+#middle #left {
+  width: 240px;
+  display: inline-block;
+  vertical-align: top;
+  .heading h3 {
+    font-weight: bold;
+  }
+}
+
+#middle #right {
+  padding-left: 0px;
+  width: 230px;
+  display: inline-block;
+  vertical-align: top;  
+}
+
+#middle #center {
+  width: 420px;
+  margin: 0px 26px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+h1,h2,h3,h4,h5 { margin: 0; }
+
+h1 {
+  font-size: 24px;
+  font-weight: bold;
+}
+h2 {
+  font-size: 20px;
+  font-weight: bold;
+}
+h3 {
+  font-size: 16px;
+  font-weight: bold;
+}
+h4 {
+  font-size: 16px;
+  font-weight: normal;
+}
+h5 {
+  font-size: 14px;
+  font-weight: normal;
+}
+
+input {
+  border: 1px solid #ADADAD;
+}
+
+input[type=password] {
+  font-size: 16px;
+/*  line-height: 10px;*/
+/*  height: 20px;*/
+  width: 130px;
+  
+}
+
+.label {
+  text-align: right;
+}
+
+.clearfix {
+  clear: both;
+}
+
+button {
+  border: 0;
+  background: transparent url("/img/main/SubmitArrow.png");
+  width: 18px;
+  height: 15px;
+}
+
+button:hover {
+  background: url("/img/main/SubmitArrow_mo.png");
+  cursor: pointer;
+}
+
+button.processing, button.processing:hover {
+  background: url("/img/main/Processing.gif");  
+}
+
+button.facilitate-button {
+  width: 12px;
+  height: 21px;
+  padding: 0px;
+  background: transparent url("/img/facilitator_star_light.png");
+  background-position: top left;
+  background-repeat: no-repeat;
+  margin-top: -2px;
+}
+
+button.facilitate-button:hover, button.facilitate-button.toggled {
+  background-image: url("/img/facilitator_star.png");
+}
+
+button.delete-button {
+  width: 14px;
+  height: 19px;
+  padding: 0px;
+  background: transparent url("/img/delete_light.png");
+  background-position: top left;
+  background-repeat: no-repeat;
+/*  margin-top: -2px;*/
+}
+
+button.delete-button:hover, button.delete-button.toggled {
+  background-image: url("/img/delete.png");
+}
+
+
+.heading {
+  height: 70px;
+  padding-left: 5px;
+}
+
+#center .heading {
+  padding-left: 0px;
+}
+
+.heading .icon {
+  width: 55px;
+  height: 70px;
+  display: inline-block;
+}
+
+.heading .content {
+  height: 30px;
+  margin: 15px 5px;
+  display: inline-block;
+}
+
+.subheading {
+  height: 65px;
+}
+#right .subheading {
+  height: 85px;
+}
+
+.subheading .icon {
+  display: inline-block;
+  height: 55px;
+  width: 55px;
+  margin: 5px 0px;
+}
+
+.subheading .icon:hover {
+  cursor: pointer;
+}
+
+.main {
+  padding: 10px;
+}
+
+#left .main h2, #left .main h3 {
+  border-bottom: 1px solid #ADADAD;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+}
+
+/* This is an icon in the lower row, so smaller */
+.main .subheading .icon {
+  height: 40px;
+  width: 40px;
+  margin: 3px;
+}
+
+.subheading .icon-separator {
+  display: inline-block;
+  margin: 5px;
+  width: 1px;
+  height: 55px;
+  background-color: #ADADAD;
+}
+
+/* This is an icon-separator in the lower row, so smaller */
+.main .subheading .icon-separator {
+  margin: 0px;
+  width: 1px;
+  height: 46px;
+}
+
+.subheading #usersettings.icon        { background-image: url("/img/profile/Profile_UserSettings.png"); }
+.subheading #usersettings.icon.sel, .subheading #usersettings.icon.sel:hover    
+  { background-image: url("/img/profile/Profile_UserSettings_sel.png"); cursor: default; }
+.subheading #usersettings.icon:hover  { background-image: url("/img/profile/Profile_UserSettings_mo.png"); }
+
+.subheading #coworkers.icon       { background-image: url("/img/profile/Profile_Coworkers.png"); }
+.subheading #coworkers.icon.sel,  .subheading #coworkers.icon.sel:hover
+  { background-image: url("/img/profile/Profile_Coworkers_sel.png"); }
+.subheading #coworkers.icon:hover { background-image: url("/img/profile/Profile_Coworkers_mo.png"); }
+
+.subheading #help.icon     { background-image: url("/img/profile/Profile_Help.png"); }
+.subheading #help.icon.sel, .subheading #help.icon.sel:hover
+  { background-image: url("/img/profile/Profile_Help_sel.png"); }
+.subheading #help.icon:hover { background-image: url("/img/profile/Profile_Help_mo.png"); }
+
+.subheading #month.icon     { background-image: url("/img/workschedule/Work_Month.png"); }
+.subheading #month.icon.sel, .subheading #month.icon.sel:hover
+  { background-image: url("/img/workschedule/Work_Month_sel.png"); }
+.subheading #month.icon:hover { background-image: url("/img/workschedule/Work_Month_mo.png"); }
+
+.subheading #day.icon     { background-image: url("/img/workschedule/Work_Day.png"); }
+.subheading #day.icon.sel, .subheading #day.icon.sel:hover
+  { background-image: url("/img/workschedule/Work_Day_sel.png"); }
+.subheading #day.icon:hover { background-image: url("/img/workschedule/Work_Day_mo.png"); }
+
+.subheading #timesheet.icon     { background-image: url("/img/workschedule/Work_Timesheet.png"); }
+.subheading #timesheet.icon.sel, .subheading #timesheet.icon.sel:hover
+  { background-image: url("/img/workschedule/Work_Timesheet_sel.png"); }
+.subheading #timesheet.icon:hover { background-image: url("/img/workschedule/Work_Timesheet_mo.png"); }
+
+.subheading #bulk.icon     { background-image: url("/img/workschedule/Work_Bulk.png"); }
+.subheading #bulk.icon.sel, .subheading #bulk.icon.sel:hover
+  { background-image: url("/img/workschedule/Work_Bulk_sel.png"); }
+.subheading #bulk.icon:hover { background-image: url("/img/workschedule/Work_Bulk_mo.png"); }
+
+.subheading #name.icon     { background-image: url("/img/profile/Profile_UserSettings/name.png"); }
+.subheading #name.icon.sel, .subheading #name.icon.sel:hover
+  { background-image: url("/img/profile/Profile_UserSettings/name_sel.png"); }
+.subheading #name.icon:hover { background-image: url("/img/profile/Profile_UserSettings/name_mo.png"); }
+
+.subheading #password.icon     { background-image: url("/img/profile/Profile_UserSettings/password.png"); }
+.subheading #password.icon.sel, .subheading #password.icon.sel:hover
+  { background-image: url("/img/profile/Profile_UserSettings/password_sel.png"); }
+.subheading #password.icon:hover { background-image: url("/img/profile/Profile_UserSettings/password_mo.png"); }
+
+.subheading #email.icon     { background-image: url("/img/profile/Profile_UserSettings/email.png"); }
+.subheading #email.icon.sel, .subheading #email.icon.sel:hover
+  { background-image: url("/img/profile/Profile_UserSettings/email_sel.png"); }
+.subheading #email.icon:hover { background-image: url("/img/profile/Profile_UserSettings/email_mo.png"); }
+
+.subheading #delete.icon     { background-image: url("/img/profile/Profile_UserSettings/delete.png"); }
+.subheading #delete.icon.sel, .subheading #delete.icon.sel:hover
+  { background-image: url("/img/profile/Profile_UserSettings/delete_sel.png"); }
+.subheading #delete.icon:hover { background-image: url("/img/profile/Profile_UserSettings/delete_mo.png"); }
+
+#center .main {
+  width: 421px;
+  margin: 0px 0px;
+  padding: 5px;
+  padding-top: 10px;
+}
+
+#right .subheading form {
+  margin-left: 6px;
+  margin-top: 10px;
+  height: 85px;
+}
+
+#right .subheading textarea {
+  float: left;
+  width: 190px;
+  height: 85px;
+}
+#right .subheading button { 
+  float: left;
+  background: transparent url("/img/messages/Message_post.png");
+  width: 18px;
+  height: 30px;
+  margin-left: 5px;
+  margin-top: 60px;
+}
+#right .subheading button:hover { 
+  background-image: url("/img/messages/Message_post_mo.png");
+}
+
+#right .subheading button.processing:hover { 
+  background-image: url("/img/main/Processing.gif");
+  background-repeat: no-repeat;
+}
+
+#right .main {
+  padding-left: 5px;
+}
+
+#right #messages .info {
+  position: relative;
+  height: 45px;
+  margin-top: 3px;
+}
+
+#right #messages .timestamp {
+  color: #AAA;
+  letter-spacing: 0.05em;
+  font-size: 0.8em;
+  position: absolute;
+  left: 0px;
+  top: 18px;
+}
+
+#right #messages .message-forms {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
+#right #messages .up, #right #messages .down, #right #messages .flag {
+  display: inline-block;
+  text-align: center;
+}
+
+#right #messages .up a, #right #messages .down a, #right #messages .flag a {
+  font-size: 0.8em;
+  color: #AAA;
+  width: 17px;
+  height: 30px;
+  padding: 0px;
+  display: block;
+  text-decoration: none;
+}
+
+#right #messages .up a {
+  background: transparent url("/img/message_up.png") no-repeat bottom center;
+}
+#right #messages .up a:hover {
+  background-image: url("/img/message_up_mo.png");
+  color: #000;
+}
+
+#right #messages .down a {
+  background: transparent url("/img/message_down.png") no-repeat bottom center;
+}
+#right #messages .down a:hover {
+  background-image: url("/img/message_down_mo.png");
+  color: #000;
+}
+#right #messages .flag a {
+  background: transparent url("/img/message_flag.png") no-repeat bottom center;
+}
+#right #messages .flag a:hover {
+  background-image: url("/img/message_flag_mo.png");
+  color: #000;
+}
+
+#right #messages-nav {
+  float: right;
+}
+
+#right #messages-nav a {
+  padding: 2px;
+  color: #CCC;
+  text-decoration: none;
+}
+
+#right #messages-nav a:hover {
+  color: #000;
+}
+
+#right #messages-nav a.sel {
+    border-bottom: 1px solid #000;
+    color: #000;
+}
+
+#right #messages-nav a#next {
+  display: inline-block;
+  margin-left: 5px;
+  margin-bottom: -3px;
+  width: 20px;
+  height: 20px;
+  padding: 0px;
+  background-image: url("/img/messages_next.png");
+  background-repeat: no-repeat;
+  background-position: bottom center;
+}
+
+#right #messages-nav a#next:hover {
+  background-image: url("/img/messages_next_mo.png");
+}
+
+#right .message {
+  font-size: .9em;
+  color: #666;
+  margin: 10px 0px 0px 0px;
+  border-bottom: 1px solid #CCC;
+}
+
+#right .message p {
+  margin: 0px;
+}
+
+#right .message .timestamp, #right .message .show-reply {
+  color: #000;
+}
+
+#bulk.main textarea {
+  width: 360px;
+  height: 200px;
+}
+
+
+.main #timesheet-heading {
+  background: transparent url("/img/timesheet.jpg") no-repeat top left;
+  padding-left: 70px;
+  padding-top: 13px;
+  height: 100px;
+}
+
+.main #timesheet #title {
+  font-size: 12px;
+  padding-right: 3px;
+  margin-right: 3px;
+  border-right: 1px solid black;
+}
+
+#timesheet.main input.hasDatepicker {
+  width: 73px;
+}
+#timesheet.main input { /*This is the name*/
+  width: 130px;
+}
+#entries {
+  margin: 0px;
+  margin-top: -30px;
+}
+
+#entries #hours, #entries #shift {
+  text-align: center;
+}
+
+#entries #hours {
+  background: transparent url("/img/timesheet_hours.jpg") no-repeat 50% 60px;
+  height: 90px;
+  width: 100px;
+}
+
+#entries #shift {
+  background: transparent url("/img/timesheet_shift.jpg") no-repeat bottom center;
+  margin-bottom: 10px;
+}
+
+#entries #changes {
+  background: transparent url("/img/timesheet_changes.jpg") no-repeat bottom left;
+  margin-bottom: 10px;
+  min-width: 100px;
+}
+
+#entries {
+  border-collapse: collapse;
+}
+
+#entries tr td {
+  border-bottom: 1px solid #ADADAD;
+  padding: 10px 0px;
+}
+
+
+#entries .entry-hours {
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+  padding: 5px;
+}
+
+#entries .entry-shift {
+  font-size: 12px;
+  padding: 10px;
+  text-align: center;
+}
+
+#entries .entry-changes div  {
+  display: inline-block;
+/*  width: 220px;*/
+  font-size: 12px;
+  padding: 5px;
+  padding-left: 22px;
+}
+
+#entries .entry-changes .change {
+  background: transparent url("/img/timesheet_delta.png") no-repeat center left;
+}
+
+#entries .entry-changes .delete {
+  background: transparent url("/img/timesheet_delete.png") no-repeat center left;
+}
+
+#entries .entry-changes .cover {
+  background: transparent url("/img/timesheet_cover.png") no-repeat center left;
+}
+
+#left .member {
+  font-size: 0.9em;
+  margin-left: -10px;
+  padding: 0px 0px 10px 15px;
+  &.facilitator {
+    background: transparent url("/img/facilitator_star.png") no-repeat top left;
+  }
+  form.facilitate-form {
+    margin: 0px;
+    display: inline-block;
+  }
+  form.delete-form {
+    margin: 0px;
+    display: inline-block;
+  }
+  
+}
+
+
+#left h4 {
+  margin: 0px;
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
