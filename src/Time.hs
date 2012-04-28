@@ -31,8 +31,9 @@ data AP = AM | PM | NONE deriving Show
 
 data TIME = KNOWN DiffTime | UNKNOWN DiffTime deriving Show
 
-halfDay = 12*60*60
-fullDay = 24*60*60
+hour = 60*60
+halfDay = 12*hour
+fullDay = 24*hour
 
 int = digitToInt <$> digit
 
@@ -66,8 +67,12 @@ parseHour = do d1 <- Just <$> int
                              ms = listToInt $ catMaybes [d3,d4] in
                          minutes $ hs * 60 + ms
                case ampm of
-                 AM -> if prelimTime < halfDay then return (KNOWN prelimTime) else fail "AM time above 12hrs"
-                 PM -> if prelimTime < halfDay then return (KNOWN $ prelimTime + halfDay) else fail "PM time above 12hs"
+                 AM -> case prelimTime >= halfDay && prelimTime < halfDay+hour of
+			True -> return (KNOWN $ prelimTime - halfDay)
+			False -> if prelimTime < halfDay then return (KNOWN prelimTime) else fail "AM time above 12hrs"
+                 PM -> case prelimTime >= halfDay && prelimTime < halfDay+hour of
+			True -> return (KNOWN prelimTime)
+			False -> if prelimTime < halfDay then return (KNOWN $ prelimTime + halfDay) else fail "PM time above 12hs"
                  NONE -> if prelimTime > fullDay then fail "time above 24hrs" else 
                          return $ if prelimTime > halfDay then KNOWN prelimTime {-this is 24hr time-} else UNKNOWN prelimTime
     where hours h = minutes (h * 60)
