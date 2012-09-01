@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, PackageImports #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Handlers.Place where
   
@@ -6,7 +6,7 @@ import Snap.Types
 import Application
 import Common
 import Control.Monad
-import "mtl" Control.Monad.Trans (liftIO)
+import Control.Monad.Trans (liftIO)
 import Data.Maybe (fromMaybe, isNothing, fromJust, mapMaybe)
 
 import Data.Time.Format
@@ -14,9 +14,9 @@ import Data.Time.Clock
 import Data.Time.Calendar
 import System.Locale
 
-import Snap.Types
+import Snap.Core
 import Text.Templating.Heist
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
 
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.Text as T
@@ -42,26 +42,26 @@ import Handlers.Timesheet
 import Handlers.Bulk
 import Handlers.Messages
 
-placeSite :: Application ()
+placeSite :: AppHandler ()
 placeSite = do
   orgName <- getParam "organization"
   placeName <- getParam "place"
   {-h <- fmap (getHeader "X-Requested-With") $ getRequest
   liftIO $ putStrLn $ show h-}
-  route [ ("/",                               ifTop $ checkPlaceLogin orgName placeName placeHomeH)
-        , ("/month/:year/:month/:day/large",  checkPlaceLoginAsync orgName placeName monthDayLargeH)
-        , ("/month/:year/:month/:day/small",  checkPlaceLoginAsync orgName placeName monthDaySmallH)
-        , ("/month/:year/:month",             checkPlaceLoginAsync orgName placeName monthH)
-        , ("/day/:year/:month/:day",          checkPlaceLoginAsync orgName placeName dayH)
-        , ("/timesheet",                      checkPlaceLoginAsync orgName placeName timesheetH)
-        , ("/bulk",                           checkPlaceLoginAsync orgName placeName bulkInputH)
-        , ("/coworkers",                      checkPlaceLoginAsync orgName placeName coworkersH)
-        , ("/help",                           checkPlaceLoginAsync orgName placeName helpH)
-        , ("/settings",                       checkPlaceLoginAsync orgName placeName settingsH)
-        , ("/shift",                          checkPlaceLoginAsync orgName placeName shiftH)
-        , ("/messages",                       checkPlaceLoginAsync orgName placeName messagesH)
-        , ("/blank",                          checkPlaceLoginAsync orgName placeName (\_ _ -> renderWS "profile/blank"))
-        ]
+  route $ [ ("/",                               ifTop $ checkPlaceLogin orgName placeName placeHomeH) ] ++
+          (map (\(a,b) -> (a, checkPlaceLoginAsync orgName placeName b))
+            [ ("/month/:year/:month/:day/large", monthDayLargeH)
+            , ("/month/:year/:month/:day/small", monthDaySmallH)
+            , ("/month/:year/:month",            monthH)
+            , ("/day/:year/:month/:day",         dayH)
+            , ("/timesheet",                     timesheetH)
+            , ("/bulk",                          bulkInputH)
+            , ("/coworkers",                     coworkersH)
+            , ("/help",                          helpH)
+            , ("/settings",                      settingsH)
+            , ("/shift",                         shiftH)
+            , ("/messages",                      messagesH)
+            , ("/blank",                         (\_ _ -> renderWS "profile/blank"))])
 
 placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     nextShift <- getNextShift u p
@@ -78,7 +78,10 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                                     _ -> Nothing
                     let emailsSplice = [("emails", renderEmails emails)]
                     messagesSplice <- messagesPageSplices p 1
-                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday showDay) ++ (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday) ++ timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)] ++ emailsSplice ++ messagesSplice)) $ renderWS "place"
+                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday showDay) ++ 
+                                             (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday) ++ 
+                                             timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)] ++ 
+                                             emailsSplice ++ messagesSplice)) $ renderWS "place"
       where mList Nothing = []
             mList (Just xs) = xs
             monthV = fmap ((T.splitOn ".") . TE.decodeUtf8) $ getView u "work.month."
@@ -189,7 +192,7 @@ timesheetH user place = do
   mstop <- getParam "stop"
   
   user' <- fmap fromJust $ case targetUser of
-            Just tU -> if pFac place then fmap mkUser (getUser tU) else return $ Just user
+            Just tU -> if pFac place then getUser tU else return $ Just user
             Nothing -> return $ Just user
             
   coworkers <- getCoworkers user' place

@@ -5,14 +5,13 @@ module Handlers.Timesheet where
 import Snap.Types
 
 import Text.Templating.Heist
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
 import qualified Text.XmlHtml as X
 
 import Data.Maybe (fromJust, fromMaybe)
 
-import Text.Digestive.Types
-import Text.Digestive.Snap.Heist
-import Text.Digestive.Validate
+import Text.Digestive
+import Text.Digestive.Heist
 import Database.HDBC
 
 import Data.Text (Text)
@@ -37,7 +36,7 @@ import State.Types
 import State.Shifts
 import Common
 
-getTimesheet :: UserPlace -> User -> Day -> Day -> Application [(Text, Splice Application)]
+getTimesheet :: UserPlace -> User -> Day -> Day -> AppHandler [(Text, Splice AppHandler)]
 getTimesheet place user start stop = do
   allOriginal <- getOriginalShifts place start (addDays 1 stop) -- because they expect it to be inclusive of stop day
   userCurrent <- getUserCurrentShifts place user start (addDays 1 stop)

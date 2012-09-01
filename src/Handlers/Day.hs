@@ -5,15 +5,14 @@ module Handlers.Day where
 import Snap.Types
 
 import Text.Templating.Heist
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
 import qualified Text.XmlHtml as X
 
 import Data.Maybe (fromJust, fromMaybe)
 import Data.List (nub)
 
-import Text.Digestive.Types
-import Text.Digestive.Snap.Heist
-import Text.Digestive.Validate
+import Text.Digestive
+import Text.Digestive.Heist
 import Database.HDBC
 
 import Data.Text (Text)
@@ -38,7 +37,7 @@ import State.Coworkers
 import Handlers.Shifts
 import Common
 
-daySplices :: User -> UserPlace -> [User] -> [Shift] -> Day -> [(T.Text, Splice Application)]
+daySplices :: User -> UserPlace -> [User] -> [Shift] -> Day -> [(T.Text, Splice AppHandler)]
 daySplices u p workers shifts day = 
   [("dayName", textSplice $ T.pack (formatTime defaultTimeLocale "%A, %B %-d" day))
   ,("dayWorkers", dayView u p workers shifts year month d)
@@ -66,7 +65,7 @@ timeColumn start length = return $
                             :(map (\n -> X.Element "div" [("class","h-4 hour")] [X.TextNode (T.pack $ (show  (if n > 12 then n - 12 else n)) ++ ":00" ++ (if n > 12 then "pm" else "am"))]) 
                             $ take (max 2 ((length `div` 4)  + 1)) (iterate (+1) (start `div` 4 + (if start `mod` 4 == 0 then 0 else 1))))
 
-dayView :: User -> UserPlace -> [User] -> [Shift] -> Integer -> Int -> Int -> Splice Application
+dayView :: User -> UserPlace -> [User] -> [Shift] -> Integer -> Int -> Int -> Splice AppHandler
 dayView u p workers shifts year month day = do
   let start = fromGregorian year month day 
   let end = addDays 1 start

@@ -7,16 +7,16 @@ import Control.Monad (when, liftM)
 import Control.Monad.Trans
 
 import Text.Templating.Heist
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T  
 import qualified Data.ByteString.Char8 as B8  
 import qualified Data.ByteString as BS  
 import Snap.Types
 
-import Text.Digestive.Types
-import Text.Digestive.Snap.Heist
-import Text.Digestive.Validate
+import Text.Digestive
+import Text.Digestive.Heist
+import Text.Digestive.Snap
 
 import State.Types
 import State.Coworkers
@@ -29,7 +29,7 @@ import Handlers.Settings (nameForm)
 import Splices.Place
 
 -- | important: the place that is passed is the place of the logged in user, so it's "pFac" will not be relevant.
-renderCoworker :: User -> Splice Application
+renderCoworker :: User -> Splice AppHandler
 renderCoworker (User uid uname uact usuper uplaces uview utoken) = do
   let place = head uplaces
   runChildrenWith [("id",         textSplice $ TE.decodeUtf8 uid)
@@ -40,11 +40,11 @@ renderCoworker (User uid uname uact usuper uplaces uview utoken) = do
                   ,("notfac",     if pFac place then blackHoleSplice else identitySplice)
                   ]
                        
-renderCoworkers :: [User] -> Splice Application
+renderCoworkers :: [User] -> Splice AppHandler
 renderCoworkers coworkers = mapSplices renderCoworker coworkers
 
 
-coworkersH :: User -> UserPlace -> Application ()
+coworkersH :: User -> UserPlace -> AppHandler ()
 coworkersH user place = 
   route [("/", ifTop $ listCoworkers user place)
         ,("/add", if pFac place then addCoworkerH user place else pass)
@@ -84,18 +84,18 @@ addCoworkerH u p = do
 
 userNotIn place = checkM "Another user with this name already exists at this place." $ \n -> fmap not $ userExists place n
 
-newUserForm p = nameForm `validate` (userNotIn p)
+newUserForm p = userNotIn p nameForm
 
 addCW u p = do  
-  r <- eitherSnapForm (newUserForm p) "add-user-form"
-  case r of
-    Left splices' -> do
-      heistLocal (bindSplices splices') $ renderWS "profile/coworkers/add"
-    Right name' -> do
-      us <- getUsersByName (B8.pack name')
+  (view, result) <- runForm "add-user-form" (newUserForm p)
+  case result of
+    Nothing -> do
+      heistLocal (bindDigestiveSplices view) $ renderWS "profile/coworkers/add"
+    Just name' -> do
+      us <- getUsersByName (TE.encodeUtf8 name')
       case us of
-        [] -> heistLocal (bindSplices [("name", textSplice $ T.pack name')]) $ renderWS "profile/coworkers/add_new"
-        _ -> heistLocal (bindSplices [("name", textSplice $ T.pack name'),("users", renderCoworkers us)]) $ renderWS "profile/coworkers/add_existing"
+        [] -> heistLocal (bindSplices [("name", textSplice name')]) $ renderWS "profile/coworkers/add_new"
+        _ -> heistLocal (bindSplices [("name", textSplice name'),("users", renderCoworkers us)]) $ renderWS "profile/coworkers/add_existing"
 
 addCWexists u p = do
   i <- getParam "id"
@@ -124,12 +124,12 @@ addCWnew u p = do
                                                      , "&pl="
                                                      , (pId p)
                                                      ]
-                             r <- eitherSnapForm emailOrBlankForm "optional-email-form"
-                             case r of
-                                 Left splices' -> do
-                                   heistLocal (bindSplices splices') $ renderWS "profile/coworkers/add_new"
-                                 Right email' -> 
-                                  case B8.pack email' of
+                             (view, result) <- runForm "optional-email-form" emailOrBlankForm
+                             case result of
+                                 Nothing -> do
+                                   heistLocal (bindDigestiveSplices view) $ renderWS "profile/coworkers/add_new"
+                                 Just email' -> 
+                                  case TE.encodeUtf8 email' of
                                     "" -> heistLocal (bindSplices [("link", textSplice (TE.decodeUtf8 actLink))]) $ renderWS "profile/coworkers/add_success"
                                     email -> do mailAccountActivation name email (BS.concat [actLink,"&em=",urlEncode email])
                                                 listCoworkers u p
@@ -137,11 +137,11 @@ addCWnew u p = do
                                                   -- should have been checked earlier, so we don't know what happened
     Nothing -> pass -- shouldn't be able to get here, so pass
 
-validEmailOrBlank :: Validator Application T.Text String
-validEmailOrBlank = check "Must be a valid email, like help@weshift.org" $ \e -> ('@' `elem` e && '.' `elem` e) || (null e)
+--validEmailOrBlank :: Validator AppHandler T.Text String
+validEmailOrBlank = check "Must be a valid email, like help@weshift.org" $ \e -> let s = TE.encodeUtf8 e in ('@' `B8.elem` s && '.' `B8.elem` s) || (T.null e)
 
-emailOrBlankForm :: SnapForm Application T.Text HeistView String
-emailOrBlankForm = input "email" Nothing  `validate` validEmailOrBlank <++ errors 
+--emailOrBlankForm :: SnapForm AppHandler T.Text HeistView String
+emailOrBlankForm = "email" .: validEmailOrBlank (text Nothing)
   
 
 coworkersSplice cs = [("coworkersCount", textSplice $ T.pack $ show $ length cs)

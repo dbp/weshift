@@ -5,14 +5,13 @@ module Handlers.Month where
 import Snap.Types
 
 import Text.Templating.Heist
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
 import qualified Text.XmlHtml as X
 
 import Data.Maybe (fromJust, fromMaybe, isJust)
 
-import Text.Digestive.Types
-import Text.Digestive.Snap.Heist
-import Text.Digestive.Validate
+import Text.Digestive
+import Text.Digestive.Heist
 import Database.HDBC
 
 import Data.Text (Text)
@@ -45,7 +44,7 @@ data DayFormat = DayFormat { dNumber :: Maybe Int -- what day of the month is it
 emptyDayFormat n = DayFormat n False False False False False False False
 
 -- | the first three params are just for the case that a large day should alse be rendered within.         
-renderDay :: User -> Maybe Int -> [Shift] -> DayFormat -> Splice Application
+renderDay :: User -> Maybe Int -> [Shift] -> DayFormat -> Splice AppHandler
 renderDay u day' shifts (DayFormat num myshifts othershifts top start end bottom request) =
   runChildrenWith $ [ ("boxClasses", textSplice boxclasses)
                     , ("dayClasses", textSplice dayclasses)
@@ -81,7 +80,7 @@ renderDay u day' shifts (DayFormat num myshifts othershifts top start end bottom
                       _ -> []
                     
                        
-renderMonth :: User -> Maybe Int -> [Shift] -> [DayFormat] -> Splice Application
+renderMonth :: User -> Maybe Int -> [Shift] -> [DayFormat] -> Splice AppHandler
 renderMonth u d' ss days = mapSplices (renderDay u d' ss) days
 
 buildMonth :: Integer -> Int -> [[DayFormat]]
@@ -122,7 +121,7 @@ formatMonth :: Integer -> Int -> [Shift] -> [Shift] -> User -> [[DayFormat]] -> 
 formatMonth y m s c u weeks = map (formatWeek y m s c u) $ 
                                 (map top (head weeks)) : ((init $ tail weeks) ++ [map bottom (last weeks)])
 
-monthView :: UserPlace -> User -> Integer -> Int -> Maybe Int -> Splice Application
+monthView :: UserPlace -> User -> Integer -> Int -> Maybe Int -> Splice AppHandler
 monthView place user year month day' = do 
   let start = fromGregorian year month 1
   let end = addDays (toInteger $ gregorianMonthLength year month) start
@@ -149,7 +148,7 @@ dayLargeSplices place user (year, month, day) = do
              ,("selfClasses", textSplice $ selfClasses)
              ])
 
-renderShift :: Shift -> Splice Application
+renderShift :: Shift -> Splice AppHandler
 renderShift (Shift id' user place start stop recorded recorder) = do
   req <- lift $ maybe (return Nothing) (getShiftRequest user) (if id' == "" then Nothing else Just id')
   runChildrenWith [("id", textSplice $ TE.decodeUtf8 id')
@@ -165,5 +164,5 @@ renderShift (Shift id' user place start stop recorded recorder) = do
                   ,("reqid", textSplice $ TE.decodeUtf8 $ fromMaybe "" req)
                   ]
 
-renderShifts :: [Shift] -> Splice Application
+renderShifts :: [Shift] -> Splice AppHandler
 renderShifts ss = mapSplices renderShift ss                             

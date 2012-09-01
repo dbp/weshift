@@ -8,7 +8,7 @@ import qualified Data.ByteString.Char8 as B8
 import qualified Data.Text.Encoding as TE
 import Data.Text (Text)
 
-import Snap.Types
+import Snap.Core
 import Common
 import Application
 import Auth
@@ -17,17 +17,15 @@ import State.Place
 import State.Account
 import Handlers.Settings
 import Splices.Place
-import Text.Digestive.Snap.Heist
-import Text.Digestive.Types
-import Text.Digestive.Validate
+import Text.Digestive.Heist
+import Text.Digestive.Snap
+import Text.Digestive
 
 import Text.Templating.Heist
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
 import Control.Monad
 import "mtl" Control.Monad.Trans
 import Control.Applicative
-
-import qualified Snap.Auth as A
 
 
 loginGetH _ = do pl <- getParam "pl" -- this is the place
@@ -72,30 +70,35 @@ loginPostH loginFailure loginSuccess = do
           euid <- getParams
           password <- getParam "password"
           mMatch <- case password of
-            Nothing -> return $ Left A.PasswordFailure
+            Nothing -> return $ Left "Password Failure"
             Just p  -> performLogin euid
           either failure (const success) mMatch
         loginFailAjax = const $ heistLocal (bindSplices [("ifPlaces", blackHoleSplice), ("message", textSplice "Invalid username or password.")]) $ renderWS "login-form"
 
+logoutH redirTo = do
+  wsPerformLogout
+  redirTo
+
+
 signupH = do
   u <- getCurrentUser
-  r <- eitherSnapForm (signupForm u) "signup-form"
-  case r of
-      Left splices' -> do
-        heistLocal (bindSplices splices') $ renderWS "signup_form"
-      Right (SignupCreds org place name) -> do
-        createOrganizationIfNotExists (B8.pack org)
-        mpid <- createPlace (B8.pack org) (B8.pack place)
+  (view, result) <- runForm "signup-form" (signupForm u)
+  case result of
+      Nothing -> do
+        heistLocal (bindDigestiveSplices view) $ renderWS "signup_form"
+      Just (SignupCreds org place name) -> do
+        createOrganizationIfNotExists (TE.encodeUtf8 org)
+        mpid <- createPlace (TE.encodeUtf8 org) (TE.encodeUtf8 place)
         case mpid of
           Nothing -> renderWS "signup_error"
           Just pid -> do
-            let newPlace = (emptyUserPlace {pId = pid, pName = (B8.pack place), pOrg = (B8.pack org), pFac = True})
+            let newPlace = (emptyUserPlace {pId = pid, pName = (TE.encodeUtf8 place), pOrg = (TE.encodeUtf8 org), pFac = True})
             case u of
               Just user -> do -- an existing user
                 addFacilitatorPlace newPlace (uId user)
                 redirectAsync (placeRoot newPlace)
               Nothing -> do -- this is a new user
-                mit <- newUser (B8.pack name) newPlace
+                mit <- newUser (TE.encodeUtf8 name) newPlace
                 case mit of
                   Nothing -> renderWS "signup_error"
                   Just (token, uid) -> do
@@ -109,25 +112,25 @@ signupH = do
                                               ]
         
   
-data SignupCreds = SignupCreds String String String
+data SignupCreds = SignupCreds Text Text Text
 
 uniquePlace = checkM "Place with this name and organization already exists" $
-                    \(SignupCreds o p _) -> fmap not $ placeExists (B8.pack o) (B8.pack p)
+                    \(SignupCreds o p _) -> fmap not $ placeExists (TE.encodeUtf8 o) (TE.encodeUtf8 p)
 
 validOrg mu = case mu of
                 Nothing -> checkM "Must be logged in as a facilitator to add to existing organizations" $ 
-                                  \o -> fmap not $ organizationExists (B8.pack o)
+                                  \o -> fmap not $ organizationExists (TE.encodeUtf8 o)
                 Just u -> checkM "Must be a facilitator for this organization to add a new place" $ 
-                                  \o -> do exists <- organizationExists (B8.pack o)
+                                  \o -> do exists <- organizationExists (TE.encodeUtf8 o)
                                            case exists of
-                                             True -> return $ (B8.pack o) `elem` (map pOrg $ filter pFac (uPlaces u))
+                                             True -> return $ (TE.encodeUtf8 o) `elem` (map pOrg $ filter pFac (uPlaces u))
                                              False -> return True
 
-signupForm :: Maybe User -> SnapForm Application Text HeistView SignupCreds
-signupForm mu = (`validate` uniquePlace) $ (<++ errors) $ SignupCreds 
-    <$> input "organization" Nothing `validate` nonEmpty `validate` (validOrg mu) <++ errors
-    <*> input "place" Nothing `validate` nonEmpty <++ errors
-    <*> input "name" Nothing `validate` (nonEmptyIfNothing mu) <++ errors
+--signupForm :: Maybe User -> SnapForm AppHandler Text HeistView SignupCreds
+signupForm mu = uniquePlace $ SignupCreds 
+    <$> "organization" .: (validOrg mu $ nonEmpty (text Nothing))
+    <*> "place" .: nonEmpty (text Nothing)
+    <*> "name" .: (nonEmptyIfNothing mu (text Nothing))
  
 activateAccountH = do
   i <- getParam "id"
@@ -137,13 +140,13 @@ activateAccountH = do
   muser <- maybe (return Nothing) (getUser) i 
   mplace <- maybe (return Nothing) getPlaceFromId pl
   wsPerformLogout -- make sure they aren't signed in as anyone else
-  case (mkUser muser,tok,mplace) of
+  case (muser,tok,mplace) of
     (Just u, Just token, Just place) -> do 
-      r <- eitherSnapForm newPasswordForm "change-password-form"
-      case r of
-          Left splices' -> do
-            heistLocal (bindSplices splices') $ renderWS "activate/account"
-          Right (p,_) -> do
+      (view, result) <- runForm "change-password-form" newPasswordForm
+      case result of
+          Nothing -> do
+            heistLocal (bindDigestiveSplices view) $ renderWS "activate/account"
+          Just (p,_) -> do
             success <- activateAccount u p
             case success of
               True  -> do

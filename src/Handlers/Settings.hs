@@ -2,17 +2,18 @@
 
 module Handlers.Settings where
   
-import Snap.Types
+import Snap.Core
 
 import Text.Templating.Heist
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
 
-import Text.Digestive.Types
-import Text.Digestive.Snap.Heist
-import Text.Digestive.Validate
+import Text.Digestive
+import Text.Digestive.Heist
+import Text.Digestive.Snap hiding (method)
 import Database.HDBC
 
 import Data.Text (Text)
+import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString.Char8 as B8
 import Control.Applicative
@@ -28,7 +29,7 @@ import Common
 import Mail
 import Control.Concurrent (threadDelay)
 
-settingsH :: User -> UserPlace -> Application ()
+settingsH :: User -> UserPlace -> AppHandler ()
 settingsH u p = route [ ("/",                 ifTop $ settingsHome u)
                       , ("/user",             userSettingsH u p)
                       , ("/name",             method POST $ changeNameH u p)
@@ -41,7 +42,7 @@ settingsH u p = route [ ("/",                 ifTop $ settingsHome u)
                       , ("/email/delete/:id", deleteEmailH u p)
                       ]
 
-settingsHome :: User -> Application ()
+settingsHome :: User -> AppHandler ()
 settingsHome u = do setView u "profile" "profile.settings"
                     renderWS "profile/usersettings/blank"
 
@@ -50,16 +51,16 @@ userSettingsH u p = do setView u "profile" "profile.settings.name"
 
 
 
-nameForm :: SnapForm Application Text HeistView String
-nameForm = input "name" Nothing  `validate` nonEmpty <++ errors 
+--nameForm :: SnapForm AppHandler Text HeistView String
+nameForm = "name" .: nonEmpty (text Nothing)
                   
-changeNameH u p = do r <- eitherSnapForm nameForm "change-name-form"
+changeNameH u p = do (view, result) <- runForm "change-name-form" nameForm
                      let name = (TE.decodeUtf8 . uName) u
-                     case r of
-                         Left splices' -> do
+                     case result of
+                         Nothing -> do
                            heistLocal (bindString "name" name ) $ 
-                            heistLocal (bindSplices splices') $ renderWS "profile/usersettings/name_form"
-                         Right name' -> do
+                            heistLocal (bindDigestiveSplices view) $ renderWS "profile/usersettings/name_form"
+                         Just name' -> do
                             success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql (uId u)]
                             {-liftIO $ threadDelay 200000-}
                             case success of
@@ -76,7 +77,7 @@ stopFacilitatingH u p = do
       if pFac p then setFacilitator (uId u) p False else return False
       renderWS "profile/usersettings/facilitation_stopped"
 
-checkPassword :: Validator Application Text String
+--checkPassword :: Validator AppHandler Text String
 checkPassword = checkM "Current password not correct:" fn
   where fn p = do mUs <- getCurrentUser
                   case mUs of
@@ -87,21 +88,21 @@ checkPassword = checkM "Current password not correct:" fn
                         [toSql (uId u), toSql p]                  
 
 
-data NewPassword = NewPassword String String String deriving (Eq,Show)
+data NewPassword = NewPassword Text Text Text deriving (Eq,Show)
 
-passwordForm :: SnapForm Application Text HeistView NewPassword
+--passwordForm :: SnapForm AppHandler Text HeistView NewPassword
 passwordForm = mkNP
-    <$> input "current" Nothing  `validate` checkPassword <++ errors
-    <*> newPasswordForm <++ errors
+    <$> "current" .: checkPassword (text Nothing)
+    <*> newPasswordForm
   where mkNP c (n,p) = NewPassword c n p
 
 
-changePasswordH u p = do r <- eitherSnapForm passwordForm "change-password-form"
+changePasswordH u p = do (view, result) <- runForm "change-password-form" passwordForm
                          setView u "profile" "profile.settings.password"
-                         case r of
-                             Left splices' -> do
-                               heistLocal (bindSplices splices') $ renderWS "profile/usersettings/password"
-                             Right (NewPassword _ new _) -> do
+                         case result of
+                             Nothing -> do
+                               heistLocal (bindDigestiveSplices view) $ renderWS "profile/usersettings/password"
+                             Just (NewPassword _ new _) -> do
                                success <- fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')) WHERE id = ? RETURNING id;" [toSql new, toSql (uId u)]
                                case success of
                                  True  -> renderWS "profile/usersettings/password_updated"
@@ -111,7 +112,7 @@ removeAccountH u p = do
   setView u "profile" "profile.settings.email"
   renderWS "profile/usersettings/remove"
 
-removeAccountPostH :: User -> UserPlace -> Application ()
+removeAccountPostH :: User -> UserPlace -> AppHandler ()
 removeAccountPostH u p = do
   mtok <- disableAccount u
   case mtok of
@@ -132,15 +133,15 @@ renderEmails = mapSplices (\(Email i u a c) -> runChildrenWith [("id", textSplic
                                                                ,("confirmed", booleanSplice c)
                                                                ])
 
-addEmailH u p = do r <- eitherSnapForm emailForm "add-email-form"
-                   case r of
-                       Left splices' -> do
-                         heistLocal (bindSplices splices') $ renderWS "profile/usersettings/email_add"
-                       Right email' -> do
+addEmailH u p = do (view, result) <- runForm "add-email-form" emailForm
+                   case result of
+                       Nothing -> do
+                         heistLocal (bindDigestiveSplices view) $ renderWS "profile/usersettings/email_add"
+                       Just email' -> do
                          token <- addUserEmail u email'
                          case token of
                            Just t  -> do
-                             mailEmailActivation (uId u) (B8.pack email') t (pId p)
+                             mailEmailActivation (uId u) (TE.encodeUtf8 email') t (pId p)
                              emails <- getUserEmails u
                              heistLocal (bindSplices [("emails", renderEmails emails),("msg",textSplice "Confirmation email sent.")]) $ renderWS "profile/usersettings/email" 
                            Nothing -> renderWS "profile/usersettings/email_error"
@@ -178,13 +179,13 @@ activateDisabled = do
   muser <- maybe (return Nothing) (getUser) acc 
   mplace <- maybe (return Nothing) getPlaceFromId pl
   wsPerformLogout -- make sure they aren't signed in as anyone else
-  case (mkUser muser,fmap urlDecode nam,emtok,mplace) of
+  case (muser,fmap urlDecode nam,emtok,mplace) of
     (Just u, Just name, Just token, Just place) -> do 
-      r <- eitherSnapForm newPasswordForm "change-password-form"
-      case r of
-          Left splices' -> do
-            heistLocal (bindSplices splices') $ renderWS "activate/disabled"
-          Right (p,_) -> do
+      (view, result) <- runForm "change-password-form" newPasswordForm
+      case result of
+          Nothing -> do
+            heistLocal (bindDigestiveSplices view) $ renderWS "activate/disabled"
+          Just (p,_) -> do
             success <- enableAccount u name p
             case success of
               True  -> redirect $ placeRoot place
@@ -194,9 +195,9 @@ activateDisabled = do
                  
                          
 -- | regex validation sucks, so don't even try.
-validEmail :: Validator Application Text String
-validEmail = check "Must be a valid email, like help@weshift.org" $ \e -> '@' `elem` e && '.' `elem` e
+--validEmail :: Validator AppHandler Text String
+validEmail = check "Must be a valid email, like help@weshift.org" $ \e -> let s = TE.encodeUtf8 e in '@' `B8.elem` s && '.' `B8.elem` s
 
-emailForm :: SnapForm Application Text HeistView String
-emailForm = input "address" Nothing  `validate` validEmail <++ errors 
+--emailForm :: SnapForm AppHandler Text HeistView String
+emailForm = "address" .: validEmail (text Nothing)
                   

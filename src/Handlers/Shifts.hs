@@ -2,7 +2,7 @@
 
 module Handlers.Shifts where
   
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
   
 import Text.Templating.Heist
 import qualified Data.Text.Encoding as TE
@@ -14,28 +14,27 @@ import Data.Text  (Text)
 import Data.Time.Calendar
 import Data.Time.LocalTime
 
-import Text.Digestive.Types
-import Text.Digestive.Snap.Heist
-import Text.Digestive.Validate
-import Text.Digestive.Transform
+import Text.Digestive
+import Text.Digestive.Heist
+import Text.Digestive.Snap hiding (method)
 
 import Control.Monad.Trans (liftIO, lift)
 import Control.Applicative
 
-import Text.Parsec
+import Text.Parsec hiding (Error)
   
-import Snap.Types
-import Snap.Auth
+import Snap.Core
 import Application
 import State.Types
 import State.Shifts
 import State.Account
 import Handlers.Month
+import Auth
 import Common
 import Time
 import Mail (mailRequestOff, mailShiftCovered)
 
-shiftH :: User -> UserPlace -> Application ()
+shiftH :: User -> UserPlace -> AppHandler ()
 shiftH u p = route [ ("/add",             shiftAddH u p)
                    , ("/edit",            shiftEditH u p)
                    , ("/delete",          method POST $ shiftDeleteH u p)
@@ -45,62 +44,62 @@ shiftH u p = route [ ("/add",             shiftAddH u p)
                    ]
 
 shiftAddH u p = do
-  r <- eitherSnapForm addShiftForm "add-shift-form"
+  (view, result) <- runForm "add-shift-form" addShiftForm
   muid <- getParam "user" 
-  case (r,muid) of
-      (Right (ShiftTime start stop), Just uid) -> do
+  case (result,muid) of
+      (Just (ShiftTime start stop), Just uid) -> do
         -- if they are a facilitator, then accept whatever id they gave, otherwise, enforce it being theirs
         let suser = if pFac p then uid else (uId u)
         insertShift (emptyShift { sUser = suser, sPlace = (pId p), sStart = start, sStop = stop, sRecorder = (uId u)})
         (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
         heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
-      (Left splices',_) -> do
-        heistLocal (bindSplices (splices' ++ [("disp", textSplice "block")])) $ renderWS "work/shift/add"
+      (Nothing,_) -> do
+        heistLocal (bindSplices [("disp", textSplice "block")]) $ heistLocal (bindDigestiveSplices view) $ renderWS "work/shift/add"
  where trd (_,_,a) = a           
 
 
 data ShiftTime = ShiftTime LocalTime LocalTime deriving Show
 
-timeTransform = transformEither (\a -> either (const $ Left "Should be like 10:00am.") Right (parse parseHour "" a))
+timeTransform = validate (\a -> either (const $ Error "Should be like 10:00am.") Success (parse parseHour "" (T.unpack a)))
 
-notOverlapping :: Validator Application Text ShiftTime
+--notOverlapping :: Validator AppHandler Text ShiftTime
 notOverlapping = checkM "Overlaps with another shift." $ \(ShiftTime start end) -> 
   do muid <- authenticatedUserId
      case muid of
        Nothing -> return False -- no user
-       Just (UserId uid) -> checkShiftTime uid start end
+       Just uid -> checkShiftTime uid start end
 
-notOverlappingChange :: Validator Application Text (BS.ByteString, ShiftTime)
+--notOverlappingChange :: Validator AppHandler Text (BS.ByteString, ShiftTime)
 notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftTime start end)) -> 
   do muid <- authenticatedUserId
      case muid of
        Nothing -> return False -- no user
-       Just (UserId uid) -> checkShiftTimeExcept skip uid start end
+       Just uid -> checkShiftTimeExcept skip uid start end
 
-timeRangeForm = (`transform` goodTime) $ (<++ childErrors) $ (,)
-  <$> input "start" Nothing `transform` timeTransform
-  <*> input "stop"  Nothing `transform` timeTransform
-    where goodTime = transformEither (\(start,end) -> maybe (Left "End before start.") Right (guessTime start end))
+timeRangeForm = goodTime $ (,)
+  <$> "start" .: timeTransform (text Nothing)
+  <*> "stop"  .: timeTransform (text Nothing)
+    where goodTime = validate (\(start,end) -> maybe (Error "End before start.") Success (guessTime start end))
 
-addShiftForm = (`validate` notOverlapping)  $ (<++ childErrors) $ newShiftForm
+addShiftForm = notOverlapping $ newShiftForm
 
-newShiftForm :: SnapForm Application Text HeistView ShiftTime
+--newShiftForm :: SnapForm AppHandler Text HeistView ShiftTime
 newShiftForm = mkNS
     <$> timeRangeForm
-    <*> inputRead "day" "Internal error D. Email help@weshift.org" Nothing
-    <*> inputRead "month" "Internal error M. Email help@weshift.org" Nothing 
-    <*> inputRead "year" "Internal error Y. Email help@weshift.org" Nothing
+    <*> "day"   .: stringRead "Internal error D. Email help@weshift.org" Nothing
+    <*> "month" .: stringRead "Internal error M. Email help@weshift.org" Nothing 
+    <*> "year"  .: stringRead "Internal error Y. Email help@weshift.org" Nothing
   where mkNS (start,stop) d m y = ShiftTime (LocalTime day (timeToTimeOfDay start)) (LocalTime day (timeToTimeOfDay stop))
           where day = fromGregorian y m d
 
   
   
 shiftEditH u p = do
-    r <- eitherSnapForm changeShiftForm "edit-shift-form"
-    case r of
-        Left splices' -> do
-          heistLocal (bindSplices (splices' ++ [("disp", textSplice "block")])) $ renderWS "work/shift/edit"
-        Right (id', ShiftTime start stop) -> do
+    (view, result) <- runForm "edit-shift-form" changeShiftForm
+    case result of
+        Nothing -> do
+          heistLocal (bindSplices [("disp", textSplice "block")]) $ heistLocal (bindDigestiveSplices view) $ renderWS "work/shift/edit"
+        Just (id', ShiftTime start stop) -> do
           s <- getUserShift (uId u) id'
           case s of
             Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/edit_error"
@@ -111,9 +110,9 @@ shiftEditH u p = do
    where trd (_,_,a) = a
 
 
-changeShiftForm :: SnapForm Application Text HeistView (BS.ByteString, ShiftTime)
-changeShiftForm = (`validate` notOverlappingChange)  $ (<++ childErrors) $ mkS
-    <$> inputRead "id" "Internal error S. Email help@weshift.org" Nothing
+--changeShiftForm :: SnapForm AppHandler Text HeistView (BS.ByteString, ShiftTime)
+changeShiftForm = notOverlappingChange $ mkS
+    <$> "id" .: stringRead "Internal error S. Email help@weshift.org" Nothing
     <*> newShiftForm
   where mkS i st = (B8.pack $ show (i :: Int), st)
 
@@ -180,7 +179,7 @@ coverShiftH = do
       case mshift of
         (Just shift) -> do
           result <- coverShift (uId u) shift reqid
-          mcuru <- fmap mkUser $ getUser (sUser shift)
+          mcuru <- getUser (sUser shift)
           emails <- maybe (return []) getUserEmails mcuru
           mailShiftCovered u shift (map emAddress $ filter emConfirmed emails)
           case result of

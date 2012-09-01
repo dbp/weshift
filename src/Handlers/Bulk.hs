@@ -14,14 +14,14 @@ import System.Locale (defaultTimeLocale)
 import "mtl" Control.Monad.Trans
 import Control.Applicative hiding (optional)
 import Text.Templating.Heist
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
 import Text.SSV
 import Data.Maybe (isJust, mapMaybe, catMaybes, fromMaybe, isNothing)
 import Data.Char (digitToInt)
 import Data.List (find,nub)
 import Data.Either (lefts,rights)
   
-import Snap.Types
+import Snap.Core
 import Application
 import State.Types
 import State.Coworkers
@@ -32,7 +32,7 @@ import Time
 
 import Text.Parsec
 
-bulkInputH :: User -> UserPlace -> Application ()
+bulkInputH :: User -> UserPlace -> AppHandler ()
 bulkInputH user place = 
   route [("/", ifTop $ method GET $ inputForm user)
         ,("/upload", method POST $ upload user place)

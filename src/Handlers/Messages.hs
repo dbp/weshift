@@ -2,16 +2,16 @@
 
 module Handlers.Messages where
   
-import Snap.Types
+import Snap.Core
 import Text.Templating.Heist
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T  
 import qualified Data.ByteString.Char8 as B8  
 import qualified Data.ByteString as BS
-import Text.Digestive.Types
-import Text.Digestive.Snap.Heist
-import Text.Digestive.Validate
+import Text.Digestive
+import Text.Digestive.Heist
+import Text.Digestive.Snap
 import Data.Maybe (fromMaybe)
 import Data.Time.Format
 import System.Locale (defaultTimeLocale)
@@ -22,7 +22,7 @@ import State.Types
 import State.Messages
 
         
-messagesH :: User -> UserPlace -> Application ()
+messagesH :: User -> UserPlace -> AppHandler ()
 messagesH u p = route [ ("/add",            messageAddH u p)
                       , ("/page/:num",      messagesPageH u p)
                       , ("/vote/up/:id",    messageVoteUpH u p)
@@ -31,17 +31,17 @@ messagesH u p = route [ ("/add",            messageAddH u p)
                       ]
                   
 messageAddH u p = do
-  r <- eitherSnapForm messageForm "add-user-form"
-  case r of
-    Left splices' ->
-      heistLocal (bindSplices splices') $ renderWS "messages/add_form"
-    Right msg' -> do
-      addMessage p (B8.pack msg')
+  (view, result) <- runForm"add-user-form" messageForm
+  case result of
+    Nothing ->
+      heistLocal (bindDigestiveSplices view) $ renderWS "messages/add_form"
+    Just msg' -> do
+      addMessage p (TE.encodeUtf8 msg')
       spl <- messagesPageSplices p 1
       heistLocal (bindSplices spl) $ renderWS "messages/add_success"
 
-messageForm = input "message" Nothing `validate` nonEmpty `validate` maxOneForty <++ errors
-  where maxOneForty = check "Message cannot be over 140 Characters" $ \m -> length m < 141
+messageForm = "message" .: maxOneForty (nonEmpty (text Nothing))
+  where maxOneForty = check "Message cannot be over 140 Characters" $ \m -> T.length m < 141
 
 messagesPageH u p = do
   mpage <- getParam "num"

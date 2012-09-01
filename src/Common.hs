@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, PackageImports #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Common where
 
@@ -9,23 +9,20 @@ import qualified Data.ByteString.Char8 as B8
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
 import qualified Data.Map as M
-import Snap.Extension.Heist
+import Snap.Snaplet.Heist
+import Snap.Snaplet
 import Data.ByteString (ByteString)
-import Snap.Auth.Handlers
-import Snap.Auth
-import Snap.Extension.Session.CookieSession
-import Snap.Extension.Heist
-import "mtl" Control.Monad.Trans (lift, liftIO)
+import Snap.Snaplet.Session
+import Control.Monad.Trans (lift, liftIO)
 import Heist.Splices.Async (heistAsyncSplices)
-import Data.Maybe (fromMaybe, maybeToList, listToMaybe, fromJust, isNothing)
+import Data.Maybe (fromMaybe, maybeToList, listToMaybe, isJust, fromJust, isNothing)
 import Control.Monad (liftM, mzero, unless)
 import Control.Applicative
 import Data.List (find)
 import Data.List.Split
-import Snap.Types
-import Text.Digestive.Types
-import Text.Digestive.Snap.Heist
-import Text.Digestive.Validate
+import Snap.Core
+import Text.Digestive.Heist
+import Text.Digestive
 
 import Data.Time.Format
 import Data.Time.Clock
@@ -43,7 +40,7 @@ import State.Coworkers
 -- they key is the prefix of the value, so it is stored like: key.value.sub;key2.value2 etc.
 -- the idea is that these will indicate which panels are open, so that the site remembers
 -- what everything looks like.
-setView :: User -> BS.ByteString -> BS.ByteString -> Application ()
+setView :: User -> BS.ByteString -> BS.ByteString -> AppHandler ()
 setView user key value = do
     updateUserView $ user { uView = view }
     return ()
@@ -57,7 +54,7 @@ getView u i = fmap TE.encodeUtf8 $ (T.stripPrefix i) =<< (find (T.isPrefixOf i) 
   where views = (T.splitOn ";" $ TE.decodeUtf8 (uView u))
 
 
-viewSplice :: BS.ByteString -> Splice Application
+viewSplice :: BS.ByteString -> Splice AppHandler
 viewSplice v = do node <- getParamNode
                   case X.getAttribute "is" node of
                     Just i -> if isView i then return (X.elementChildren node) else return []
@@ -76,30 +73,30 @@ viewSplice v = do node <- getParamNode
 placeName place = BS.intercalate ", " $ (map ($ place) [pName,pOrg])
 placeRoot place = BS.intercalate "/"  $ (map (repUnders. ($ place)) [const "",pOrg,pName])
 
-getCurrentPlace :: Application (Maybe UserPlace)
-getCurrentPlace = do mplaceId <- getFromSession "place"
+getCurrentPlace :: AppHandler (Maybe UserPlace)
+getCurrentPlace = do mplaceId <- with sess $ getFromSession "place"
                      muser <- getCurrentUser
-                     let hm = do placeId <- mplaceId
+                     let hm = do placeId <- fmap TE.encodeUtf8 $ mplaceId
                                  user <- muser
                                  place <- find ((==) placeId . pId) $ uPlaces user
                                  return $ place
                      return hm
-getCurrentUserAndPlace :: Application (Maybe (User,UserPlace))
-getCurrentUserAndPlace = do mplaceId <- getFromSession "place"
+getCurrentUserAndPlace :: AppHandler (Maybe (User,UserPlace))
+getCurrentUserAndPlace = do mplaceId <- with sess $ getFromSession "place"
                             muser <- getCurrentUser
-                            let hm = do placeId <- mplaceId
+                            let hm = do placeId <- fmap TE.encodeUtf8 $ mplaceId
                                         user <- muser
                                         place <- find ((==) placeId . pId) $ uPlaces user
                                         return $ (user,place)
                             return hm
                      
-redirPlaceHome :: Application ()
+redirPlaceHome :: AppHandler ()
 redirPlaceHome = do hm <- liftM (fmap placeRoot) getCurrentPlace
                     redirect $ fromMaybe "/" hm
 
 redirectAsync url = heistLocal (bindSplice "url" (textSplice $ TE.decodeUtf8 url)) $ renderWS "redirect"
 
-redirPlaceHomeAsync :: Application ()
+redirPlaceHomeAsync :: AppHandler ()
 redirPlaceHomeAsync = do hm <- liftM (fmap placeRoot) getCurrentPlace
                          redirectAsync $ fromMaybe "/" hm
 
@@ -107,7 +104,7 @@ redirPlaceHomeAsync = do hm <- liftM (fmap placeRoot) getCurrentPlace
 checkPlaceLogin = checkPlaceLogin' redirect
 checkPlaceLoginAsync = checkPlaceLogin' redirectAsync
 
-checkPlaceLogin' :: (BS.ByteString -> Application ()) -> Maybe BS.ByteString -> Maybe BS.ByteString -> (User -> UserPlace -> Application ()) -> Application ()
+checkPlaceLogin' :: (BS.ByteString -> AppHandler ()) -> Maybe BS.ByteString -> Maybe BS.ByteString -> (User -> UserPlace -> AppHandler ()) -> AppHandler ()
 checkPlaceLogin' redr (Just org) (Just place) handler = 
   do u <- getCurrentUser
      uri <- liftM rqURI getRequest
@@ -117,7 +114,7 @@ checkPlaceLogin' redr (Just org) (Just place) handler =
                            p
      case (userPlace p u, u) of
        (Just pl, Just u) -> do
-         setInSession "place" (pId pl)
+         with sess $ setInSession "place" (TE.decodeUtf8 $ pId pl)
          handler u pl
        _ -> loginPage
        
@@ -129,7 +126,7 @@ renderTime t = T.pack $ formatTime defaultTimeLocale "%-l:%M%P" t
 renderDate t = T.pack $ formatTime defaultTimeLocale "%-m.%-d.%Y" t
 renderDateLong t = T.pack $ formatTime defaultTimeLocale "%B %e, %Y" t
 
-spliceMBS :: T.Text -> Maybe BS.ByteString -> [(T.Text, Splice Application)]
+spliceMBS :: T.Text -> Maybe BS.ByteString -> [(T.Text, Splice AppHandler)]
 spliceMBS name val = maybeToList $ fmap (\p -> (name, return [X.TextNode (TE.decodeUtf8 p)])) val
 
 facilitatorSplice p = do node <- getParamNode
@@ -137,7 +134,7 @@ facilitatorSplice p = do node <- getParamNode
                            Just place -> if (pFac place) then return (X.elementChildren node) else return []
                            Nothing -> return []
 
-normalUserSplice :: Maybe UserPlace -> Splice Application
+normalUserSplice :: Maybe UserPlace -> Splice AppHandler
 normalUserSplice p = do node <- getParamNode
                         case p of
                           Just place -> if (not $ pFac place) then return (X.elementChildren node) else return []
@@ -160,20 +157,22 @@ parseWSDate s = parseTime defaultTimeLocale "%-m.%-d.%Y" $ B8.unpack s
 maybeRead :: Read a => ByteString -> Maybe a
 maybeRead = fmap fst . listToMaybe . reads . B8.unpack
 
-nonEmpty :: Validator Application T.Text String
-nonEmpty = check "Field must not be empty:" $ \s -> not $ null s
+--nonEmpty :: Validator AppHandler T.Text String
+nonEmpty :: Form T.Text AppHandler T.Text -> Form T.Text AppHandler T.Text
+nonEmpty = check "Field must not be empty:" $ \s -> not $ T.null s
 
-nonEmptyIfNothing :: Maybe a -> Validator Application T.Text String
-nonEmptyIfNothing m = check "Field must not be empty:" $ \s -> if isNothing m then (not $ null s) else True 
+--nonEmptyIfNothing :: Maybe a -> Validator AppHandler T.Text String
+nonEmptyIfNothing m = check "Field must not be empty:" $ \s -> if isNothing m then (not $ T.null s) else True 
 
-newPasswordForm  :: SnapForm Application T.Text HeistView (String,String)
-newPasswordForm = (`validate` matchingPasswords) $ (<++ errors) $ (,) 
-    <$> input "new"     Nothing  `validate` nonEmpty      <++ errors 
-    <*> input "confirm" Nothing  `validate` nonEmpty      <++ errors 
-  where matchingPasswords = check "New passwords do not match:" $ \(p1,p2) -> p1 == p2
+--newPasswordForm  :: SnapForm AppHandler T.Text HeistView (String,String)
+newPasswordForm = validate matchingPasswords $ (,) 
+    <$> "new"     .: nonEmpty (text Nothing) 
+    <*> "confirm" .: nonEmpty (text Nothing) 
+  where matchingPasswords (a,b) | a == b = Success (a,b)
+        matchingPasswords _ = Error "New passwords do not match:"
 
 
-userLookup :: M.Map BS.ByteString User -> Splice Application
+userLookup :: M.Map BS.ByteString User -> Splice AppHandler
 userLookup users = do node <- getParamNode
                       case X.getAttribute "id" node >>= (flip M.lookup users . TE.encodeUtf8) of
                         Nothing -> return []
@@ -214,7 +213,7 @@ renderPlaces curPlace places =
                   places
     where shorten s = if (BS.length s > 20) then (BS.append (BS.take 17 s) "...") else s
 
-renderWS :: ByteString -> Application ()
+renderWS :: ByteString -> AppHandler ()
 renderWS t = do mup <- getCurrentUserAndPlace
                 let userSplices = do (u,p) <- mup
                                      return [("placeRoot", bTS $ placeRoot p)
@@ -226,8 +225,8 @@ renderWS t = do mup <- getCurrentUserAndPlace
                                             ]
                 let permissionSplices = [("isFacilitator", facilitatorSplice $ fmap snd mup)
                                         ,("isNormalUser", normalUserSplice $ fmap snd mup)
-                                        ,("ifLoggedIn", ifLoggedIn)
-                                        ,("ifGuest", ifGuest)
+                                        ,("ifLoggedIn", booleanSplice (isJust mup))
+                                        ,("ifGuest", booleanSplice (isNothing mup))
                                         ]
                 workersSplice <- case mup of
                                     Just (cu, p) -> do 
@@ -251,6 +250,6 @@ renderWS t = do mup <- getCurrentUserAndPlace
   where bTS = textSplice . TE.decodeUtf8
                   
                   
-redirTo :: Application ()
+redirTo :: AppHandler ()
 redirTo = do r <- getParam "redirectTo"
              redirect $ fromMaybe "/" r

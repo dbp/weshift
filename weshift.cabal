@@ -1,7 +1,7 @@
-Name:                weshift-snap
-Version:             0.1
+Name:                weshift
+Version:             0.2
 Synopsis:            Tool for organizing time at workplaces
-Description:         A rewrite of an ocsigen application
+Description:         
 License:             BSD3
 Author:              Daniel Patterson
 Maintainer:          dbp@riseup.net
@@ -14,31 +14,33 @@ Flag development
   Description: Whether to build the server in development (interpreted) mode
   Default: False
 
-Executable weshift-snap
+Executable weshift
   hs-source-dirs: src
   main-is: Main.hs
 
   Build-depends:
     base >= 4 && < 5,
     bytestring >= 0.9.1 && < 0.10,
-    heist >= 0.5 && < 0.6,
-    MonadCatchIO-transformers >= 0.2.1 && < 0.3,
+    data-lens >= 2.0.1 && < 2.11,
+    data-lens-template >= 2.1 && < 2.2,
+    heist >= 0.8,
+    MonadCatchIO-transformers >= 0.2.1 && < 0.4,
     mtl >= 2 && < 3,
-    snap >= 0.5 && < 0.6,
-    snap-core >= 0.5 && < 0.6,
-    snap-server >= 0.5 && < 0.6,
+    snap == 0.9.*,
+    snap-core   == 0.9.*,
+    snap-server == 0.9.*,
+    snap-loader-static == 0.9.*,
     text >= 0.11 && < 0.12,
-    time >= 1.2.0.5 && < 1.3,
-    xmlhtml == 0.1.*,
-    snap-auth,
+    time >= 1.2.0.5 && < 1.5,
+    xmlhtml >= 0.1,
     blaze-html,
-    HDBC >= 2.2 && < 2.3,
-    HDBC-postgresql >= 2.2 && < 2.3,
+    HDBC >= 2.2,
+    HDBC-postgresql >= 2.2,
     containers,
     bson,
-    digestive-functors,
-    digestive-functors-snap-heist == 0.1.3.*,
-    -- digestive-functors-heist == 0.1,
+    digestive-functors >= 0.5,
+    digestive-functors-snap >= 0.5,
+    digestive-functors-heist >= 0.5,
     QuickCheck >= 2 && < 3,
     split,
     random,
@@ -47,19 +49,18 @@ Executable weshift-snap
     HTTP,
     attoparsec,
     aeson,
-    heist-async >= 0.4,
+    heist-async >= 0.5,
     email-postmark,
-    resource-pool >= 0.1 && < 0.2,
-    snap-less,
+    resource-pool >= 0.1,
+    --snap-less,
     old-locale,
-    ssv >= 0.2 && < 0.3,
-    parsec >= 3.1 && < 3.2
-
-  extensions: TypeSynonymInstances MultiParamTypeClasses
+    ssv >= 0.2,
+    parsec >= 3.1
 
   if flag(development)
+    build-depends:
+      snap-loader-dynamic == 0.9.*
     cpp-options: -DDEVELOPMENT
-    build-depends: hint >= 0.3.2 && < 0.4
     -- In development mode, speed is already going to suffer, so skip
     -- the fancy optimization flags.  Additionally, disable all
     -- warnings.  The hint library doesn't give an option to execute
@@ -69,8 +70,7 @@ Executable weshift-snap
   else
     if impl(ghc >= 6.12.0)
       ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields -O2
-                   -fno-warn-orphans -fno-warn-unused-do-bind 
+                   -fno-warn-orphans -fno-warn-unused-do-bind
     else
       ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields -O2
                    -fno-warn-orphans
-

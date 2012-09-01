@@ -10,8 +10,6 @@ import            Data.Maybe (catMaybes, mapMaybe, listToMaybe)
 import            Database.HDBC
 import            Data.Time.LocalTime
 
-import            Snap.Auth
-
 import Application
 import State.Types
 import State.Place
@@ -26,7 +24,7 @@ getUserFromToken token = do
   user  <- withPGDB "SELECT id, name, active, super, view, token FROM users WHERE token = ? LIMIT 1;" [toSql token]
   let userId = ((fmap (fromSql.head)).listToMaybe) user
   places <- maybe (return []) getUserPlaces userId
-  return $ mkUser (U.bind2 buildUser (listToMaybe user) (Just places))
+  return $ U.bind2 buildUser (listToMaybe user) (Just places)
 
 
 getUserEmails u =
@@ -87,29 +85,39 @@ activateAccount u p =
 buildEmail (i:u:e:c:[]) = Just (Email (fromSql i) (fromSql u) (fromSql e) (fromSql c))
 buildEmail _ = Nothing
 
-updateUserView :: User -> Application Bool
+updateUserView :: User -> AppHandler Bool
 updateUserView user = do
   res <- withPGDB "UPDATE users SET view = ? WHERE id = ? RETURNING id;" [toSql (uView user), toSql (uId user)]
   return $ not (null res)
 
-mkUser au = do (Attrs active super places view token) <- liftM snd au
-               auth <- liftM fst au
-               (UserId id')   <- userId auth
-               name <- userEmail auth
-               return $ User id' name active super places view  token
+--mkUser au = do (Attrs active super places view token) <- liftM snd au
+--               auth <- liftM fst au
+--               (UserId id')   <- userId auth
+--               name <- userEmail auth
+--               return $ User id' name active super places view  token
 
 buildUser (ui:un:ua:us:uv:ut:[]) places =  
-  Just (emptyAuthUser { userId = Just $ UserId (fromSql ui) 
-                      , userEmail = fromSql un
-                      , userPassword = Just (Encrypted "")
-                      , userSalt = Just ""
-                      }
-        , Attrs (fromSql ua) (fromSql us) 
-                (map (\(pi:pn:pt:po:pf:[]) -> 
-                  UserPlace (fromSql pi) (fromSql pn) (fromSql po) (fromSql pf) (fromSql pt)) 
-                places)
-                (fromSql uv)
-                (fromSql ut))
+  Just $ User (fromSql ui)
+              (fromSql un) 
+              (fromSql ua)
+              (fromSql us)
+              (map (\(pi:pn:pt:po:pf:[]) -> 
+                UserPlace (fromSql pi) (fromSql pn) (fromSql po) (fromSql pf) (fromSql pt)) 
+              places)
+              (fromSql uv)
+              (fromSql ut)
+
+  --Just (emptyAuthUser { userId = Just $ UserId (fromSql ui) 
+  --                    , userEmail = fromSql un
+  --                    , userPassword = Just (Encrypted "")
+  --                    , userSalt = Just ""
+  --                    }
+  --      , Attrs (fromSql ua) (fromSql us) 
+  --              (map (\(pi:pn:pt:po:pf:[]) -> 
+  --                UserPlace (fromSql pi) (fromSql pn) (fromSql po) (fromSql pf) (fromSql pt)) 
+  --              places)
+  --              (fromSql uv)
+  --              (fromSql ut))
                 
 buildUser _ _ = Nothing
 
