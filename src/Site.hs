@@ -50,11 +50,13 @@ import Handlers.Settings (activateEmail, activateDisabled)
 import Handlers.Shifts (coverShiftH)
 import State.Place
 import Splices.Place
+import Snap.Less
 
 site = [ ("/",                      ifTop indexH)
-       , ("/js",                    serveDirectory "resources/static/js")
-       , ("/css",                   serveDirectory "resources/static/css")
-       , ("/img",                   serveDirectory "resources/static/img")
+       , ("/js",                    serveDirectory "static/js")
+       , ("/css",                   withLess renderLess)
+       , ("/css",                   serveDirectory "static/css")
+       , ("/img",                   serveDirectory "static/img")
        , ("/activate/account",      activateAccountH)
        , ("/activate/email",        activateEmail)
        , ("/activate/disabled",     activateDisabled)
@@ -86,5 +88,6 @@ app = makeSnaplet "weshift" "An application for coordinating shifts." Nothing $ 
                         1
                         10
                         5
+    l <- liftIO $ newLessDirectory' "snaplets/lesscss/stylesheets"
     addRoutes site
-    return $ App h s d
+    return $ App h s d l

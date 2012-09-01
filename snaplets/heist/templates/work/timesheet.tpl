@@ -4,23 +4,23 @@
 
 <div-async name="center-main" class="main" id="timesheet">
   <h2>Timesheet | Total Hours: <totalHours/></h2>
-    <form-async action="$(placeRoot)/timesheet" method="POST">
+    <form-async action="${placeRoot}/timesheet" method="POST">
     <div id="timesheet">
-      <input class="date" type="text" name="start" value="$(timesheetStart)"> 
+      <input class="date" type="text" name="start" value="${timesheetStart}"> 
       to 
-      <input class="date" type="text" name="stop" value="$(timesheetStop)">
+      <input class="date" type="text" name="stop" value="${timesheetStop}">
       <isFacilitator>
         for
         <span>
           <select name="user">
             <timesheetCoworkers>
-              <option value="$(userId)" $(selected)><userName/></option>
+              <option value="${userId}" ${selected}><userName/></option>
             </timesheetCoworkers>
           </select>
         </span>
       </isFacilitator>
       <isNormalUser>
-        <span><input type="hidden" name="user" value="$(userId)"></span>        
+        <span><input type="hidden" name="user" value="${userId}"></span>        
       </isNormalUser>
       <button type="submit" title="Get Timesheet" /></div></form-async>
     <table id="entries"><tbody><tr class="heading">
@@ -35,7 +35,7 @@
         <td class="entry-shift"><startTime/>-<endTime/><br><shiftDate/></td>
         <td class="entry-changes">
           <changes>
-            <div class="$(changeClasses)"><changeDescription/> by <changePerson/><br>(<changeTime/>, <changeDate/>)</div>
+            <div class="${changeClasses}"><changeDescription/> by <changePerson/><br>(<changeTime/>, <changeDate/>)</div>
           </changes>
       </tr>
     </timesheet>

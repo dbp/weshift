@@ -6,7 +6,7 @@
   <div class="content">
     <h3>Change Password</h3>
     <div-async name="password-change-form">
-    <form-async action="$(placeRoot)/settings/password" method="POST">
+    <form-async action="${placeRoot}/settings/password" method="POST">
       <table>
         <tr><td colspan="2"><current-errors><error/><br></current-errors></td></tr>
         <tr><td class="label"><label for="current">Current:</label></td> <td><input name="current" type="password" /></td></tr>

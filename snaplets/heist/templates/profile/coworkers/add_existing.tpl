@@ -2,8 +2,8 @@
   We found people named <name/> already on WeShift. Did you mean any of these people?
   <br><br>
   <users>
-    <form-async method="POST" action="$(placeRoot)/coworkers/add/exists">
-      <input type="hidden" name="id" value="$(id)"/>
+    <form-async method="POST" action="${placeRoot}/coworkers/add/exists">
+      <input type="hidden" name="id" value="${id}"/>
       <name/> at <places><name/>, <org/> - </places>
       <button type="submit"/>
     </form-async>

@@ -1,1 +1,1 @@
-<redirect-async url="$(url)"/>
+<redirect-async url="${url}"/>

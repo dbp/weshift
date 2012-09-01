@@ -55,7 +55,8 @@ Executable weshift
     --snap-less,
     old-locale,
     ssv >= 0.2,
-    parsec >= 3.1
+    parsec >= 3.1,
+    snap-less
 
   if flag(development)
     build-depends:

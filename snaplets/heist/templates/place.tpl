@@ -6,14 +6,14 @@
          <div class="content">
            <h3><div-async name="user-name"><userName/></div-async></h3>
            <h5>
-            <form action="$(placeRoot)">
+            <form action="${placeRoot}">
               <select onchange="this.parentNode.action = this.value;">
                <userPlaces>
-                <show selected="$(current)">
-                  <option value="$(root)" selected="selected"><shortname/></option>
+                <show selected="${current}">
+                  <option value="${root}" selected="selected"><shortname/></option>
                 </show>
-                <show notselected="$(current)">
-                  <option value="$(root)"><shortname/></option>
+                <show notselected="${current}">
+                  <option value="${root}"><shortname/></option>
                 </show>
               </userPlaces>
               </select>

@@ -5,9 +5,9 @@
 <div-async name="center-main" class="main" id="month">
   <h2>Monthly Calendar</h2>
   <div id="month-heading">
-    <h1><a-async href="$(placeRoot)/month/$(mPrevYear)/$(mPrevMonth)" id="prev"></a-async> 
+    <h1><a-async href="${placeRoot}/month/${mPrevYear}/${mPrevMonth}" id="prev"></a-async> 
         <monthName/> 
-        <a-async href="$(placeRoot)/month/$(mNextYear)/$(mNextMonth)" id="next"></a-async></h1>
+        <a-async href="${placeRoot}/month/${mNextYear}/${mNextMonth}" id="next"></a-async></h1>
   </div> <!-- #month-heading -->
   <div id="month-daynames">
     <div class="dayname">Sun</div>

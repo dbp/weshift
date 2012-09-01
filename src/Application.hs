@@ -17,12 +17,14 @@ import Data.Pool
 import Control.Monad.State
 import Control.Monad.Reader
 import Control.Monad.Trans
+import Snap.Less
 
 ------------------------------------------------------------------------------
 data App = App
     { _heist :: Snaplet (Heist App)
     , _sess :: Snaplet SessionManager
     , _db :: Pool Connection
+    , _less :: LessDirectory
     }
 
 makeLens ''App
@@ -36,7 +38,10 @@ withPGDB r ps = do c <- get
                    liftIO $ withResource (getL db c) (\conn -> do r <- quickQuery' conn r ps
                                                                   commit conn
                                                                   return r)
-
+withLess :: (LessState -> AppHandler ()) -> AppHandler ()
+withLess f = do c <- get
+                ls <- getDirectoryLS (getL less c)
+                f ls
 
 ------------------------------------------------------------------------------
 type AppHandler = Handler App App
