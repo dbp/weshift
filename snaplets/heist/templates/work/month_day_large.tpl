@@ -58,6 +58,15 @@
           <button class="cover toggle" data-toggle-target=".cover-form-${id}"/>               
         </ifRequested>
         <user-lookup id="${user}"><name/></user-lookup> - <start/>-<stop/><br>
+        <isFacilitator>
+          <button class="delete toggle" data-toggle-target=".delete-form-$(id)"></button> 
+        </isFacilitator>
+        <br/>
+        <isFacilitator>
+          <apply template="shift/delete">
+            <bind tag="disp">none</bind>
+          </apply>
+        </isFacilitator>
         <ifRequested>
           <apply template="shift/cover">
             <bind tag="disp">none</bind>

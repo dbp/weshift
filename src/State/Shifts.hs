@@ -84,7 +84,7 @@ getUserCurrentShifts place user start stop = fmap (catMaybes . (map buildShift))
 getUserShift :: BS.ByteString -> BS.ByteString -> AppHandler (Maybe Shift)
 getUserShift uid id' = fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder FROM shifts_current AS S WHERE S.id = ? AND S.user_id = ?;" [toSql $ id', toSql uid]
 
-getShift :: BS.ByteString -> Application (Maybe Shift)
+getShift :: BS.ByteString -> AppHandler (Maybe Shift)
 getShift id' = fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder FROM shifts_current AS S WHERE S.id = ?;" [toSql $ id']
   
 getShiftChanges :: Shift -> AppHandler [Modification]
