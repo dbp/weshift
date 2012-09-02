@@ -20,7 +20,7 @@ import Forms.Settings
 userNotIn place = checkM "Another user with this name already exists at this place." $ \n -> fmap not $ userExists place n
 
 newUserForm :: UserPlace -> Form Text AppHandler Text
-newUserForm p = userNotIn p nameForm
+newUserForm p = userNotIn p $ nameForm Nothing
 
 validEmailOrBlank = check "Must be a valid email, like help@weshift.org" $ \e -> let s = TE.encodeUtf8 e in ('@' `B8.elem` s && '.' `B8.elem` s) || (T.null e)
 

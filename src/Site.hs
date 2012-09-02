@@ -24,6 +24,8 @@ import            Snap.Snaplet.Session.Backends.CookieSession
 import            Snap.Less
 
 import            Secrets (dbName, pgUser, pgPassword)
+import            DigestiveAdaptor (digestiveAdaptorSplices)
+
 
 import            Handlers.Place (placeSite)
 import            Handlers.Account
@@ -71,4 +73,5 @@ app = makeSnaplet "weshift" "An application for coordinating shifts." Nothing $ 
                         5
     l <- liftIO $ newLessDirectory' "snaplets/lesscss/stylesheets"
     addRoutes site
+    addSplices digestiveAdaptorSplices
     return $ App h s d l

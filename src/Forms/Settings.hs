@@ -29,8 +29,8 @@ passwordForm = mkNP
     <$> "current" .: checkPassword (text Nothing)
     <*> newPasswordForm
   where mkNP c (n,p) = NewPassword c n p
-nameForm = "name" .: nonEmpty (text Nothing)
-                         
+nameForm mname = "name" .: nonEmpty (text mname)
+
 -- | regex validation sucks, so don't even try.
 validEmail = check "Must be a valid email, like help@weshift.org" $ \e -> let s = TE.encodeUtf8 e in '@' `B8.elem` s && '.' `B8.elem` s
 

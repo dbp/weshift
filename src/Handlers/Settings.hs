@@ -38,14 +38,14 @@ settingsHome u = do setView u "profile" "profile.settings"
                     renderWS "profile/usersettings/blank"
 
 userSettingsH u p = do setView u "profile" "profile.settings.name"
-                       renderWS "profile/usersettings/user"
+                       view <- getForm "ws" $ nameForm $ (Just . TE.decodeUtf8 . uName) u
+                       heistLocal (bindDigestiveSplices view) $ renderWS "profile/usersettings/user"
 
                   
-changeNameH u p = do (view, result) <- runForm "change-name-form" nameForm
-                     let name = (TE.decodeUtf8 . uName) u
+changeNameH u p = do let name = (TE.decodeUtf8 . uName) u
+                     (view, result) <- runForm "ws" $ nameForm (Just name)
                      case result of
                          Nothing -> do
-                           heistLocal (bindString "name" name ) $ 
                             heistLocal (bindDigestiveSplices view) $ renderWS "profile/usersettings/name_form"
                          Just name' -> do
                             success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql (uId u)]
