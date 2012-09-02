@@ -15,12 +15,15 @@ import qualified  Utils as U
 
 -- | Module specific imports
 import Text.SSV
+import Text.Parsec
 import Data.Char (digitToInt)
 import Data.Either (lefts,rights)
+
 import State.Coworkers
 import State.Shifts
+
 import Render.Shifts
-import Text.Parsec
+import Render.Bulk
 
 bulkInputH :: User -> UserPlace -> AppHandler ()
 bulkInputH user place = 
@@ -71,22 +74,6 @@ confirm u p = do
        showTimeRange start stop = (ftime start) ++ "-" ++ (ftime stop)
        ftime t = if ftime' "%M" t == "00" then ftime' "%H" t else ftime' "%R" t
        ftime' = formatTime defaultTimeLocale
-         
-renderNotUnderstood :: Monad m => [(String,Day,String)] -> Splice m
-renderNotUnderstood = mapSplices (\(name, date, shift) -> 
-                           runChildrenWithText [("name",        T.pack name)
-                                               ,("date",        T.pack $ show date)
-                                               ,("shift",       T.pack shift)
-                                               ])
-
-renderNotUnderStoodCSV :: [(String,Day,String)] -> String
-renderNotUnderStoodCSV nus = showCSV $ rows
-  where days = nub $ map (\(_,d,_) -> d) nus
-        names = nub $ map (\(n,_,_) -> n) nus
-        blanks = map (\n -> (n,days)) names
-        rows = ("Name":(map (formatTime defaultTimeLocale "%-m/%-d/%Y") days)) : (map (\(n, days) -> n : (map (gets n) days)) blanks)
-        gets n d = maybe "" (\(_,_,s) -> s) $ find (\(n',d',s) -> n==n' && d==d') nus
-
 
 -- | transformCSV makes it so that each cell is a standalone three-tuple that is the name, date, and shift
 transformCSV :: [[String]] -> [(String,Day,String)]

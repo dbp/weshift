@@ -18,6 +18,7 @@ import State.Account
 import State.Place
 import State.Coworkers
 import Mail
+import Forms.Settings
 
 settingsH :: User -> UserPlace -> AppHandler ()
 settingsH u p = route [ ("/",                 ifTop $ settingsHome u)
@@ -39,10 +40,6 @@ settingsHome u = do setView u "profile" "profile.settings"
 userSettingsH u p = do setView u "profile" "profile.settings.name"
                        renderWS "profile/usersettings/user"
 
-
-
---nameForm :: SnapForm AppHandler Text HeistView String
-nameForm = "name" .: nonEmpty (text Nothing)
                   
 changeNameH u p = do (view, result) <- runForm "change-name-form" nameForm
                      let name = (TE.decodeUtf8 . uName) u
@@ -64,26 +61,7 @@ stopFacilitatingH u p = do
     Just 1 -> renderWS "profile/usersettings/facilitation_only_one"
     Just _ -> do
       if pFac p then setFacilitator (uId u) p False else return False
-      renderWS "profile/usersettings/facilitation_stopped"
-
---checkPassword :: Validator AppHandler Text String
-checkPassword = checkM "Current password not correct:" fn
-  where fn p = do mUs <- getCurrentUser
-                  case mUs of
-                    Nothing -> return False
-                    Just u ->
-                      fmap (not.null) $ withPGDB 
-                        "SELECT id FROM users WHERE id = ? AND password = crypt(?, password) LIMIT 1;" 
-                        [toSql (uId u), toSql p]                  
-
-
-data NewPassword = NewPassword Text Text Text deriving (Eq,Show)
-
---passwordForm :: SnapForm AppHandler Text HeistView NewPassword
-passwordForm = mkNP
-    <$> "current" .: checkPassword (text Nothing)
-    <*> newPasswordForm
-  where mkNP c (n,p) = NewPassword c n p
+      renderWS "profile/usersettings/facilitation_stopped"               
 
 
 changePasswordH u p = do (view, result) <- runForm "change-password-form" passwordForm
@@ -182,11 +160,4 @@ activateDisabled = do
                       renderWS "activate/disabled"
     _ -> pass
                  
-                         
--- | regex validation sucks, so don't even try.
---validEmail :: Validator AppHandler Text String
-validEmail = check "Must be a valid email, like help@weshift.org" $ \e -> let s = TE.encodeUtf8 e in '@' `B8.elem` s && '.' `B8.elem` s
-
---emailForm :: SnapForm AppHandler Text HeistView String
-emailForm = "address" .: validEmail (text Nothing)
-                  
+                

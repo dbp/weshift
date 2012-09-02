@@ -20,15 +20,19 @@ import qualified  Utils as U
 -- | Module specific imports
 import            Data.Pool
 import            Heist.Splices.Async
-import            Secrets (dbName, pgUser, pgPassword)
 import            Snap.Snaplet.Session.Backends.CookieSession
+import            Snap.Less
+
+import            Secrets (dbName, pgUser, pgPassword)
 
 import            Handlers.Place (placeSite)
 import            Handlers.Account
 import            Handlers.Settings (activateEmail, activateDisabled)
 import            Handlers.Shifts (coverShiftH)
+
+import            Forms.Account
+
 import            State.Place
-import            Snap.Less
 
 site = [ ("/",                      ifTop indexH)
        , ("/js",                    serveDirectory "static/js")

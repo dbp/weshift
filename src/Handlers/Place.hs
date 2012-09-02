@@ -29,6 +29,7 @@ import Handlers.Messages
 
 import Render.Calendar
 import Render.Timesheet
+import Render.Coworkers
 
 placeSite :: AppHandler ()
 placeSite = do
@@ -141,23 +142,7 @@ monthH u p = do month <- fmap (maybeRead =<<) $ getParam "month"
                 heistLocal (bindSplices ((monthSplices u p day Nothing) ++ (commonSplices day))) $ renderWS "work/month_calendar"
 
        
-            
-monthSplices u p curday day' = [("monthName", textSplice $ T.pack (formatTime defaultTimeLocale "%B %Y" curday))
-                               ,("notLarge", identitySplice)
-                               ,("large", blackHoleSplice)
-                               ,("monthDays", monthView p u year month day')
-                               ,("mNextYear",  textSplice $ T.pack $ show nextYear)
-                               ,("mNextMonth", textSplice $ T.pack $ show nextMonth)
-                               ,("mCurrYear",  textSplice $ T.pack $ show year)
-                               ,("mCurrMonth", textSplice $ T.pack $ show month)
-                               ,("mPrevYear",  textSplice $ T.pack $ show prevYear)
-                               ,("mPrevMonth", textSplice $ T.pack $ show prevMonth)
-                               ,("day", identitySplice) -- this is to allow the same template to be used in other ways
-                               ]
-  where (year,month,_) = toGregorian curday
-        (nextYear,nextMonth,_) = toGregorian $ addGregorianMonthsClip 1 curday
-        (prevYear,prevMonth,_) = toGregorian $ addGregorianMonthsClip (-1) curday
-  
+
 dayH u p = do
   day <- fmap (maybeRead =<<) $ getParam "day"
   month <- fmap (maybeRead =<<) $ getParam "month"

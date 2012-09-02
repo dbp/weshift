@@ -17,23 +17,8 @@ import qualified  Utils as U
 import State.Coworkers
 import State.Account
 import Mail
-import Handlers.Settings (nameForm)
-
--- | important: the place that is passed is the place of the logged in user, so it's "pFac" will not be relevant.
-renderCoworker :: User -> Splice AppHandler
-renderCoworker (User uid uname uact usuper uplaces uview utoken) = do
-  let place = head uplaces
-  runChildrenWith [("id",         textSplice $ TE.decodeUtf8 uid)
-                  ,("name",       textSplice $ TE.decodeUtf8 uname)
-                  ,("classes",    textSplice $ T.concat (["member"] ++ if pFac place then [" facilitator"] else []))
-                  ,("places",     renderPlaces Nothing uplaces)
-                  ,("fac",        if pFac place then identitySplice else blackHoleSplice)
-                  ,("notfac",     if pFac place then blackHoleSplice else identitySplice)
-                  ]
-                       
-renderCoworkers :: [User] -> Splice AppHandler
-renderCoworkers coworkers = mapSplices renderCoworker coworkers
-
+import Render.Coworkers
+import Forms.Coworkers
 
 coworkersH :: User -> UserPlace -> AppHandler ()
 coworkersH user place = 
@@ -72,10 +57,6 @@ addCoworkerH u p = do
         ,("/exists", addCWexists u p)
         ,("/new", addCWnew u p)
         ]
-
-userNotIn place = checkM "Another user with this name already exists at this place." $ \n -> fmap not $ userExists place n
-
-newUserForm p = userNotIn p nameForm
 
 addCW u p = do  
   (view, result) <- runForm "add-user-form" (newUserForm p)
@@ -127,15 +108,4 @@ addCWnew u p = do
         _ -> renderWS "profile/coworkers/add_error" -- the only thing that should have been able to go wrong 
                                                   -- should have been checked earlier, so we don't know what happened
     Nothing -> pass -- shouldn't be able to get here, so pass
-
---validEmailOrBlank :: Validator AppHandler T.Text String
-validEmailOrBlank = check "Must be a valid email, like help@weshift.org" $ \e -> let s = TE.encodeUtf8 e in ('@' `B8.elem` s && '.' `B8.elem` s) || (T.null e)
-
---emailOrBlankForm :: SnapForm AppHandler T.Text HeistView String
-emailOrBlankForm = "email" .: validEmailOrBlank (text Nothing)
   
-
-coworkersSplice cs = [("coworkersCount", textSplice $ T.pack $ show $ length cs)
-                     ,("coworkers", renderCoworkers cs)
-                     ,("name-errors", blackHoleSplice)
-                     ]
