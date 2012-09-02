@@ -21,6 +21,7 @@ import Snap.Snaplet.Session.Common
 import Snap.Core
 
 import Control.Monad
+import Control.Monad.Trans (liftIO)
 
 import            Application
 import            State.Types
@@ -33,7 +34,7 @@ repUnders = B8.map (\c -> if c == ' ' then '_' else c)
 
 
 requireUserBounce :: AppHandler () -> AppHandler ()
-requireUserBounce good =  requireUserBounce' (const good)
+requireUserBounce good = requireUserBounce' (const good)
 
 requireUserBounce' :: (User -> AppHandler ()) -> AppHandler ()
 requireUserBounce' good = do
@@ -54,14 +55,16 @@ requireUserBounce' good = do
 -- | Set the current user's 'UserId' in the active session
 --
 setSessionUserId :: BS.ByteString -> AppHandler ()
-setSessionUserId t = with sess $ setInSession "__user_id" (TE.decodeUtf8 t)
-
+setSessionUserId t = do
+  with sess $ setInSession "__user_id" (TE.decodeUtf8 t)
+  with sess commitSession
 
 ------------------------------------------------------------------------------
 -- | Remove 'UserId' from active session, effectively logging the user out.
 removeSessionUserId :: AppHandler ()
-removeSessionUserId = with sess $ deleteFromSession "__user_id"
-
+removeSessionUserId = do
+  with sess $ deleteFromSession "__user_id"
+  with sess commitSession
 
 ------------------------------------------------------------------------------
 -- | Get the current user's 'UserId' from the active session
@@ -80,17 +83,14 @@ performLogin params = do
   where 
     getUserFromCreds params = do
       let ps = fmap (map (toSql . B8.concat)) $ sequence [M.lookup "name" params, M.lookup "pl" params, M.lookup "password" params]
-      resp <- maybe (return []) 
+      resp <- maybe (return [])
                     (withPGDB "SELECT id, name, active, super, view, token FROM users JOIN placeusers ON placeusers.user_id = users.id WHERE users.name = ? AND placeusers.place = ? AND password = crypt(?, password) LIMIT 1;") 
                     ps
       places <- maybe (return []) (getUserPlaces . fromSql . head) (listToMaybe resp)
-      {-liftIO $ putStrLn "Logging in user"
-      liftIO $ putStrLn $ show $ buildUser =<< listToMaybe resp-}
       return $ U.bind2 buildUser (listToMaybe resp) (Just places)
     login user = do
-      setSessionUserId (uId user) 
+      setSessionUserId (uId user)
       maybe (return ()) (\p -> with sess $ ((setInSession "place") . TE.decodeUtf8 . BS.concat) p) $ M.lookup "pl" params
-      {-liftIO $ putStrLn "logging in"-}
       return (Right user)
 
 wsPerformLogout :: AppHandler ()

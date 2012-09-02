@@ -35,9 +35,12 @@ import            Data.List (null, sortBy, find)
 import            System.Random (randomRIO)
 import            Heist.Splices.Async
 
+import Text.Digestive.Heist
+import Text.Digestive.Snap hiding (method)
+
 ------------------------------------------------------------------------------
 import            Application
-import            Secrets (pgUser, pgPassword)
+import            Secrets (dbName, pgUser, pgPassword)
 import            State.Types
 import qualified  Utils as U
 import            Common
@@ -69,10 +72,9 @@ site = [ ("/",                      ifTop indexH)
        ]
 
 indexH = do
-  heistLocal (bindSplices [("organization-errors", blackHoleSplice)
-                          ,("place-errors", blackHoleSplice)
-                          ,("name-errors", blackHoleSplice)
-                          ]) $ renderWS "index"
+  u <- getCurrentUser
+  (view, _) <- runForm "signup-form" (signupForm u)
+  heistLocal (bindDigestiveSplices view) $ renderWS "index"
 
 
 ------------------------------------------------------------------------------
@@ -83,7 +85,7 @@ app = makeSnaplet "weshift" "An application for coordinating shifts." Nothing $ 
     s <- nestSnaplet "sess" sess $
            initCookieSessionManager "config/site-key.txt" "weshift-session" (Just 3600)
     d <- liftIO $ createPool
-                        (connectPostgreSQL "hostaddr=127.0.0.1 dbname=postgres user=postgres password=pass") 
+                        (connectPostgreSQL ("hostaddr=127.0.0.1 dbname=" ++ dbName ++ " user=" ++ pgUser ++ " password=" ++ pgPassword))
                         disconnect 
                         1
                         10

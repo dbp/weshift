@@ -2,18 +2,19 @@
   <ifGuest>
     <strong>If you already have an account on WeShift, be sure to log in above first.</strong><br/><br/>
   </ifGuest>
-  <form-async action="/signup" method="POST">
-    Organization:<br> 
-    <div class="errors"><organization-errors><error/><br></organization-errors></div>
-    <input type="text" name="organization" value="${organization-value}"/><br>
-    Place Name:<br>
-    <div class="errors"><place-errors><error/><br></place-errors></div>
-     <input type="text" name="place" value="${place-value}" />
+  <dfForm data-async="1" action="/signup" method="POST">
+    <dfLabel ref="organization">Organization:</dfLabel><br> 
+    <dfErrorList ref="organization" class="errors"/>
+    <dfInputText ref="organization" /><br>
+    <dfLabel ref="place">Place Name:</dfLabel><br>
+    <dfErrorList ref="place" class="errors"/>
+    <dfInputText ref="place" />
     <ifGuest>
-      <br>Your Name:<br> 
-      <div class="errors"><name-errors><error/><br></name-errors></div>
-      <input type="text" name="name" value="${name-value}" />
+      <br>
+      <dfLabel ref="name">Your Name:</dfLabel><br>
+      <dfErrorList ref="name" class="errors"/>
+      <dfInputText ref="name" />
     </ifGuest>
     <button type="submit"/>
-  </form-async>
+  </dfForm>
 </div-async>

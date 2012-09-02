@@ -3,19 +3,19 @@
   <bind tag="center">
   <div class="content">
     <h3>Please set your password:</h3>
-    <form method="POST">
+    <dfForm method="POST">
       <table>
-        <tr><td colspan="2"><new-errors><error/><br></new-errors></td></tr>
+        <tr><td colspan="2"><dfErrorList ref="new"/></td></tr>
         <tr><td class="label">
-          <label for="new">Password:</label></td> 
-          <td><input name="new" type="password" /></td></tr>
-        <tr><td colspan="2"><confirm-errors><error/><br></confirm-errors></td></tr>
+          <dfLabel ref="new">Password:</dfLabel></td> 
+          <td><dfInputPassword ref="new" /></td></tr>
+        <tr><td colspan="2"><dfErrorList ref="confirm"/></td></tr>
         <tr><td class="label">
-          <label for="confirm">Again:</label></td> 
-          <td><input name="confirm" type="password" />
+          <dfLabel ref="confirm">Again:</dfLabel></td> 
+          <td><dfInputPassword ref="confirm" />
           <button type="submit" title=""/></td></tr>
       </table>
-    </form>
+    </dfForm>
   </div> <!-- .content -->
   
   </bind>
