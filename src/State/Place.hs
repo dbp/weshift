@@ -10,8 +10,8 @@ import            Data.Maybe (catMaybes, listToMaybe, mapMaybe)
 import            Database.HDBC
 import            Data.Time.LocalTime
 
-import Application
-import State.Types
+import 			  Application
+import 			  State.Types
 
 getPlaceFromId :: BS.ByteString -> AppHandler (Maybe UserPlace)
 getPlaceFromId pid = fmap ((>>= buildPlace).listToMaybe) $ withPGDB "SELECT P.id, P.name, P.token, P.organization FROM places as P WHERE P.id = ?;" [toSql pid]

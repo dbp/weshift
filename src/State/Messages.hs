@@ -11,9 +11,9 @@ import            Data.Maybe (catMaybes, mapMaybe, listToMaybe)
 import            Database.HDBC
 import            Data.Time.LocalTime
 
-import Application
-import State.Types
-import Auth
+import 			  Application
+import 			  State.Types
+import 			  Auth
 
 -- | the messages are sorted by a falloff algorithm - the votes down are subtracted from the votes up - this is turned to zero if it is negative (votes down alone are not enough to get it to shoot to the end of the list, that's what an innapropriate flag is for). then this is divided by the age of the message. So if something gets a lot of votes, it will stay at the top for a while, but after a while, something that has less votes, but is newer, will replace it. This is pretty standard for this kind of thing (though not sure if doing it purely in SQL is...)
   -- PAGE is BASE 1! this is to match the UI

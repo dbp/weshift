@@ -2,30 +2,22 @@
 
 module Handlers.Account where
 
-import Data.Maybe (isNothing, fromJust, listToMaybe, fromMaybe)  
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as B8
-import qualified Data.Text.Encoding as TE
-import Data.Text (Text)
+-- | Boilerplate imports
+import            Imports
+import qualified  Data.Text as T
+import qualified  Data.Text.Encoding as TE
+import qualified  Data.Bson as B
+import qualified  Data.Map as M
+import qualified  Data.ByteString as BS
+import qualified  Data.ByteString.Char8 as B8
+import qualified  Text.XmlHtml as X
+import qualified  Utils as U
 
-import Snap.Core
-import Common
-import Application
-import Auth
+-- | Module specific imports
 import State.Types
 import State.Place
 import State.Account
 import Handlers.Settings
-import Splices.Place
-import Text.Digestive.Heist
-import Text.Digestive.Snap
-import Text.Digestive
-
-import Text.Templating.Heist
-import Snap.Snaplet.Heist
-import Control.Monad
-import "mtl" Control.Monad.Trans
-import Control.Applicative
 
 
 loginGetH _ = do pl <- getParam "pl" -- this is the place

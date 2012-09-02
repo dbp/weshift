@@ -1,46 +1,34 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Handlers.Place where
-  
-import Snap.Types
-import Application
-import Common
-import Control.Monad
-import Control.Monad.Trans (liftIO)
-import Data.Maybe (fromMaybe, isNothing, fromJust, mapMaybe)
 
-import Data.Time.Format
-import Data.Time.Clock
-import Data.Time.Calendar
-import System.Locale
+  -- | Boilerplate imports
+import            Imports
+import qualified  Data.Text as T
+import qualified  Data.Text.Encoding as TE
+import qualified  Data.Bson as B
+import qualified  Data.Map as M
+import qualified  Data.ByteString as BS
+import qualified  Data.ByteString.Char8 as B8
+import qualified  Text.XmlHtml as X
+import qualified  Utils as U
 
-import Snap.Core
-import Text.Templating.Heist
-import Snap.Snaplet.Heist
-
-import qualified Data.ByteString.Char8 as B8
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
-import qualified Text.XmlHtml as X
-
-import State.Types
+-- | Module specific imports
 import State.Shifts
 import State.Coworkers
 import State.Account
-import Common
-
-import Auth
 
 import Handlers.Coworkers
 import Handlers.Help
 import Handlers.Settings
 import Handlers.Shifts
 import Handlers.Messages
-import Handlers.Month
-import Handlers.Day
 import Handlers.Timesheet
 import Handlers.Bulk
 import Handlers.Messages
+
+import Render.Calendar
+import Render.Timesheet
 
 placeSite :: AppHandler ()
 placeSite = do
@@ -184,27 +172,4 @@ dayH u p = do
   shifts <- getShifts curday (addDays 1 curday) p
   workers <- getWorkers p
   heistLocal (bindSplices ((commonSplices curday) ++ (daySplices u p workers shifts curday))) $ renderWS "work/day_calendar"
-
-
-timesheetH user place = do
-  targetUser <- getParam "user"
-  mstart <- getParam "start"
-  mstop <- getParam "stop"
-  
-  user' <- fmap fromJust $ case targetUser of
-            Just tU -> if pFac place then getUser tU else return $ Just user
-            Nothing -> return $ Just user
-            
-  coworkers <- getCoworkers user' place
-  let coworkersSplice = [("timesheetCoworkers", renderTSCoworkers user' coworkers)]
-  
-  today <- liftM utctDay $ liftIO getCurrentTime
-  
-  timesheetSplice <- case (mstart >>= parseWSDate,mstop >>= parseWSDate) of
-                        (Just start, Just stop) -> getTimesheet place user' start stop
-                        _ -> getTimesheet place user' (addDays (-14) today) today
-  
-  setView user "work" "work.timesheet"
-
-  heistLocal (bindSplices (commonSplices today ++ coworkersSplice ++ timesheetSplice)) $ renderWS "work/timesheet"
 

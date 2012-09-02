@@ -6,54 +6,29 @@ module Site
 
 ------------------------------------------------------------------------------
 
-import            Control.Monad
-import            Control.Monad.Trans (liftIO)
-import            Control.Applicative
-import            Data.ByteString (ByteString)
-import            Data.Maybe
+-- | Boilerplate imports
+import            Imports
 import qualified  Data.Text as T
-import            Snap.Core
-import            Snap.Snaplet
-import            Snap.Snaplet.Heist
-import            Snap.Snaplet.Session.Backends.CookieSession
-import            Snap.Util.FileServe
-import            Text.Templating.Heist
 import qualified  Data.Text.Encoding as TE
-import            Snap.Core
 import qualified  Data.Bson as B
+import qualified  Data.Map as M
 import qualified  Data.ByteString as BS
 import qualified  Data.ByteString.Char8 as B8
-import            Data.Time.Clock (getCurrentTime, diffUTCTime)
-
-import Database.HDBC.PostgreSQL
-import Database.HDBC
-import Data.Pool
-
-import            Text.XmlHtml (docContent)
-import            Text.Blaze.Renderer.XmlHtml (renderHtml)
-import            Data.List (null, sortBy, find)
-import            System.Random (randomRIO)
-import            Heist.Splices.Async
-
-import Text.Digestive.Heist
-import Text.Digestive.Snap hiding (method)
-
-------------------------------------------------------------------------------
-import            Application
-import            Secrets (dbName, pgUser, pgPassword)
-import            State.Types
+import qualified  Text.XmlHtml as X
 import qualified  Utils as U
-import            Common
-import            Auth
 
+-- | Module specific imports
+import            Data.Pool
+import            Heist.Splices.Async
+import            Secrets (dbName, pgUser, pgPassword)
+import            Snap.Snaplet.Session.Backends.CookieSession
 
-import Handlers.Place (placeSite)
-import Handlers.Account
-import Handlers.Settings (activateEmail, activateDisabled)
-import Handlers.Shifts (coverShiftH)
-import State.Place
-import Splices.Place
-import Snap.Less
+import            Handlers.Place (placeSite)
+import            Handlers.Account
+import            Handlers.Settings (activateEmail, activateDisabled)
+import            Handlers.Shifts (coverShiftH)
+import            State.Place
+import            Snap.Less
 
 site = [ ("/",                      ifTop indexH)
        , ("/js",                    serveDirectory "static/js")

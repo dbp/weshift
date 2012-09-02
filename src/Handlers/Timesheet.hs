@@ -1,40 +1,49 @@
 {-# LANGUAGE OverloadedStrings, PackageImports #-}
 
 module Handlers.Timesheet where
-  
-import Snap.Types
 
-import Text.Templating.Heist
-import Snap.Snaplet.Heist
-import qualified Text.XmlHtml as X
 
-import Data.Maybe (fromJust, fromMaybe)
+-- | Boilerplate imports
+import            Imports
+import qualified  Data.Text as T
+import qualified  Data.Text.Encoding as TE
+import qualified  Data.Bson as B
+import qualified  Data.Map as M
+import qualified  Data.ByteString as BS
+import qualified  Data.ByteString.Char8 as B8
+import qualified  Text.XmlHtml as X
+import qualified  Utils as U
 
-import Text.Digestive
-import Text.Digestive.Heist
-import Database.HDBC
-
-import Data.Text (Text)
-import qualified Data.Text.Encoding as TE
-import qualified Data.Text as T
-import Control.Applicative
-import "mtl" Control.Monad.Trans (liftIO, lift)
-
-import Data.Time.Calendar
-import Data.Time.LocalTime
-import Data.Time.Calendar.OrdinalDate
-import Data.Time.Format
-import Data.Time.Clock
-import System.Locale
-
-import Data.List.Split
-import Data.List (sortBy)
-
-import Application
-import Auth
-import State.Types
+-- | Module specific imports
 import State.Shifts
-import Common
+import State.Account
+import State.Coworkers
+import Render.Timesheet
+
+
+
+timesheetH user place = do
+  targetUser <- getParam "user"
+  mstart <- getParam "start"
+  mstop <- getParam "stop"
+  
+  user' <- fmap fromJust $ case targetUser of
+            Just tU -> if pFac place then getUser tU else return $ Just user
+            Nothing -> return $ Just user
+            
+  coworkers <- getCoworkers user' place
+  let coworkersSplice = [("timesheetCoworkers", renderTSCoworkers user' coworkers)]
+  
+  today <- liftM utctDay $ liftIO getCurrentTime
+  
+  timesheetSplice <- case (mstart >>= parseWSDate,mstop >>= parseWSDate) of
+                        (Just start, Just stop) -> getTimesheet place user' start stop
+                        _ -> getTimesheet place user' (addDays (-14) today) today
+  
+  setView user "work" "work.timesheet"
+
+  heistLocal (bindSplices (commonSplices today ++ coworkersSplice ++ timesheetSplice)) $ renderWS "work/timesheet"
+
 
 getTimesheet :: UserPlace -> User -> Day -> Day -> AppHandler [(Text, Splice AppHandler)]
 getTimesheet place user start stop = do
@@ -66,45 +75,3 @@ timesheetEntry user shift = do
   return $ Entry hoursWorked (sStart shift) (sStop shift) modifications
     where roundHours n = (/ 10) $ fromIntegral $ floor $ n * 10 
 
-renderTSCoworkers self coworkers = mapSplices (renderTSCoworker self) (self : coworkers)
-renderTSCoworker self u = runChildrenWithText [ ("userId",   TE.decodeUtf8 $ uId u)
-                                              , ("userName", TE.decodeUtf8 $ uName u)
-                                              , ("selected", if u == self then "selected='selected'" else "")
-                                              ]
-
-
-data Entry = Entry Double LocalTime LocalTime [Modification] deriving Show -- hours worked, orig. start, orig. end, list of modifications
-
-entryHours (Entry h _ _ _) = h
-
-renderChange (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
-                                                , ("changeDescription", "Deleted")
-                                                , ("changePerson", TE.decodeUtf8 $ uName u)
-                                                , ("changeTime", renderTime t)
-                                                , ("changeDate", renderDate t)
-                                                ]
-
-
-renderChange (Change s e u t) = runChildrenWithText [ ("changeClasses", "change")
-                                                    , ("changeDescription", T.concat ["To ",(renderTime s),"-",(renderTime e)])
-                                                    , ("changePerson", TE.decodeUtf8 $ uName u)
-                                                    , ("changeTime", renderTime t)
-                                                    , ("changeDate", renderDate t)
-                                                    ]
-                                                    
-
-renderChange (Cover u t) = runChildrenWithText [ ("changeClasses", "cover")
-                                               , ("changeDescription", "Covered")
-                                               , ("changePerson", TE.decodeUtf8 $ uName u)
-                                               , ("changeTime", renderTime t)
-                                               , ("changeDate", renderDate t)
-                                               ]
-                                               
-renderEntry (Entry hours start end changes) =
-  runChildrenWith [ ("hoursWorked", textSplice $ T.pack $ show hours)
-                  , ("startTime", textSplice $ renderTime start)
-                  , ("endTime", textSplice $ renderTime end)
-                  , ("shiftDate", textSplice $ renderDateLong start)
-                  , ("changes", mapSplices renderChange changes)
-                  ]
-                  

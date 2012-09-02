@@ -157,7 +157,6 @@ parseWSDate s = parseTime defaultTimeLocale "%-m.%-d.%Y" $ B8.unpack s
 maybeRead :: Read a => ByteString -> Maybe a
 maybeRead = fmap fst . listToMaybe . reads . B8.unpack
 
---nonEmpty :: Validator AppHandler T.Text String
 nonEmpty :: Form T.Text AppHandler T.Text -> Form T.Text AppHandler T.Text
 nonEmpty = check "Field must not be empty:" $ \s -> not $ T.null s
 

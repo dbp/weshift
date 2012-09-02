@@ -2,24 +2,22 @@
 
 module Handlers.Messages where
   
-import Snap.Core
-import Text.Templating.Heist
-import Snap.Snaplet.Heist
-import qualified Data.Text.Encoding as TE
-import qualified Data.Text as T  
-import qualified Data.ByteString.Char8 as B8  
-import qualified Data.ByteString as BS
-import Text.Digestive
-import Text.Digestive.Heist
-import Text.Digestive.Snap
-import Data.Maybe (fromMaybe)
-import Data.Time.Format
-import System.Locale (defaultTimeLocale)
-import Control.Monad.Trans
-import Application
-import Common
+-- | Boilerplate imports
+import            Imports
+import qualified  Data.Text as T
+import qualified  Data.Text.Encoding as TE
+import qualified  Data.Bson as B
+import qualified  Data.Map as M
+import qualified  Data.ByteString as BS
+import qualified  Data.ByteString.Char8 as B8
+import qualified  Text.XmlHtml as X
+import qualified  Utils as U
+
+-- | Module specific imports
 import State.Types
 import State.Messages
+import Forms.Messages
+import Render.Messages
 
         
 messagesH :: User -> UserPlace -> AppHandler ()
@@ -39,9 +37,6 @@ messageAddH u p = do
       addMessage p (TE.encodeUtf8 msg')
       spl <- messagesPageSplices p 1
       heistLocal (bindSplices spl) $ renderWS "messages/add_success"
-
-messageForm = "message" .: maxOneForty (nonEmpty (text Nothing))
-  where maxOneForty = check "Message cannot be over 140 Characters" $ \m -> T.length m < 141
 
 messagesPageH u p = do
   mpage <- getParam "num"
@@ -75,14 +70,3 @@ messageAct fn u p = do
 messageVoteUpH = messageAct voteMessageUp
 messageVoteDownH = messageAct voteMessageDown
 messageFlagH = messageAct flagMessage
-
-renderPages n total = mapSplices (\i -> runChildrenWithText [("num", T.pack $ show i),("class", if i == n then "sel" else "")]) $ take total $ iterate (+1) 1
-
-renderMessages = mapSplices (\(Message i c u d f r) -> 
-                              runChildrenWithText [("id", TE.decodeUtf8 i)
-                                                  ,("message", TE.decodeUtf8 c)
-                                                  ,("ups", T.pack $ show u)
-                                                  ,("downs", T.pack $ show d)
-                                                  ,("flags", T.pack $ show f)
-                                                  ,("timestamp", T.pack $ formatTime defaultTimeLocale "written %-I:%M%p, %-m.%d.%Y" r)
-                                                  ])

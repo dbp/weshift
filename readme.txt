@@ -1,3 +1,7 @@
+General Setup:
+create a Secrets.hs file with pgUser, pgPassword, dbName, postmarkToken.
+create corresponding database and user. 
+
 Packages:
 dbmigrations package at darcsden.com/dbp/dmigrations (fork with relaxed deps so it builds)
 snap-less package at github.com/dbp/snap-less (fork with updated import for snap)

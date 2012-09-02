@@ -2,32 +2,22 @@
 
 module Handlers.Settings where
   
-import Snap.Core
+-- | Boilerplate imports
+import            Imports
+import qualified  Data.Text as T
+import qualified  Data.Text.Encoding as TE
+import qualified  Data.Bson as B
+import qualified  Data.Map as M
+import qualified  Data.ByteString as BS
+import qualified  Data.ByteString.Char8 as B8
+import qualified  Text.XmlHtml as X
+import qualified  Utils as U
 
-import Text.Templating.Heist
-import Snap.Snaplet.Heist
-
-import Text.Digestive
-import Text.Digestive.Heist
-import Text.Digestive.Snap hiding (method)
-import Database.HDBC
-
-import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
-import qualified Data.ByteString.Char8 as B8
-import Control.Applicative
-import "mtl" Control.Monad.Trans (liftIO)
-
-import Application
-import Auth
-import State.Types
+-- | Module specific imports
 import State.Account
 import State.Place
 import State.Coworkers
-import Common
 import Mail
-import Control.Concurrent (threadDelay)
 
 settingsH :: User -> UserPlace -> AppHandler ()
 settingsH u p = route [ ("/",                 ifTop $ settingsHome u)
@@ -62,7 +52,6 @@ changeNameH u p = do (view, result) <- runForm "change-name-form" nameForm
                             heistLocal (bindDigestiveSplices view) $ renderWS "profile/usersettings/name_form"
                          Just name' -> do
                             success <- fmap (not.null) $ withPGDB "UPDATE users SET name = ? WHERE id = ? RETURNING id;" [toSql name', toSql (uId u)]
-                            {-liftIO $ threadDelay 200000-}
                             case success of
                               True  -> renderWS "profile/usersettings/name_updated"
                               False -> renderWS "profile/usersettings/name_couldntupdate"

@@ -15,13 +15,13 @@ import            System.Random
 import qualified  Data.Map as M
 
 import            Database.HDBC
-import Snap.Snaplet
-import Snap.Snaplet.Session
-import Snap.Snaplet.Session.Common
-import Snap.Core
+import            Snap.Snaplet
+import            Snap.Snaplet.Session
+import            Snap.Snaplet.Session.Common
+import            Snap.Core
 
-import Control.Monad
-import Control.Monad.Trans (liftIO)
+import            Control.Monad
+import            Control.Monad.Trans (liftIO)
 
 import            Application
 import            State.Types

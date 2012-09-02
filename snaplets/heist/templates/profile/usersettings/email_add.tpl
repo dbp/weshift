@@ -1,10 +1,10 @@
 <div-async name="add-email">
-  <form-async action="${placeRoot}/settings/email/add" method="POST">
+  <dfForm data-async="1" action="${placeRoot}/settings/email/add" method="POST">
   <table>
-    <tr><td colspan="2"><address-errors><error/><br></address-errors></td></tr>
-    <tr><td class="label"><label for="address">Add:</label></td> 
-      <td><input name="address" type="text" value="${address}" />
+    <tr><td colspan="2"><dfErrorList ref="address"/></td></tr>
+    <tr><td class="label"><dfLabel ref="address">Add:</dfLabel></td> 
+      <td><dfInputText ref="address" />
         <button type="submit" title=""/></td></tr>
   </table>
-  </form-async>
+  </dfForm>
 </div-async>

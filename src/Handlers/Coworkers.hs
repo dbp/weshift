@@ -2,31 +2,22 @@
 
 module Handlers.Coworkers where
 
-import Data.Maybe (fromJust, isNothing)  
-import Control.Monad (when, liftM)
-import Control.Monad.Trans
+-- | Boilerplate imports
+import            Imports
+import qualified  Data.Text as T
+import qualified  Data.Text.Encoding as TE
+import qualified  Data.Bson as B
+import qualified  Data.Map as M
+import qualified  Data.ByteString as BS
+import qualified  Data.ByteString.Char8 as B8
+import qualified  Text.XmlHtml as X
+import qualified  Utils as U
 
-import Text.Templating.Heist
-import Snap.Snaplet.Heist
-import qualified Data.Text.Encoding as TE
-import qualified Data.Text as T  
-import qualified Data.ByteString.Char8 as B8  
-import qualified Data.ByteString as BS  
-import Snap.Types
-
-import Text.Digestive
-import Text.Digestive.Heist
-import Text.Digestive.Snap
-
-import State.Types
+-- | Module specific imports
 import State.Coworkers
 import State.Account
-import Application
-import Common
-import Auth
 import Mail
 import Handlers.Settings (nameForm)
-import Splices.Place
 
 -- | important: the place that is passed is the place of the logged in user, so it's "pFac" will not be relevant.
 renderCoworker :: User -> Splice AppHandler

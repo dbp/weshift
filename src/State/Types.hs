@@ -13,7 +13,7 @@ import            Data.Time.LocalTime
 import            Data.Time.Calendar
 import            Data.Time.Clock
 
-import Application
+import            Application
 
 
 data User = User { uId :: BS.ByteString
@@ -62,6 +62,13 @@ data Shift = Shift { sId :: BS.ByteString
                    deriving (Eq, Show, Read)
 emptyShift = Shift "" "" "" emptyLocalTime emptyLocalTime emptyLocalTime ""
 
+data Modification = Delete User LocalTime -- who deleted it, and when
+                  | Change LocalTime LocalTime User LocalTime -- new start, new end, who did it, when it was changed
+                  | Cover User LocalTime -- who covered it, and when
+                  deriving (Eq, Show)
+mTime (Delete _ t) = t
+mTime (Change _ _ _ t) = t
+mTime (Cover _ t) = t
 
 buildPlace (pi:pn:pt:po:[]) = Just $ UserPlace (fromSql pi) (fromSql pn) (fromSql po) False (fromSql pt) 
 buildPlace _ = Nothing

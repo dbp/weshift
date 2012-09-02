@@ -6,21 +6,17 @@
   <div class="content">
     <h3>Change Password</h3>
     <div-async name="password-change-form">
-    <form-async action="${placeRoot}/settings/password" method="POST">
+    <dfForm data-async="1" action="${placeRoot}/settings/password" method="POST">
       <table>
-        <tr><td colspan="2"><current-errors><error/><br></current-errors></td></tr>
-        <tr><td class="label"><label for="current">Current:</label></td> <td><input name="current" type="password" /></td></tr>
-        <tr><td colspan="2"><new-errors><error/><br></new-errors></td></tr>
-        <tr><td class="label">
-          <label for="new">New:</label></td> 
-          <td><input name="new" type="password" /></td></tr>
-        <tr><td colspan="2"><confirm-errors><error/><br></confirm-errors></td></tr>
-        <tr><td class="label">
-          <label for="confirm">Again:</label></td> 
-          <td><input name="confirm" type="password" />
+        <tr><td colspan="2"><dfErrorList ref="current"/></td></tr>
+        <tr><td class="label"><dfLabel ref="current">Current:</dfLabel></td> <td><dfInputPassword ref="current" /></td></tr>
+        <tr><td colspan="2"><dfErrorList ref="new"/></td></tr>
+        <tr><td class="label"><dfLabel ref="new">New:</dfLabel></td> <td><dfInputPassword ref="new" /></td></tr>
+        <tr><td colspan="2"><dfErrorList ref="confirm"/></td></tr>
+        <tr><td class="label"><dfLabel ref="confirm">Confirm:</dfLabel></td> <td><dfInputPassword ref="confirm" />
           <button type="submit" title=""/></td></tr>
       </table>
-    </form-async>
+    </dfForm>
     </div-async>
   </div> <!-- .content -->
 

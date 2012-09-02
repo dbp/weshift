@@ -1,7 +1,7 @@
 <div-async name="add-message">
-  <form-async action="${placeRoot}/messages/add" method="POST">
-    <div class="errors"><message-errors><error/><br></message-errors></div>
-    <textarea name="message"><show notblank="${message-value}"><message-value/></show></textarea>
+  <dfForm data-async="1" action="${placeRoot}/messages/add" method="POST">
+  	<dfErrorList ref="message"/>
+    <dfInputTextArea ref="message"></dfInputTextArea>
     <button type="submit" title="Post Message"></button>
-  </form-async>
+  </dfForm>
 </div-async>

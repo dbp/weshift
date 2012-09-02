@@ -11,17 +11,11 @@ import            Database.HDBC
 import            Data.Time.LocalTime
 import            Data.Time.Calendar
 
-import Application
-import State.Types
-import State.Account (buildUser)
+import            Application
+import            State.Types
+import            State.Account (buildUser)
 
-data Modification = Delete User LocalTime -- who deleted it, and when
-                  | Change LocalTime LocalTime User LocalTime -- new start, new end, who did it, when it was changed
-                  | Cover User LocalTime -- who covered it, and when
-                  deriving (Eq, Show)
-mTime (Delete _ t) = t
-mTime (Change _ _ _ t) = t
-mTime (Cover _ t) = t
+
 
 -- | if successful, returns Right id, else Left shift that could not be entered
 insertShift :: Shift -> AppHandler (Either Shift BS.ByteString)

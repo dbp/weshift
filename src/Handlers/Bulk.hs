@@ -2,34 +2,24 @@
 
 module Handlers.Bulk where
   
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE  
-import qualified Data.ByteString.Char8 as B8  
-import Data.Time.Clock
-import Data.Time.Format
-import Data.Time.Calendar
-import Data.Time.LocalTime
-import System.Locale (defaultTimeLocale)
+-- | Boilerplate imports
+import            Imports
+import qualified  Data.Text as T
+import qualified  Data.Text.Encoding as TE
+import qualified  Data.Bson as B
+import qualified  Data.Map as M
+import qualified  Data.ByteString as BS
+import qualified  Data.ByteString.Char8 as B8
+import qualified  Text.XmlHtml as X
+import qualified  Utils as U
 
-import "mtl" Control.Monad.Trans
-import Control.Applicative hiding (optional)
-import Text.Templating.Heist
-import Snap.Snaplet.Heist
+-- | Module specific imports
 import Text.SSV
-import Data.Maybe (isJust, mapMaybe, catMaybes, fromMaybe, isNothing)
 import Data.Char (digitToInt)
-import Data.List (find,nub)
 import Data.Either (lefts,rights)
-  
-import Snap.Core
-import Application
-import State.Types
 import State.Coworkers
 import State.Shifts
-import Common
-import Handlers.Month
-import Time
-
+import Render.Shifts
 import Text.Parsec
 
 bulkInputH :: User -> UserPlace -> AppHandler ()
