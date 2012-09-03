@@ -1,23 +1,11 @@
 <div-async name="change-form-${id}" class="change-form-${id} change-form" style="display: ${disp};">
-  	<show notblank="${id}">
-  		<form-async action="${placeRoot}/shift/edit" method="POST">
-    		<input type="hidden" name="id" value="${id}"/>
-    		<input type="hidden" name="day" value="${dayNum}"/>
-    		<input type="hidden" name="month" value="${currMonth}"/>
-    		<input type="hidden" name="year" value="${currYear}"/>
-    		<input type="text" name="start"/> to <input type="text" name="stop" />
-    		<button type="submit"/>
-    	</form-async>
-    </show>
-    <show blank="${id}">    
-  		<dfForm data-async="1" action="${placeRoot}/shift/edit" method="POST">
-    		<dfInputHidden ref="id"/>
-    		<dfInputHidden ref="day"/>
-    		<dfInputHidden ref="month"/>
-    		<dfInputHidden ref="year"/>
-			<dfInputText ref="start"/> to <dfInputText ref="stop"/>
-			<dfChildErrors />
+  	<dfForm data-async="1" action="${placeRoot}/shift/edit" method="POST">
+    		<dfInputHidden ref="id" data-default="${id}"/>
+    		<dfInputHidden ref="day" data-default="${dayNum}"/>
+    		<dfInputHidden ref="month" data-default="${currMonth}"/>
+    		<dfInputHidden ref="year" data-default="${currYear}"/>
+			<dfInputText ref="start" data-default="${start}"/> to <dfInputText ref="stop" data-default="${stop}"/>
+			<dfChildErrorList class="errors" />
 			<button type="submit"/>
-  		</dfForm>
-	</show>
+  	</dfForm>
 </div-async>

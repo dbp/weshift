@@ -43,7 +43,7 @@ userSettingsH u p = do setView u "profile" "profile.settings.name"
 
                   
 changeNameH u p = do let name = (TE.decodeUtf8 . uName) u
-                     (view, result) <- runForm "ws" $ nameForm (Just name)
+                     (view, result) <- wsForm $ nameForm (Just name)
                      case result of
                          Nothing -> do
                             heistLocal (bindDigestiveSplices view) $ renderWS "profile/usersettings/name_form"
@@ -64,7 +64,7 @@ stopFacilitatingH u p = do
       renderWS "profile/usersettings/facilitation_stopped"               
 
 
-changePasswordH u p = do (view, result) <- runForm "change-password-form" passwordForm
+changePasswordH u p = do (view, result) <- wsForm passwordForm
                          setView u "profile" "profile.settings.password"
                          case result of
                              Nothing -> do
@@ -100,7 +100,7 @@ renderEmails = mapSplices (\(Email i u a c) -> runChildrenWith [("id", textSplic
                                                                ,("confirmed", booleanSplice c)
                                                                ])
 
-addEmailH u p = do (view, result) <- runForm "add-email-form" emailForm
+addEmailH u p = do (view, result) <- wsForm emailForm
                    case result of
                        Nothing -> do
                          heistLocal (bindDigestiveSplices view) $ renderWS "profile/usersettings/email_add"
@@ -148,7 +148,7 @@ activateDisabled = do
   wsPerformLogout -- make sure they aren't signed in as anyone else
   case (muser,fmap urlDecode nam,emtok,mplace) of
     (Just u, Just name, Just token, Just place) -> do 
-      (view, result) <- runForm "change-password-form" newPasswordForm
+      (view, result) <- wsForm newPasswordForm
       case result of
           Nothing -> do
             heistLocal (bindDigestiveSplices view) $ renderWS "activate/disabled"

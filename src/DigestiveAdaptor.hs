@@ -9,7 +9,7 @@ module DigestiveAdaptor where
 import Control.Monad (liftM, mplus)
 import Data.Function (on)
 import Data.List (unionBy)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, maybeToList)
 import Data.Monoid (mappend)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -49,6 +49,12 @@ makeElement name nodes = return . flip (X.Element name) nodes
 
 
 --------------------------------------------------------------------------------
+getDefaultValue :: [(Text, Text)] -> [(Text, Text)]
+getDefaultValue as = maybeToList $ do
+    v <- lookup "data-default" as
+    return ("value", v)
+
+--------------------------------------------------------------------------------
 getRefAttributes :: Monad m
                  => Maybe Text -- ^ Optional default ref
                  -> HeistT m (Text, [(Text, Text)]) -- ^ (Ref, other attrs)
@@ -86,8 +92,9 @@ dfInputText :: Monad m => Splice m
 dfInputText = do
     (ref, attrs) <- getRefAttributes Nothing
     let ref' = T.append "ws." ref
+    let def = getDefaultValue attrs
     return $ makeElement "input" [] $ addAttrs attrs
-        [("type", "text"), ("id", ref'), ("name", ref')]
+        ([("type", "text"), ("id", ref'), ("name", ref')] ++ def)
 
 dfInputTextArea :: Monad m => Splice m
 dfInputTextArea = do
@@ -107,8 +114,9 @@ dfInputHidden :: Monad m => Splice m
 dfInputHidden = do
     (ref, attrs) <- getRefAttributes Nothing
     let ref' = T.append "ws." ref
+    let def = getDefaultValue attrs
     return $ makeElement "input" [] $ addAttrs attrs
-        [("type", "hidden"), ("id", ref'), ("name", ref')]
+        ([("type", "hidden"), ("id", ref'), ("name", ref')] ++ def)
 
 -- can't be done
 --dfInputSelect :: Monad m => Splice m

@@ -121,12 +121,11 @@ dayLargeSplices place user (year, month, day) = do
 
 -- | the first three params are just for the case that a large day should alse be rendered within.         
 renderDay :: User -> Maybe Int -> [Shift] -> DayFormat -> Splice AppHandler
-renderDay u day' shifts (DayFormat num myshifts othershifts top start end bottom request) = do
-  ex <- lift extra
+renderDay u day' shifts (DayFormat num myshifts othershifts top start end bottom request) =
   runChildrenWith $ [ ("boxClasses", textSplice boxclasses)
                     , ("dayClasses", textSplice dayclasses)
                     , ("dayNum", textSplice (maybe " " (T.pack . show) num))
-                    ] ++ ex
+                    ] ++ extra
       where boxclasses = T.concat (["daybox"] ++ 
                                   (if start then [" start"] else []) ++ 
                                   (if end then [" end"] else []) ++ 
@@ -142,9 +141,8 @@ renderDay u day' shifts (DayFormat num myshifts othershifts top start end bottom
             onToday s = Just (trd (toGregorian (localDay (sStart s)))) == day'
             trd (_,_,a) = a 
             extra = case day' of
-                      Just d | Just d == num -> do
-                        addv <- getForm "add-shift-form" addShiftForm
-                        return $ [("notLarge", blackHoleSplice)
+                      Just d | Just d == num -> 
+                                 [("notLarge", blackHoleSplice)
                                  ,("large", identitySplice)
                                  ,("start-value", textSplice "9:00am")
                                  ,("stop-value", textSplice "5:00pm")
@@ -154,8 +152,8 @@ renderDay u day' shifts (DayFormat num myshifts othershifts top start end bottom
                                  ,("selfShifts",  renderShifts selfShifts)
                                  ,("otherShifts", renderShifts otherShifts)
                                  ,("selfClasses", textSplice $ if null selfShifts then "" else "shift")
-                                 ] ++ (digestiveSplices addv)
-                      _ -> return []
+                                 ]
+                      _ -> []
                           
 
 

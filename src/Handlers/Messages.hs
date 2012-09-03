@@ -29,7 +29,7 @@ messagesH u p = route [ ("/add",            messageAddH u p)
                       ]
                   
 messageAddH u p = do
-  (view, result) <- runForm"add-user-form" messageForm
+  (view, result) <- wsForm messageForm
   case result of
     Nothing ->
       heistLocal (bindDigestiveSplices view) $ renderWS "messages/add_form"

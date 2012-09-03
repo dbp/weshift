@@ -30,7 +30,7 @@ shiftH u p = route [ ("/add",             shiftAddH u p)
                    ]
 
 shiftAddH u p = do
-  (view, result) <- runForm "add-shift-form" addShiftForm
+  (view, result) <- wsForm addShiftForm
   muid <- getParam "user" 
   case (result,muid) of
       (Just (ShiftTime start stop), Just uid) -> do
@@ -46,10 +46,11 @@ shiftAddH u p = do
   
   
 shiftEditH u p = do
-    (view, result) <- runForm "edit-shift-form" changeShiftForm
+    id' <- fmap (TE.decodeUtf8.fromJust) $ getParam "ws.id" -- if this isn't present, it means tampering, so don't care.
+    (view, result) <- wsForm changeShiftForm
     case result of
         Nothing -> do
-          heistLocal (bindSplices [("disp", textSplice "block")]) $ heistLocal (bindDigestiveSplices view) $ renderWS "work/shift/edit"
+          heistLocal (bindSplices [("disp", textSplice "block"), ("id", textSplice id')]) $ heistLocal (bindDigestiveSplices view) $ renderWS "work/shift/edit"
         Just (id', ShiftTime start stop) -> do
           s <- getUserShift (uId u) id'
           case s of

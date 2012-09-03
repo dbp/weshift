@@ -54,7 +54,7 @@ site = [ ("/",                      ifTop indexH)
 
 indexH = do
   u <- getCurrentUser
-  (view, _) <- runForm "signup-form" (signupForm u)
+  (view, _) <- wsForm (signupForm u)
   heistLocal (bindDigestiveSplices view) $ renderWS "index"
 
 

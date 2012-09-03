@@ -73,7 +73,7 @@ logoutH redirTo = do
 
 signupH = do
   u <- getCurrentUser
-  (view, result) <- runForm "signup-form" (signupForm u)
+  (view, result) <- wsForm (signupForm u)
   case result of
       Nothing -> do
         heistLocal (bindDigestiveSplices view) $ renderWS "signup_form"
@@ -112,7 +112,7 @@ activateAccountH = do
   wsPerformLogout -- make sure they aren't signed in as anyone else
   case (muser,tok,mplace) of
     (Just u, Just token, Just place) -> do 
-      (view, result) <- runForm "change-password-form" newPasswordForm
+      (view, result) <- wsForm newPasswordForm
       case result of
           Nothing -> do
             heistLocal (bindDigestiveSplices view) $ renderWS "activate/account"

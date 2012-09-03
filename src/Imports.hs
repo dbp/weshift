@@ -66,7 +66,7 @@ import            Database.HDBC.PostgreSQL
 import            Database.HDBC
 import            Text.Digestive hiding (Method)
 import            Text.Digestive.Heist
-import            Text.Digestive.Snap hiding (method)
+import            Text.Digestive.Snap hiding (runForm, method) -- we use our own version of runForm
 
 import            Application
 import            Auth

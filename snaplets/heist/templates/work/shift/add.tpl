@@ -13,10 +13,10 @@
     <isNormalUser>
         <dfInputHidden ref="user"/>
     </isNormalUser>
-    <dfInputHidden ref="day" value="${dayNum}${day-value}"/>
-    <dfInputHidden ref="month" value="${currMonth}${month-value}"/>
-    <dfInputHidden ref="year" value="${currYear}${year-value}"/>
-    <dfInputText ref="start"/> to <dfInputText ref="stop"/><button type="submit"/>
+    <dfInputHidden ref="day" data-default="${dayNum}"/>
+    <dfInputHidden ref="month" data-default="${currMonth}"/>
+    <dfInputHidden ref="year" data-default="${currYear}"/>
+    <dfInputText ref="start" data-default="9:00am"/> to <dfInputText ref="stop" data-default="5:00pm"/><button type="submit"/>
     <dfErrorList ref="start"/>
   </dfForm>
 </div-async>

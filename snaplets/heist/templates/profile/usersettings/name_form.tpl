@@ -4,7 +4,7 @@
     <table>
       <tr><td colspan="2"><dfErrorList ref="name" class="errors"/></td></tr>
       <tr><td class="label"><dfLabel ref="name">Name:</dfLabel></td> 
-        <td><dfInputText ref="name"/>
+        <td><dfInputText ref="name" data-default="${userName}"/>
         <button type="submit" title=""/></td></tr>
     </table>
   </dfForm>

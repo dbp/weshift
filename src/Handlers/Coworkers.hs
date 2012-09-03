@@ -59,7 +59,7 @@ addCoworkerH u p = do
         ]
 
 addCW u p = do  
-  (view, result) <- runForm "add-user-form" (newUserForm p)
+  (view, result) <- wsForm (newUserForm p)
   case result of
     Nothing -> do
       heistLocal (bindDigestiveSplices view) $ renderWS "profile/coworkers/add"
@@ -96,7 +96,7 @@ addCWnew u p = do
                                                      , "&pl="
                                                      , (pId p)
                                                      ]
-                             (view, result) <- runForm "optional-email-form" emailOrBlankForm
+                             (view, result) <- wsForm emailOrBlankForm
                              case result of
                                  Nothing -> do
                                    heistLocal (bindDigestiveSplices view) $ renderWS "profile/coworkers/add_new"

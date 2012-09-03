@@ -22,6 +22,7 @@ import Data.List (find)
 import Data.List.Split
 import Snap.Core
 import Text.Digestive.Heist
+import Text.Digestive.Snap hiding (method)
 import Text.Digestive
 
 import Data.Time.Format
@@ -35,6 +36,11 @@ import State.Types
 import State.Account
 import State.Place
 import State.Coworkers
+
+
+-- | this function is a helper for our use of digestive functors - we always use same prefix
+wsForm :: Form v AppHandler a -> AppHandler (View v, Maybe a)
+wsForm = runForm "ws"
 
 -- | this function takes a 'key' and a 'value' for the view, and sets it in the user's account.
 -- they key is the prefix of the value, so it is stored like: key.value.sub;key2.value2 etc.
