@@ -33,10 +33,11 @@ shiftAddH u p = do
   (view, result) <- wsForm addShiftForm
   muid <- getParam "user" 
   case (result,muid) of
-      (Just (ShiftTime start stop), Just uid) -> do
+      (Just (ShiftTime start stop color units), Just uid) -> do
         -- if they are a facilitator, then accept whatever id they gave, otherwise, enforce it being theirs
         let suser = if pFac p then uid else (uId u)
-        insertShift (emptyShift { sUser = suser, sPlace = (pId p), sStart = start, sStop = stop, sRecorder = (uId u)})
+        insertShift (emptyShift { sUser = suser, sPlace = (pId p), sStart = start, sStop = stop, 
+                                  sRecorder = (uId u), sColor = color, sUnits = units})
         (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
         heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
       (Nothing,_) -> do
@@ -51,14 +52,14 @@ shiftEditH u p = do
     case result of
         Nothing -> do
           heistLocal (bindSplices [("disp", textSplice "block"), ("id", textSplice id')]) $ heistLocal (bindDigestiveSplices view) $ renderWS "work/shift/edit"
-        Just (id', ShiftTime start stop) -> do
+        Just (id', ShiftTime start stop color units) -> do
           s <- getUserShift (uId u) id'
           case s of
             Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), 
                                                 ("disp", textSplice "block"), 
                                                 ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/edit_error"
             Just shift -> do
-              changeShift u shift start stop 
+              changeShift u shift start stop color units
               (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
               heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
    where trd (_,_,a) = a

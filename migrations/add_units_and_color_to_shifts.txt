@@ -1,0 +1,15 @@
+Description: Adding units (could be money, credits, etc) and a color (optional, used for coding different types of shifts in day view) to shifts.
+Created: 2012-09-06 14:34:03.360896 UTC
+Depends: add_token add_view add_organization_key cascade_delete_users email_confirm_token add_email add_current_shifts_view remove_master add_shift_requests_covers base_schema
+Apply:
+  ALTER TABLE shifts ADD COLUMN units DECIMAL(5,2) NOT NULL DEFAULT 0;
+  ALTER TABLE shifts ADD COLUMN color SMALLINT NOT NULL DEFAULT -1;
+  ALTER TABLE shiftchanges ADD COLUMN units DECIMAL(5,2);
+  ALTER TABLE shiftchanges ADD COLUMN color SMALLINT;
+  DROP VIEW shifts_current;
+  CREATE VIEW shifts_current AS SELECT DISTINCT ON (S.id) S.id as id, COALESCE(CO.coverer,S.user_id) as user_id, S.place as place, COALESCE(SC.recorder,S.recorder) as recorder, COALESCE(SC.recorded, S.recorded) as recorded, COALESCE(SC.start, S.start) AS start, COALESCE(SC.stop,S.stop) AS stop, COALESCE(SC.units, S.units) as units, COALESCE(SC.color, S.color) as color FROM shifts AS S LEFT OUTER JOIN shiftchanges AS SC ON S.id = SC.old_shift LEFT OUTER JOIN shiftdeletes AS SD ON S.id = SD.old_shift JOIN users AS U ON U.id = S.user_id LEFT OUTER JOIN shiftcovers AS CO ON CO.shift_id = S.id WHERE SD.old_shift IS NULL ORDER BY S.id, SC.recorded desc, CO.recorded desc;
+
+Revert:
+  ALTER TABLE shifts DROP COLUMN units;
+  ALTER TABLE shifts DROP COLUMN color;
+  CREATE VIEW shifts_current AS SELECT DISTINCT ON (S.id) S.id as id, COALESCE(CO.coverer,S.user_id) as user_id, S.place as place, COALESCE(SC.recorder,S.recorder) as recorder, COALESCE(SC.recorded, S.recorded) as recorded, COALESCE(SC.start, S.start) AS start, COALESCE(SC.stop,S.stop)  AS stop FROM shifts AS S LEFT OUTER JOIN shiftchanges AS SC ON S.id = SC.old_shift LEFT OUTER JOIN shiftdeletes AS SD ON S.id = SD.old_shift JOIN users AS U ON U.id = S.user_id LEFT OUTER JOIN shiftcovers AS CO ON CO.shift_id = S.id WHERE SD.old_shift IS NULL ORDER BY S.id, SC.recorded desc, CO.recorded desc;

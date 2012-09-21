@@ -347,9 +347,27 @@
   }
   .shift.self {
     background-color: rgba(99,200,230,0.9);
+    &.Red {
+      background-color: #F66;
+    }
+    &.Blue {
+      background-color: #2F4F4F;
+    }
+    &.Green {
+      background-color: #458B00;
+    }
   }
   .shift.other {
     background-color: rgba(139,214,237,0.8);
+    .Red {
+      background-color: #F66 + #333;
+    }
+    &.Blue {
+      background-color: #2F4F4F + #333;
+    }
+    &.Green {
+      background-color: #458B00 + #333;
+    }
   }
   .shift {
     position: relative;

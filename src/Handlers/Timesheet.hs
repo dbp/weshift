@@ -71,7 +71,7 @@ timesheetEntry user shift = do
                       _ -> case last modifications of
                             Cover coverer _ -> if (uId user) == (uId coverer) then roundHours $ (diffUTCTime utcEnd utcStart) / (60* 60) else 0
                             Delete _ _ -> 0
-                            Change ns ne _ _ -> roundHours $ (diffUTCTime (localTimeToUTC tz ne) (localTimeToUTC tz ns)) / (60*60)
+                            Change ns ne _ _ _ _ -> roundHours $ (diffUTCTime (localTimeToUTC tz ne) (localTimeToUTC tz ns)) / (60*60)
   return $ Entry hoursWorked (sStart shift) (sStop shift) modifications
     where roundHours n = (/ 10) $ fromIntegral $ floor $ n * 10 
 

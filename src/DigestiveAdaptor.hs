@@ -9,7 +9,7 @@ module DigestiveAdaptor where
 import Control.Monad (liftM, mplus)
 import Data.Function (on)
 import Data.List (unionBy)
-import Data.Maybe (fromMaybe, maybeToList)
+import Data.Maybe (fromMaybe, fromJust, maybeToList)
 import Data.Monoid (mappend)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -18,6 +18,8 @@ import qualified Text.XmlHtml as X
 
 import Snap.Snaplet.Heist (liftHeist, SnapletSplice)
 import Application (App)
+
+import Debug.Trace (trace)
 
 --------------------------------------------------------------------------------
 digestiveAdaptorSplices :: [(Text, SnapletSplice App App)]
@@ -31,6 +33,7 @@ digestiveAdaptorSplices = map (\(a,b) -> (a, liftHeist b))
     , ("dfInputFile", dfInputFile)
     , ("dfInputSubmit", dfInputSubmit)
     , ("dfLabel", dfLabel)
+    , ("wsSelect", wsSelect)
     , ("dfForm", dfForm)
     , ("dfErrorList", dfErrorList)
     , ("dfChildErrorList", dfChildErrorList)
@@ -148,6 +151,24 @@ dfLabel = do
     content <- getContent
     let ref' = T.append "ws." ref
     return $ makeElement "label" content $ addAttrs attrs [("for", ref')]
+
+wsSelect :: Monad m => Splice m
+wsSelect = do
+    node <- getParamNode
+    case node of
+        X.Element _ as chlds -> do
+            let dval = fromMaybe "" $ lookup "data-default" as
+            let name = fromJust $ lookup "name" as
+            trace (show dval) (return ())
+            trace (show chlds) (return ())
+            return $ [X.Element "select" (addAttrs [("name", T.append "ws." name)] as)
+                                        (map (cld dval) chlds)]
+        _ -> return []
+  where cld def e = case e of
+            (X.Element n as cs) -> if ((lookup "value" as) == (Just def)) then
+                                      (X.Element n (addAttrs [("selected", "selected")] as) cs)
+                                   else e
+            _ -> e -- should not happen, all children should be elements
 
 dfForm :: Monad m => Splice m
 dfForm = do

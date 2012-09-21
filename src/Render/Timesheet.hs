@@ -34,12 +34,12 @@ renderChange (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
                                                 ]
 
 
-renderChange (Change s e u t) = runChildrenWithText [ ("changeClasses", "change")
-                                                    , ("changeDescription", T.concat ["To ",(renderTime s),"-",(renderTime e)])
-                                                    , ("changePerson", TE.decodeUtf8 $ uName u)
-                                                    , ("changeTime", renderTime t)
-                                                    , ("changeDate", renderDate t)
-                                                    ]
+renderChange (Change s e c un u t) = runChildrenWithText [ ("changeClasses", "change")
+                                                         , ("changeDescription", T.concat ["To ",(renderTime s),"-",(renderTime e)])
+                                                         , ("changePerson", TE.decodeUtf8 $ uName u)
+                                                         , ("changeTime", renderTime t)
+                                                         , ("changeDate", renderDate t)
+                                                         ]
                                                     
 
 renderChange (Cover u t) = runChildrenWithText [ ("changeClasses", "cover")

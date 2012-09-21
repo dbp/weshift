@@ -7,7 +7,7 @@
           <bind tag="disp">none</bind>
         </apply>
       <selfShifts>
-        <div class="shift">
+        <div class="shift ${color}">
           <div class="time">
             <start/>-<stop/>
           </div> 
@@ -54,12 +54,13 @@
 
     <div class="other-wrap">
       <otherShifts>
+        <div class="other-shift ${color}">
         <ifRequested>
           <button class="cover toggle" data-toggle-target=".cover-form-${id}"/>               
         </ifRequested>
         <user-lookup id="${user}"><name/></user-lookup> - <start/>-<stop/><br>
         <isFacilitator>
-          <button class="delete toggle" data-toggle-target=".delete-form-$(id)"></button> 
+          <button class="delete toggle" data-toggle-target=".delete-form-${id}"></button> 
         </isFacilitator>
         <br/>
         <isFacilitator>
@@ -72,6 +73,7 @@
             <bind tag="disp">none</bind>
           </apply>
         </ifRequested>
+        </div>
       </otherShifts>
 
       

@@ -14,22 +14,22 @@ import qualified  Text.XmlHtml as X
 import qualified  Utils as U
 
 -- | Module specific imports
-import Text.Parsec hiding (Error)
+import Text.Parsec hiding (Error, choice)
 import State.Shifts
 
-data ShiftTime = ShiftTime LocalTime LocalTime deriving Show
+data ShiftTime = ShiftTime LocalTime LocalTime Color Double deriving Show
 
 timeTransform = validate (\a -> either (const $ Error "Should be like 10:00am.") Success (parse parseHour "" (T.unpack a)))
 
 --notOverlapping :: Validator AppHandler Text ShiftTime
-notOverlapping = checkM "Overlaps with another shift." $ \(ShiftTime start end) -> 
+notOverlapping = checkM "Overlaps with another shift." $ \(ShiftTime start end _ _) -> 
   do muid <- authenticatedUserId
      case muid of
        Nothing -> return False -- no user
        Just uid -> checkShiftTime uid start end
 
 --notOverlappingChange :: Validator AppHandler Text (BS.ByteString, ShiftTime)
-notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftTime start end)) -> 
+notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftTime start end _ _)) -> 
   do muid <- authenticatedUserId
      case muid of
        Nothing -> return False -- no user
@@ -46,10 +46,12 @@ addShiftForm = notOverlapping $ newShiftForm
 --newShiftForm :: SnapForm AppHandler Text HeistView ShiftTime
 newShiftForm = mkNS
     <$> timeRangeForm
+    <*> "color" .: stringRead "Internal error C. Email help@weshift.org" Nothing
+    <*> "units" .: stringRead "Must be a number like 1.5" Nothing
     <*> "day"   .: stringRead "Internal error D. Email help@weshift.org" Nothing
     <*> "month" .: stringRead "Internal error M. Email help@weshift.org" Nothing 
     <*> "year"  .: stringRead "Internal error Y. Email help@weshift.org" Nothing
-  where mkNS (start,stop) d m y = ShiftTime (LocalTime day (timeToTimeOfDay start)) (LocalTime day (timeToTimeOfDay stop))
+  where mkNS (start,stop) c u d m y = ShiftTime (LocalTime day (timeToTimeOfDay start)) (LocalTime day (timeToTimeOfDay stop)) c u
           where day = fromGregorian y m d
 
 --changeShiftForm :: SnapForm AppHandler Text HeistView (BS.ByteString, ShiftTime)

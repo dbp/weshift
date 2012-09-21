@@ -69,8 +69,9 @@ confirm u p = do
     _ -> renderWS "work/bulk_error"
 
  where filterFac ss = if pFac p then ss else filter (\s -> sUser s == uId u) ss   
-       formatNU workers (Shift _ user _ start stop _ _) = do u <- find ((== user).uId) workers
-                                                             return (B8.unpack $ uName u, localDay start, showTimeRange start stop)
+       formatNU workers (Shift _ user _ start stop _ _ _ _) = 
+          do u <- find ((== user).uId) workers
+             return (B8.unpack $ uName u, localDay start, showTimeRange start stop)
        showTimeRange start stop = (ftime start) ++ "-" ++ (ftime stop)
        ftime t = if ftime' "%M" t == "00" then ftime' "%H" t else ftime' "%R" t
        ftime' = formatTime defaultTimeLocale

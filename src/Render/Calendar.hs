@@ -208,12 +208,13 @@ workerDay self start ss us dl =
                                        offset' = start - offset
                                        stop = timePeriod (localTimeOfDay (sStop s))
                                        len = stop - start
-                                       classes = if (uId self) == (sUser s) then "self" else "other"
+                                       classes = T.concat [if (uId self) == (sUser s) then "self" else "other",
+                                                           " ", T.pack (show (sColor s))]
                                        time = (formatTime defaultTimeLocale "%-I:%M%P" (sStart s)) ++ "-" ++ (formatTime defaultTimeLocale "%-I:%M%P" (sStop s)) in
                                        (stop, (offset',len,classes,time):acc)
           sS (offset,len,classes,time) = runChildrenWith [("offset", textSplice $ T.pack $ show offset)
-                                                            ,("length", textSplice $ T.pack $ show len)
-                                                            ,("classes", textSplice $ classes)
-                                                            ,("time", textSplice $ T.pack time)
-                                                            ]
+                                                          ,("length", textSplice $ T.pack $ show len)
+                                                          ,("classes", textSplice $ classes)
+                                                          ,("time", textSplice $ T.pack time)
+                                                          ]
     

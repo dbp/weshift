@@ -156,5 +156,6 @@ dayH u p = do
                                             ]))
   shifts <- getShifts curday (addDays 1 curday) p
   workers <- getWorkers p
-  heistLocal (bindSplices ((commonSplices curday) ++ (daySplices u p workers shifts curday))) $ renderWS "work/day_calendar"
+  heistLocal (bindSplices ((commonSplices curday) ++ 
+                           (daySplices u p workers shifts curday))) $ renderWS "work/day_calendar"
 

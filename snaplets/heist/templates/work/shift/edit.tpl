@@ -5,7 +5,16 @@
     		<dfInputHidden ref="month" data-default="${currMonth}"/>
     		<dfInputHidden ref="year" data-default="${currYear}"/>
 			<dfInputText ref="start" data-default="${start}"/> to <dfInputText ref="stop" data-default="${stop}"/>
-			<dfChildErrorList class="errors" />
+			<dfLabel ref="units">units</dfLabel>
+            <dfInputText ref="units" data-default="${units}"/>
+            <wsSelect name="color" data-default="${color}">
+                <option value="None">None</option>
+                <option value="Blue">Blue</option>
+                <option value="Red">Red</option>
+                <option value="Green">Green</option>
+            </wsSelect>
+            <dfChildErrorList class="errors" />
+            
 			<button type="submit"/>
   	</dfForm>
 </div-async>
