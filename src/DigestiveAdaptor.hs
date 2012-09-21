@@ -159,8 +159,6 @@ wsSelect = do
         X.Element _ as chlds -> do
             let dval = fromMaybe "" $ lookup "data-default" as
             let name = fromJust $ lookup "name" as
-            trace (show dval) (return ())
-            trace (show chlds) (return ())
             return $ [X.Element "select" (addAttrs [("name", T.append "ws." name)] as)
                                         (map (cld dval) chlds)]
         _ -> return []

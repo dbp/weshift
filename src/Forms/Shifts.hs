@@ -17,23 +17,15 @@ import qualified  Utils as U
 import Text.Parsec hiding (Error, choice)
 import State.Shifts
 
-data ShiftTime = ShiftTime LocalTime LocalTime Color Double deriving Show
+data ShiftTime = ShiftTime BS.ByteString LocalTime LocalTime Color Double deriving Show
 
 timeTransform = validate (\a -> either (const $ Error "Should be like 10:00am.") Success (parse parseHour "" (T.unpack a)))
 
---notOverlapping :: Validator AppHandler Text ShiftTime
-notOverlapping = checkM "Overlaps with another shift." $ \(ShiftTime start end _ _) -> 
-  do muid <- authenticatedUserId
-     case muid of
-       Nothing -> return False -- no user
-       Just uid -> checkShiftTime uid start end
+notOverlapping = checkM "Overlaps with another shift." $ \(ShiftTime user start end _ _) -> 
+    checkShiftTime user start end
 
---notOverlappingChange :: Validator AppHandler Text (BS.ByteString, ShiftTime)
-notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftTime start end _ _)) -> 
-  do muid <- authenticatedUserId
-     case muid of
-       Nothing -> return False -- no user
-       Just uid -> checkShiftTimeExcept skip uid start end
+notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftTime user start end _ _)) -> 
+    checkShiftTimeExcept skip user start end
 
 timeRangeForm :: Form T.Text AppHandler (DiffTime, DiffTime)
 timeRangeForm = goodTime $ (,)
@@ -43,15 +35,17 @@ timeRangeForm = goodTime $ (,)
 
 addShiftForm = notOverlapping $ newShiftForm
 
---newShiftForm :: SnapForm AppHandler Text HeistView ShiftTime
 newShiftForm = mkNS
     <$> timeRangeForm
+    <*> "user"  .: stringRead "Internal error U. Email help@weshift.org" Nothing 
     <*> "color" .: stringRead "Internal error C. Email help@weshift.org" Nothing
     <*> "units" .: stringRead "Must be a number like 1.5" Nothing
     <*> "day"   .: stringRead "Internal error D. Email help@weshift.org" Nothing
     <*> "month" .: stringRead "Internal error M. Email help@weshift.org" Nothing 
     <*> "year"  .: stringRead "Internal error Y. Email help@weshift.org" Nothing
-  where mkNS (start,stop) c u d m y = ShiftTime (LocalTime day (timeToTimeOfDay start)) (LocalTime day (timeToTimeOfDay stop)) c u
+  where mkNS (start,stop) user c u d m y = ShiftTime (B8.pack $ show (user :: Int))
+                                                     (LocalTime day (timeToTimeOfDay start)) 
+                                                     (LocalTime day (timeToTimeOfDay stop)) c u
           where day = fromGregorian y m d
 
 --changeShiftForm :: SnapForm AppHandler Text HeistView (BS.ByteString, ShiftTime)
