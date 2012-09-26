@@ -56,8 +56,9 @@ getTimesheet place user start stop = do
          , ("timesheetStart", textSplice $ renderDate start)
          , ("timesheetStop", textSplice $ renderDate stop)
          , ("totalHours", textSplice $ T.pack $ show $ sum $ map entryHours (filter (not.entryDeadline) entries))
-         , ("totalUnits", textSplice $ T.pack $ show $ sum $ map entryUnits entries)
+         , ("totalUnits", textSplice $ T.pack $ show $ sum $ map entryUnits (filter deadlineDone entries))
          ]
+    where deadlineDone e = if entryDeadline e then entryDone e else True
 
 timesheetEntry user shift = do
   tz <- liftIO getCurrentTimeZone
@@ -69,7 +70,7 @@ timesheetEntry user shift = do
   covers  <- getShiftCovers shift
   let modifications = sortBy (\m1 m2 -> compare (mTime m1) (mTime m2)) (changes ++ deletes ++ covers)
   let (hoursWorked,unitsWorked) = getHours user tz utcStart utcEnd units modifications
-  return $ Entry hoursWorked unitsWorked (sStart shift) (sStop shift) modifications (sDeadline shift)
+  return $ Entry hoursWorked unitsWorked (sStart shift) (sStop shift) modifications (sDeadline shift) (sDeadlineDone shift)
 
 
 getHours user tz defstart defstop units [] = 

@@ -26,7 +26,7 @@ notOverlapping = checkM "Overlaps with another shift." $ \(ShiftTime user start 
      if isDeadline then return True else checkShiftTime user start end
 
 notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftTime user start end _ _)) -> 
-  do isDeadline <- fmap (maybe False sDeadline) $ getShift skip
+  do isDeadline <- fmap (maybe False sDeadline) $ getShift' skip
      if isDeadline then return True else checkShiftTimeExcept skip user start end
 
 timeRangeForm :: Form T.Text AppHandler (DiffTime, DiffTime)

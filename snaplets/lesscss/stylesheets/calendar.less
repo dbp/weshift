@@ -101,6 +101,13 @@
         .shift {
           color: #44B9DE;
           border-bottom: 1px solid white;
+          button.done {
+              background: none;
+              width: 30px;
+              &.toggled {
+                color: #44B9DE;
+              }
+            }
           .buttons button {
             &.request {
               background: transparent url("/img/workschedule/icons/switch.png") no-repeat center left;
@@ -133,7 +140,7 @@
             }
           }
         }
-        .add-form, .delete-form, .change-form, .request-form, .unrequest-form {
+        .add-form, .delete-form, .change-form, .request-form, .unrequest-form, .done-form {
           color: white;
           form {
             margin: 0;

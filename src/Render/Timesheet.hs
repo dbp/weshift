@@ -22,11 +22,12 @@ renderTSCoworker self u = runChildrenWithText [ ("userId",   TE.decodeUtf8 $ uId
                                               ]
 
 
-data Entry = Entry Double Double LocalTime LocalTime [Modification] Bool deriving Show -- hours worked, units, orig. start, orig. end, list of modifications, is deadline
+data Entry = Entry Double Double LocalTime LocalTime [Modification] Bool Bool deriving Show -- hours worked, units, orig. start, orig. end, list of modifications, is deadline, is deadline done
 
-entryHours (Entry h _ _ _ _ _) = h
-entryUnits (Entry _ u _ _ _ _) = u
-entryDeadline (Entry _ _ _ _ _ d) = d
+entryHours (Entry h _ _ _ _ _ _) = h
+entryUnits (Entry _ u _ _ _ _ _) = u
+entryDeadline (Entry _ _ _ _ _ d _) = d
+entryDone (Entry _ _ _ _ _ _ d) = d
 
 renderChange d (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
                                                   , ("changeDescription", "Deleted")
@@ -52,7 +53,7 @@ renderChange d (Cover u t) = runChildrenWithText [ ("changeClasses", "cover")
                                                  , ("changeDate", renderDate t)
                                                  ]
                                                
-renderEntry (Entry hours units start end changes deadline) =
+renderEntry (Entry hours units start end changes deadline deadlineDone) =
   runChildrenWith [ ("hoursWorked", textSplice $ T.pack $ show hours)
                   , ("units", textSplice $ T.pack $ show units)
                   , ("startTime", textSplice $ renderTime start)
@@ -61,5 +62,7 @@ renderEntry (Entry hours units start end changes deadline) =
                   , ("changes", mapSplices (renderChange deadline) changes)
                   , ("isDeadline", booleanSplice deadline)
                   , ("notDeadline", booleanSplice (not deadline))
+                  ,("isDeadlineDone", booleanSplice (deadlineDone || (not deadline)))
+                  ,("notDeadlineDone", booleanSplice ((not deadlineDone) || (not deadline)))
                   ]
                   

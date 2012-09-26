@@ -7,12 +7,19 @@
           <bind tag="disp">none</bind>
         </apply>
       <selfShifts>
+        <notDeadlineDone>
         <div class="shift ${color}">
           <div class="time">
             <isDeadline>due by</isDeadline>
             <start/><notDeadline>-<stop/></notDeadline>
             (<units/>)
+            <isDeadline>
+              <button class="done toggle" data-toggle-target=".done-form-${id}">Done</button>
+            </isDeadline>
           </div> 
+          <apply template="shift/deadline_done">
+            <bind tag="disp">none</bind>
+          </apply>
           <div class="buttons">
             <ifRequested>
               <button class="unrequest toggle" data-toggle-target=".unrequest-form-${id}">Stop Request</button>               
@@ -44,6 +51,7 @@
             <bind tag="stop-value"><stop/></bind>
           </apply>
         </div>
+      </notDeadlineDone>
       </selfShifts>
     </div>
   
@@ -56,6 +64,7 @@
 
     <div class="other-wrap">
       <otherShifts>
+        <notDeadlineDone>
         <div class="other-shift ${color}">
         <ifRequested>
           <button class="cover toggle" data-toggle-target=".cover-form-${id}"/>               
@@ -76,6 +85,7 @@
           </apply>
         </ifRequested>
         </div>
+        </notDeadlineDone>
       </otherShifts>
 
       

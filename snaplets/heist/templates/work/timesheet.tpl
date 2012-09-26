@@ -31,7 +31,13 @@
     
     <timesheet>
       <tr>
-        <td class="entry-hours"><notDeadline><hoursWorked/></notDeadline><isDeadline>N/A</isDeadline> (<units/>)</td>
+        <td class="entry-hours">
+          <notDeadline><hoursWorked/></notDeadline>
+          <isDeadline>
+            <isDeadlineDone>&#10003;</isDeadlineDone>
+            <notDeadlineDone>&#10007;</notDeadlineDone>
+          </isDeadline>
+          (<units/>)</td>
         <td class="entry-shift"><startTime/><notDeadline>-<endTime/></notDeadline><br><shiftDate/></td>
         <td class="entry-changes">
           <changes>
