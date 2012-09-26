@@ -44,6 +44,15 @@ bean.add(document, 'DOMContentLoaded', function () {
       bonzo(elem).removeClass("toggled");
     }
   });
+
+  declare("click", ".deadline-toggle", true, function (elem) {
+    var e = bonzo(bonzo(bonzo(qwery(".deadline-toggle")).next()).next()); 
+    if (bonzo(qwery(".deadline-toggle")).attr("checked")) {
+      e.hide();
+    } else {
+      e.show();
+    }
+  });
   
  
 });

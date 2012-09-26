@@ -9,7 +9,9 @@
       <selfShifts>
         <div class="shift ${color}">
           <div class="time">
-            <start/>-<stop/>
+            <isDeadline>due by</isDeadline>
+            <start/><notDeadline>-<stop/></notDeadline>
+            (<units/>)
           </div> 
           <div class="buttons">
             <ifRequested>
@@ -58,7 +60,7 @@
         <ifRequested>
           <button class="cover toggle" data-toggle-target=".cover-form-${id}"/>               
         </ifRequested>
-        <user-lookup id="${user}"><name/></user-lookup> - <start/>-<stop/><br>
+        <user-lookup id="${user}"><name/></user-lookup> - <isDeadline>due by</isDeadline> <start/><notDeadline>-<stop/></notDeadline> (<units/>)<br>
         <isFacilitator>
           <button class="delete toggle" data-toggle-target=".delete-form-${id}"></button> 
         </isFacilitator>

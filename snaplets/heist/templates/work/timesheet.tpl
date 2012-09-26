@@ -31,8 +31,8 @@
     
     <timesheet>
       <tr>
-        <td class="entry-hours"><hoursWorked/> (<units/>)</td>
-        <td class="entry-shift"><startTime/>-<endTime/><br><shiftDate/></td>
+        <td class="entry-hours"><notDeadline><hoursWorked/></notDeadline><isDeadline>N/A</isDeadline> (<units/>)</td>
+        <td class="entry-shift"><startTime/><notDeadline>-<endTime/></notDeadline><br><shiftDate/></td>
         <td class="entry-changes">
           <changes>
             <div class="${changeClasses}"><changeDescription/> by <changePerson/><br>(<changeTime/>, <changeDate/>)</div>

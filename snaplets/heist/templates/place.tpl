@@ -55,6 +55,7 @@
          <div class="content">
            <h1>Work Schedule</h1>
            <h5>Next Shift: <nextShift/></h5>
+           <h5>Next Deadline: <nextDeadline/></h5>
          </div>
        </div> <!-- .heading -->
        

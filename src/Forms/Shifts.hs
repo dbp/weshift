@@ -22,10 +22,12 @@ data ShiftTime = ShiftTime BS.ByteString LocalTime LocalTime Color Double derivi
 timeTransform = validate (\a -> either (const $ Error "Should be like 10:00am.") Success (parse parseHour "" (T.unpack a)))
 
 notOverlapping = checkM "Overlaps with another shift." $ \(ShiftTime user start end _ _) -> 
-    checkShiftTime user start end
+  do isDeadline <- fmap isJust $ getParam "ws.deadline"
+     if isDeadline then return True else checkShiftTime user start end
 
 notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftTime user start end _ _)) -> 
-    checkShiftTimeExcept skip user start end
+  do isDeadline <- fmap (maybe False sDeadline) $ getShift skip
+     if isDeadline then return True else checkShiftTimeExcept skip user start end
 
 timeRangeForm :: Form T.Text AppHandler (DiffTime, DiffTime)
 timeRangeForm = goodTime $ (,)

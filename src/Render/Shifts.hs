@@ -18,7 +18,7 @@ import State.Shifts
 
 
 renderShift :: Shift -> Splice AppHandler
-renderShift (Shift id' user place start stop color units recorded recorder) = do
+renderShift (Shift id' user place start stop color units recorded recorder deadline) = do
   req <- lift $ maybe (return Nothing) (getShiftRequest user) (if id' == "" then Nothing else Just id')
   runChildrenWith [("id", textSplice $ TE.decodeUtf8 id')
                   ,("user", textSplice $ TE.decodeUtf8 user)
@@ -33,6 +33,8 @@ renderShift (Shift id' user place start stop color units recorded recorder) = do
                   ,("ifRequested", if isJust req then identitySplice else blackHoleSplice)
                   ,("notRequested", if isJust req then blackHoleSplice else identitySplice)
                   ,("reqid", textSplice $ TE.decodeUtf8 $ fromMaybe "" req)
+                  ,("isDeadline", booleanSplice deadline)
+                  ,("notDeadline", booleanSplice (not deadline))
                   ]
 
 renderShifts :: [Shift] -> Splice AppHandler

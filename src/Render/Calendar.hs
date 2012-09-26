@@ -27,7 +27,7 @@ data DayFormat = DayFormat { dNumber :: Maybe Int -- what day of the month is it
                            , dStart :: Bool -- is this the start of a week
                            , dEnd :: Bool -- is this the end of a week
                            , dBottom :: Bool -- is this the bottom of the calendar
-                           , dRequest :: Bool -- are there requets this day
+                           , dRequest :: Bool -- are there requests this day
                            }
 
 emptyDayFormat n = DayFormat n False False False False False False False
@@ -186,7 +186,10 @@ timeColumn start length = return $
                             $ take (max 2 ((length `div` 4)  + 1)) (iterate (+1) (start `div` 4 + (if start `mod` 4 == 0 then 0 else 1))))
 
 dayView :: User -> UserPlace -> [User] -> [Shift] -> Integer -> Int -> Int -> Splice AppHandler
-dayView u p workers shifts year month day = do
+dayView u p workers shifts' year month day = do
+  -- don't include deadlines - they don't really make sense on a day calendar, as
+  -- they can overlap with stuff.
+  let shifts = filter (not . sDeadline) shifts'
   let start = fromGregorian year month day 
   let end = addDays 1 start
   uncoveredShifts <- lift $ getUncoveredShifts start end p
@@ -213,8 +216,8 @@ workerDay self start ss us dl =
                                        time = (formatTime defaultTimeLocale "%-I:%M%P" (sStart s)) ++ "-" ++ (formatTime defaultTimeLocale "%-I:%M%P" (sStop s)) in
                                        (stop, (offset',len,classes,time):acc)
           sS (offset,len,classes,time) = runChildrenWith [("offset", textSplice $ T.pack $ show offset)
-                                                          ,("length", textSplice $ T.pack $ show len)
-                                                          ,("classes", textSplice $ classes)
-                                                          ,("time", textSplice $ T.pack time)
-                                                          ]
+                                                         ,("length", textSplice $ T.pack $ show len)
+                                                         ,("classes", textSplice $ classes)
+                                                         ,("time", textSplice $ T.pack time)
+                                                         ]
     

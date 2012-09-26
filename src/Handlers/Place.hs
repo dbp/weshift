@@ -54,7 +54,9 @@ placeSite = do
 
 placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     nextShift <- getNextShift u p
+                    nextDeadline <- getNextDeadline u p
                     let nextShiftSplice = spliceMBS "nextShift" $ Just $ fromMaybe "No Next Shift" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextShift
+                    let nextDeadlineSplice = spliceMBS "nextDeadline" $ Just $ fromMaybe "No Next Deadline" $ liftM (B8.pack . (formatTime defaultTimeLocale "%-l:%M%P, %-e %-B  %Y").sStart) nextDeadline
                     workers <- getWorkers p
                     let coworkers = filter ((/= (uId u)) . uId) workers
                     let monthday = maybe today (\(y,m,d') -> fromGregorian y m (fromMaybe 1 d')) savedMonth
@@ -67,7 +69,7 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                                     _ -> Nothing
                     let emailsSplice = [("emails", renderEmails emails)]
                     messagesSplice <- messagesPageSplices p 1
-                    heistLocal (bindSplices (nextShiftSplice ++ (commonSplices today) ++ (monthSplices u p monthday showDay) ++ 
+                    heistLocal (bindSplices (nextShiftSplice ++ nextDeadlineSplice ++ (commonSplices today) ++ (monthSplices u p monthday showDay) ++ 
                                              (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday) ++ 
                                              timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)] ++ 
                                              emailsSplice ++ messagesSplice)) $ renderWS "place"

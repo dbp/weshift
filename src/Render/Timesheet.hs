@@ -22,40 +22,44 @@ renderTSCoworker self u = runChildrenWithText [ ("userId",   TE.decodeUtf8 $ uId
                                               ]
 
 
-data Entry = Entry Double Double LocalTime LocalTime [Modification] deriving Show -- hours worked, units, orig. start, orig. end, list of modifications
+data Entry = Entry Double Double LocalTime LocalTime [Modification] Bool deriving Show -- hours worked, units, orig. start, orig. end, list of modifications, is deadline
 
-entryHours (Entry h _ _ _ _) = h
-entryUnits (Entry _ u _ _ _) = u
+entryHours (Entry h _ _ _ _ _) = h
+entryUnits (Entry _ u _ _ _ _) = u
+entryDeadline (Entry _ _ _ _ _ d) = d
 
-renderChange (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
-                                                , ("changeDescription", "Deleted")
-                                                , ("changePerson", TE.decodeUtf8 $ uName u)
-                                                , ("changeTime", renderTime t)
-                                                , ("changeDate", renderDate t)
-                                                ]
+renderChange d (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
+                                                  , ("changeDescription", "Deleted")
+                                                  , ("changePerson", TE.decodeUtf8 $ uName u)
+                                                  , ("changeTime", renderTime t)
+                                                  , ("changeDate", renderDate t)
+                                                  ]
 
 
-renderChange (Change s e c un u t) = runChildrenWithText [ ("changeClasses", "change")
-                                                         , ("changeDescription", T.concat ["To ",(renderTime s),"-",(renderTime e)])
-                                                         , ("changePerson", TE.decodeUtf8 $ uName u)
-                                                         , ("changeTime", renderTime t)
-                                                         , ("changeDate", renderDate t)
-                                                         ]
+renderChange d (Change s e c un u t) = 
+  runChildrenWithText [ ("changeClasses", "change")
+                      , ("changeDescription", T.concat (["To ",(renderTime s)] ++ (if d then [] else ["-",(renderTime e)])))
+                      , ("changePerson", TE.decodeUtf8 $ uName u)
+                      , ("changeTime", renderTime t)
+                      , ("changeDate", renderDate t)
+                      ]
                                                     
 
-renderChange (Cover u t) = runChildrenWithText [ ("changeClasses", "cover")
-                                               , ("changeDescription", "Covered")
-                                               , ("changePerson", TE.decodeUtf8 $ uName u)
-                                               , ("changeTime", renderTime t)
-                                               , ("changeDate", renderDate t)
-                                               ]
+renderChange d (Cover u t) = runChildrenWithText [ ("changeClasses", "cover")
+                                                 , ("changeDescription", "Covered")
+                                                 , ("changePerson", TE.decodeUtf8 $ uName u)
+                                                 , ("changeTime", renderTime t)
+                                                 , ("changeDate", renderDate t)
+                                                 ]
                                                
-renderEntry (Entry hours units start end changes) =
+renderEntry (Entry hours units start end changes deadline) =
   runChildrenWith [ ("hoursWorked", textSplice $ T.pack $ show hours)
                   , ("units", textSplice $ T.pack $ show units)
                   , ("startTime", textSplice $ renderTime start)
                   , ("endTime", textSplice $ renderTime end)
                   , ("shiftDate", textSplice $ renderDateLong start)
-                  , ("changes", mapSplices renderChange changes)
+                  , ("changes", mapSplices (renderChange deadline) changes)
+                  , ("isDeadline", booleanSplice deadline)
+                  , ("notDeadline", booleanSplice (not deadline))
                   ]
                   

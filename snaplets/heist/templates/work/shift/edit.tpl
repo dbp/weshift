@@ -5,7 +5,9 @@
     		<dfInputHidden ref="day" data-default="${dayNum}"/>
     		<dfInputHidden ref="month" data-default="${currMonth}"/>
     		<dfInputHidden ref="year" data-default="${currYear}"/>
-			<dfInputText ref="start" data-default="${start}"/> to <dfInputText ref="stop" data-default="${stop}"/>
+			<dfInputText ref="start" data-default="${start}"/>
+            <notDeadline>to <dfInputText ref="stop" data-default="${stop}"/></notDeadline>
+            <isDeadline><dfInputHidden ref="stop" data-default="${stop}"/></isDeadline>
 			<dfLabel ref="units">units</dfLabel>
             <dfInputText ref="units" data-default="${units}"/>
             <wsSelect name="color" data-default="${color}">

@@ -35,8 +35,10 @@ shiftAddH u p = do
       Just (ShiftTime uid start stop color units)-> do
         -- if they are a facilitator, then accept whatever id they gave, otherwise, enforce it being theirs
         let suser = if pFac p then uid else (uId u)
+        isDeadline <- fmap (maybe False (const True)) $ getParam "ws.deadline"
         insertShift (emptyShift { sUser = suser, sPlace = (pId p), sStart = start, sStop = stop, 
-                                  sRecorder = (uId u), sColor = color, sUnits = units})
+                                  sRecorder = (uId u), sColor = color, sUnits = units, 
+                                  sDeadline = isDeadline})
         (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
         heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
       Nothing -> do

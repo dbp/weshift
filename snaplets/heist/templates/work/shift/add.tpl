@@ -13,6 +13,10 @@
     <dfInputHidden ref="day" data-default="${dayNum}"/>
     <dfInputHidden ref="month" data-default="${currMonth}"/>
     <dfInputHidden ref="year" data-default="${currYear}"/>
+
+    <label for="ws.deadline">Deadline</label>
+    <input type="checkbox" name="ws.deadline" class="deadline-toggle"/>
+
     <dfInputText ref="start" data-default="9:00am"/> to <dfInputText ref="stop" data-default="5:00pm"/>
     <dfLabel ref="units">units</dfLabel>
     <dfInputText ref="units" data-default="0"/>
