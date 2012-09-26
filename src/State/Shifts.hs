@@ -67,7 +67,7 @@ getNextShift u p =
 
 getNextDeadline :: User -> UserPlace -> AppHandler (Maybe Shift)
 getNextDeadline u p =
-  fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT id, user_id, place, start, stop, recorded, recorder, color, units, deadline, deadline_done FROM shifts_current WHERE user_id = ? AND place = ? AND start > now() AND deadline = true ORDER BY start ASC LIMIT 1;" [toSql $ uId u, toSql $ pId p]
+  fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT id, user_id, place, start, stop, recorded, recorder, color, units, deadline, deadline_done FROM shifts_current WHERE user_id = ? AND place = ? AND start > now() AND deadline = true AND deadline_done = false ORDER BY start ASC LIMIT 1;" [toSql $ uId u, toSql $ pId p]
 
 
 getShifts :: Day -> Day -> UserPlace -> AppHandler [Shift]
