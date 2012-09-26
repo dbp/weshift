@@ -3,7 +3,7 @@
 </apply>
 
 <div-async name="center-main" class="main" id="timesheet">
-  <h2>Timesheet | Total Hours: <totalHours/></h2>
+  <h2>Timesheet | Hours: <totalHours/>, Units: <totalUnits/></h2>
     <form-async action="${placeRoot}/timesheet" method="POST">
     <div id="timesheet">
       <input class="date" type="text" name="start" value="${timesheetStart}"> 
@@ -24,14 +24,14 @@
       </isNormalUser>
       <button type="submit" title="Get Timesheet" /></div></form-async>
     <table id="entries"><tbody><tr class="heading">
-      <td id="hours"><h5>Hours Worked</h5></td>
+      <td id="hours"><h5>Hours (Units)</h5></td>
       <td id="shift"><h5>Original Shift</h5></td>
       <td id="changes"><h5>History</h5></td>
     </tr>
     
     <timesheet>
       <tr>
-        <td class="entry-hours"><hoursWorked/></td>
+        <td class="entry-hours"><hoursWorked/> (<units/>)</td>
         <td class="entry-shift"><startTime/>-<endTime/><br><shiftDate/></td>
         <td class="entry-changes">
           <changes>

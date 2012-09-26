@@ -56,22 +56,32 @@ getTimesheet place user start stop = do
          , ("timesheetStart", textSplice $ renderDate start)
          , ("timesheetStop", textSplice $ renderDate stop)
          , ("totalHours", textSplice $ T.pack $ show $ sum $ map entryHours entries)
+         , ("totalUnits", textSplice $ T.pack $ show $ sum $ map entryUnits entries)
          ]
 
 timesheetEntry user shift = do
   tz <- liftIO getCurrentTimeZone
   let utcStart = localTimeToUTC tz $ sStart shift
   let utcEnd = localTimeToUTC tz $ sStop shift
+  let units = sUnits shift
   changes <- getShiftChanges shift
   deletes <- getShiftDeletes shift
   covers  <- getShiftCovers shift
   let modifications = sortBy (\m1 m2 -> compare (mTime m1) (mTime m2)) (changes ++ deletes ++ covers)
-  let hoursWorked = case modifications of
-                      [] -> roundHours $ (diffUTCTime utcEnd utcStart) / (60*60)
-                      _ -> case last modifications of
-                            Cover coverer _ -> if (uId user) == (uId coverer) then roundHours $ (diffUTCTime utcEnd utcStart) / (60* 60) else 0
-                            Delete _ _ -> 0
-                            Change ns ne _ _ _ _ -> roundHours $ (diffUTCTime (localTimeToUTC tz ne) (localTimeToUTC tz ns)) / (60*60)
-  return $ Entry hoursWorked (sStart shift) (sStop shift) modifications
-    where roundHours n = (/ 10) $ fromIntegral $ floor $ n * 10 
+  let (hoursWorked,unitsWorked) = getHours user tz utcStart utcEnd units modifications
+  return $ Entry hoursWorked unitsWorked (sStart shift) (sStop shift) modifications
 
+
+getHours user tz defstart defstop units [] = 
+  (roundHours $ (diffUTCTime defstop defstart) / (60*60), units)
+getHours user tz defstart defstop units modifications = 
+    case last modifications of
+      Cover coverer _ -> 
+        if (uId user) == (uId coverer)
+        then (getHours user tz defstart defstop units (tail modifications))
+        else (0, 0)
+      Delete _ _ -> (0, 0)
+      Change ns ne _ u _ _ -> 
+        (roundHours $ (diffUTCTime (localTimeToUTC tz ne) (localTimeToUTC tz ns)) / (60*60), u)
+
+roundHours n = (/ 10) $ fromIntegral $ floor $ n * 10 

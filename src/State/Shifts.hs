@@ -84,7 +84,7 @@ getShift id' = fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT S.id, S.us
   
 getShiftChanges :: Shift -> AppHandler [Modification]
 getShiftChanges shift = fmap (catMaybes . (map buildChange)) $ withPGDB "SELECT U.name, start, stop, recorder, recorded, color, units FROM shiftchanges JOIN users AS U ON recorder = U.id WHERE old_shift = ?;" [toSql $ sId shift]
-  where buildChange (n:srt:stp:co:un:rer:red:[]) = Just $ Change (fromSql srt) (fromSql stp) (colorFromInt (fromSql co)) (fromSql un) (emptyUser {uId = (fromSql rer), uName = (fromSql n)}) (fromSql red)
+  where buildChange (n:srt:stp:rer:red:co:un:[]) = Just $ Change (fromSql srt) (fromSql stp) (colorFromInt (fromSql co)) (fromSql un) (emptyUser {uId = (fromSql rer), uName = (fromSql n)}) (fromSql red)
         buildChange _ = Nothing
   
 getShiftDeletes :: Shift -> AppHandler [Modification]
