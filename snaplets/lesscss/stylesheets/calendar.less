@@ -130,6 +130,15 @@
                 color: #44B9DE;
               }
             }
+            &.split {
+              background: transparent url("/img/workschedule/icons/change.png") no-repeat center left;
+              &:hover { background-image: url("/img/workschedule/icons/change_sel.png") }
+              width: 100px;
+              &.toggled {
+                background-image: url("/img/workschedule/icons/change_sel.png");
+                color: #44B9DE;
+              }
+            }
             &.delete {
               background: transparent url("/img/workschedule/icons/delete.png") no-repeat center left;
               &:hover { background-image: url("/img/workschedule/icons/delete_sel.png") }
@@ -140,7 +149,7 @@
             }
           }
         }
-        .add-form, .delete-form, .change-form, .request-form, .unrequest-form, .done-form {
+        .add-form, .delete-form, .change-form, .split-form, .request-form, .unrequest-form, .done-form {
           color: white;
           form {
             margin: 0;

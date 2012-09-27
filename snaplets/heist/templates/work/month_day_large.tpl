@@ -45,8 +45,16 @@
           </apply>
           <div class="buttons">
             <button class="change toggle" data-toggle-target=".change-form-${id}">Change Shift</button>
+            <notDeadline>
+              <button class="split toggle" data-toggle-target=".split-form-${id}">Split Shift</button>
+            </notDeadline>
           </div>
           <apply template="shift/edit">
+            <bind tag="disp">none</bind>
+            <bind tag="start-value"><start/></bind>
+            <bind tag="stop-value"><stop/></bind>
+          </apply>
+          <apply template="shift/split">
             <bind tag="disp">none</bind>
             <bind tag="start-value"><start/></bind>
             <bind tag="stop-value"><stop/></bind>

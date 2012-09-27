@@ -23,6 +23,7 @@ import            Forms.Shifts
 shiftH :: User -> UserPlace -> AppHandler ()
 shiftH u p = route [ ("/add",             shiftAddH u p)
                    , ("/edit",            shiftEditH u p)
+                   , ("/split",           shiftSplitH u p)
                    , ("/delete",          method POST $ shiftDeleteH u p)
                    , ("/requestoff",      method POST $ requestOffH u p)
                    , ("/unrequestoff",    method POST $ unRequestOffH u p)
@@ -79,6 +80,36 @@ shiftEditH u p = do
                                        ("message", textSplice "Error E, Contact help@weshift.org"),
                                        ("dayNum", textSplice $ TE.decodeUtf8 dayNum)]) $ renderWS "work/shift/edit_error"
    where trd (_,_,a) = a
+
+
+shiftSplitH u p = do
+    id' <- fmap (TE.decodeUtf8.fromJust) $ getParam "ws.id" -- if this isn't present, it means tampering, so don't care.
+    (view, result) <- wsForm splitShiftForm
+    case result of
+        Nothing -> do
+          heistLocal (bindSplices [("disp", textSplice "block"), ("id", textSplice id')]) $ heistLocal (bindDigestiveSplices view) $ renderWS "work/shift/split"
+        Just (id', ShiftTime user start stop color units description) -> do
+          let suser = if pFac p then user else (uId u)
+          -- this is guaranteed to fail for non-facilitators editing other people's shifts
+          s <- getUserShift suser id'
+          dayNum <- fmap (fromMaybe "") $ getParam "ws.day"
+          case s of
+            Nothing -> retErr id' dayNum "Could not find shift."
+            Just shift -> do
+              success <- changeShift u shift start stop color units description
+              case success of
+                True -> do
+                  insertShift (shift { sUser = suser, sPlace = (pId p), sStart = stop, 
+                                       sRecorder = (uId u), sUnits = ((sUnits shift) - units) })
+                  (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
+                  heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+                False -> retErr id' dayNum "Error E, Contact help@weshift.org"
+   where trd (_,_,a) = a
+         retErr id' dayNum msg = 
+              heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), 
+                                       ("disp", textSplice "block"), 
+                                       ("message", textSplice msg),
+                                       ("dayNum", textSplice $ TE.decodeUtf8 dayNum)]) $ renderWS "work/shift/split_error"
 
 
 

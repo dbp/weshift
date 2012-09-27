@@ -29,7 +29,13 @@ notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftT
   do isDeadline <- fmap (maybe False sDeadline) $ getShift' skip
      if isDeadline then return True else checkShiftTimeExcept skip user start end
 
+withinRange = checkM "Stop and units must be within current shift." $ \(current, s@(ShiftTime user start end _ units _)) -> 
+  do shift <- getShift' current
+     maybe (return False) (\s -> return (end > sStart s && end <= sStop s && units <= sUnits s)) shift
+
 descLength = check "Description too long: maximum 30 characters" $ \t -> T.length t < 30
+
+nonNegative = check "Units cannot be negative" $ \u -> u >= 0
 
 timeRangeForm :: Form T.Text AppHandler (DiffTime, DiffTime)
 timeRangeForm = goodTime $ (,)
@@ -43,7 +49,7 @@ newShiftForm = mkNS
     <$> timeRangeForm
     <*> "user"        .: stringRead "Internal error U. Email help@weshift.org" Nothing 
     <*> "color"       .: stringRead "Internal error C. Email help@weshift.org" Nothing
-    <*> "units"       .: stringRead "Must be a number like 1.5" Nothing
+    <*> "units"       .: nonNegative (stringRead "Must be a number like 1.5" Nothing)
     <*> "day"         .: stringRead "Internal error D. Email help@weshift.org" Nothing
     <*> "month"       .: stringRead "Internal error M. Email help@weshift.org" Nothing 
     <*> "year"        .: stringRead "Internal error Y. Email help@weshift.org" Nothing
@@ -54,10 +60,12 @@ newShiftForm = mkNS
                                                            (TE.encodeUtf8 desc)
           where day = fromGregorian y m d
 
---changeShiftForm :: SnapForm AppHandler Text HeistView (BS.ByteString, ShiftTime)
 changeShiftForm = notOverlappingChange $ mkS
     <$> "id" .: stringRead "Internal error S. Email help@weshift.org" Nothing
     <*> newShiftForm
   where mkS i st = (B8.pack $ show (i :: Int), st)
 
-  
+splitShiftForm = withinRange $ mkS
+    <$> "id" .: stringRead "Internal error SP. Email help@weshift.org" Nothing
+    <*> newShiftForm
+  where mkS i st = (B8.pack $ show (i :: Int), st)
