@@ -24,9 +24,11 @@
       <div class="columns">
         <dayWorkers>
           <div class="column h-${columnHeight}">
+            <div class="background"><timeColumn/></div>
             <shifts>
               <div class="shift o-${offset} h-${length} ${classes}">
                 <div class="time">
+                  <description/>
                   <time/>
                 </div>
               </div>

@@ -67,9 +67,17 @@ shiftEditH u p = do
                                        ("message", textSplice "Could not find shift."),
                                        ("dayNum", textSplice $ TE.decodeUtf8 dayNum)]) $ renderWS "work/shift/edit_error"
             Just shift -> do
-              changeShift u shift start stop color units description
-              (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
-              heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+              success <- changeShift u shift start stop color units description
+              case success of
+                True -> do
+                  (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
+                  heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+                False -> do
+                  dayNum <- fmap (fromMaybe "") $ getParam "ws.day"
+                  heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), 
+                                       ("disp", textSplice "block"), 
+                                       ("message", textSplice "Error E, Contact help@weshift.org"),
+                                       ("dayNum", textSplice $ TE.decodeUtf8 dayNum)]) $ renderWS "work/shift/edit_error"
    where trd (_,_,a) = a
 
 

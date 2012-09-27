@@ -32,7 +32,7 @@ deadlineDone u s = fmap (not.null) $ withPGDB "UPDATE shifts SET deadline_done =
 
 -- | note: this does not actually change a shift in place, it merely adds a change to the database.
 changeShift :: User -> Shift -> LocalTime -> LocalTime -> Color -> Double -> BS.ByteString -> AppHandler Bool
-changeShift u s ns ne co uns desc = fmap (not.null) $ withPGDB "INSERT INTO shiftchanges (place, user_id, old_shift, start, stop, color, units, recorder, description) (SELECT ? as place, ? as user_id, ? as old_shift, ? as start, ? as stop, ? as color, ? as units, ? as recorder, ? as description WHERE NOT EXISTS (SELECT id, user_id, start, stop FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) AND id != ?)) RETURNING id;" [toSql (sPlace s), toSql (sUser s), toSql (sId s), toSql ns, toSql ne, toSql (colorToInt co), toSql uns, toSql (uId u), toSql desc, toSql (sUser s), toSql ns, toSql ne, toSql (sId s)]
+changeShift u s ns ne co uns desc = fmap (not.null) $ withPGDB "INSERT INTO shiftchanges (place, user_id, old_shift, start, stop, color, units, recorder, description) (SELECT ? as place, ? as user_id, ? as old_shift, ? as start, ? as stop, ? as color, ? as units, ? as recorder, ? as description) RETURNING id;" [toSql (sPlace s), toSql (sUser s), toSql (sId s), toSql ns, toSql ne, toSql (colorToInt co), toSql uns, toSql (uId u), toSql desc]
 
 requestShift :: User -> Shift -> AppHandler (Maybe BS.ByteString)
 requestShift u shift = fmap ((fmap (fromSql.head)) . listToMaybe) $ withPGDB "INSERT INTO shiftrequests (shift_id, requester) VALUES (?, ?) RETURNING id;" [toSql (sId shift), toSql (uId u)]
@@ -59,7 +59,7 @@ checkShiftTime :: BS.ByteString -> LocalTime -> LocalTime -> AppHandler Bool
 checkShiftTime uid start stop = fmap null $ withPGDB "SELECT id FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) AND deadline = false" [toSql uid, toSql start, toSql stop]
 
 checkShiftTimeExcept :: BS.ByteString -> BS.ByteString -> LocalTime -> LocalTime -> AppHandler Bool
-checkShiftTimeExcept skip uid start stop = fmap null $ withPGDB "SELECT id FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) AND id != ?;" [toSql uid, toSql start, toSql stop, toSql skip]
+checkShiftTimeExcept skip uid start stop = fmap null $ withPGDB "SELECT id FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) AND deadline = false AND id != ?;" [toSql uid, toSql start, toSql stop, toSql skip]
 
 getNextShift :: User -> UserPlace -> AppHandler (Maybe Shift)
 getNextShift u p =

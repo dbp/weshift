@@ -18,6 +18,8 @@ import qualified  Utils as U
 import State.Shifts
 import Forms.Shifts
 import Render.Shifts
+import Data.Ord (comparing)
+import Data.List (sortBy)
 
 
 data DayFormat = DayFormat { dNumber :: Maybe Int -- what day of the month is it, if any
@@ -181,23 +183,26 @@ daySplices u p workers shifts day =
           dayLength = (\n -> if n < 0 then 0 else n) $ endTime - startTime
           timeColumnHeight = dayLength + (4 - (dayLength `mod` 4)) + (4 - (startTime `mod` 4))
           
-timeColumn start length = return $
-                            (X.Element "div" [("class", T.append "top t-" (T.pack $ show $ 4 - (start `mod` 4)))] [])
-                            :(map (\n -> X.Element "div" [("class","h-4 hour")] [X.TextNode (T.pack $ (show  (if n > 12 then n - 12 else n)) ++ ":00" ++ (if n > 12 then "pm" else "am"))]) 
-                            $ take (max 2 ((length `div` 4)  + 1)) (iterate (+1) (start `div` 4 + (if start `mod` 4 == 0 then 0 else 1))))
+timeColumn start length = 
+  return $ 
+    (X.Element "div" 
+      [("class", T.append "top t-" (T.pack $ show $ 4 - (start `mod` 4)))] [])
+    :(map (\n -> X.Element "div" [("class","h-4 hour")] [X.TextNode (T.pack $ (show  (if n > 12 then n - 12 else n)) ++ ":00" ++ (if n > 12 then "pm" else "am"))]) 
+      $ take (max 2 ((length `div` 4)  + 1)) (iterate (+1) (start `div` 4 + (if start `mod` 4 == 0 then 0 else 1))))
 
 dayView :: User -> UserPlace -> [User] -> [Shift] -> Integer -> Int -> Int -> Splice AppHandler
 dayView u p workers shifts' year month day = do
   -- don't include deadlines - they don't really make sense on a day calendar, as
   -- they can overlap with stuff.
-  let shifts = filter (not . sDeadline) shifts'
+  let shifts = sortBy (flip $ comparing sStart) $ filter (not . sDeadline) shifts'
   let start = fromGregorian year month day 
   let end = addDays 1 start
   uncoveredShifts <- lift $ getUncoveredShifts start end p
   let shiftUsers = map sUser shifts
   let dayLaborers = filter (\w -> (uId w) `elem` shiftUsers) workers
   let rest = filter (not . (flip elem dayLaborers)) workers
-  let startTime = timePeriod $ localTimeOfDay $ minimum $ map sStart shifts
+  let startTime' = timePeriod $ localTimeOfDay $ minimum $ map sStart shifts
+  let startTime = startTime' - (4 - (startTime' `mod` 4))
   renderDayVD workers u startTime shifts uncoveredShifts (dayLaborers ++ rest)
 
 timePeriod tod = (todHour tod) * 4 + (todMin tod `div` 15)
@@ -212,13 +217,16 @@ workerDay self start ss us dl =
                                        offset' = start - offset
                                        stop = timePeriod (localTimeOfDay (sStop s))
                                        len = stop - start
+                                       desc = sDescription s
                                        classes = T.concat [if (uId self) == (sUser s) then "self" else "other",
                                                            " ", T.pack (show (sColor s))]
                                        time = (formatTime defaultTimeLocale "%-I:%M%P" (sStart s)) ++ "-" ++ (formatTime defaultTimeLocale "%-I:%M%P" (sStop s)) in
-                                       (stop, (offset',len,classes,time):acc)
-          sS (offset,len,classes,time) = runChildrenWith [("offset", textSplice $ T.pack $ show offset)
-                                                         ,("length", textSplice $ T.pack $ show len)
-                                                         ,("classes", textSplice $ classes)
-                                                         ,("time", textSplice $ T.pack time)
-                                                         ]
+                                       (stop, (offset',len,classes,time,desc):acc)
+          sS (offset,len,classes,time,desc) = 
+            runChildrenWith [("offset", textSplice $ T.pack $ show offset)
+                            ,("length", textSplice $ T.pack $ show len)
+                            ,("classes", textSplice $ classes)
+                            ,("time", textSplice $ T.pack time)
+                            ,("description", textSplice $ TE.decodeUtf8 desc)
+                            ]
     
