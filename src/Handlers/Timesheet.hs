@@ -70,7 +70,7 @@ timesheetEntry user shift = do
   covers  <- getShiftCovers shift
   let modifications = sortBy (\m1 m2 -> compare (mTime m1) (mTime m2)) (changes ++ deletes ++ covers)
   let (hoursWorked,unitsWorked) = getHours user tz utcStart utcEnd units modifications
-  return $ Entry hoursWorked unitsWorked (sStart shift) (sStop shift) modifications (sDeadline shift) (sDeadlineDone shift)
+  return $ Entry hoursWorked unitsWorked (sStart shift) (sStop shift) modifications (sDeadline shift) (sDeadlineDone shift) (sDescription shift)
 
 
 getHours user tz defstart defstop units [] = 
@@ -82,7 +82,7 @@ getHours user tz defstart defstop units modifications =
         then (getHours user tz defstart defstop units (tail modifications))
         else (0, 0)
       Delete _ _ -> (0, 0)
-      Change ns ne _ u _ _ -> 
+      Change ns ne _ u _ _ _ -> 
         (roundHours $ (diffUTCTime (localTimeToUTC tz ne) (localTimeToUTC tz ns)) / (60*60), u)
 
 roundHours n = (/ 10) $ fromIntegral $ floor $ n * 10 

@@ -69,7 +69,7 @@ confirm u p = do
     _ -> renderWS "work/bulk_error"
 
  where filterFac ss = if pFac p then ss else filter (\s -> sUser s == uId u) ss   
-       formatNU workers (Shift _ user _ start stop _ _ _ _ _ _) = 
+       formatNU workers (Shift _ user _ start stop _ _ _ _ _ _ _) = 
           do u <- find ((== user).uId) workers
              return (B8.unpack $ uName u, localDay start, showTimeRange start stop)
        showTimeRange start stop = (ftime start) ++ "-" ++ (ftime stop)

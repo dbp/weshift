@@ -33,13 +33,13 @@ shiftH u p = route [ ("/add",             shiftAddH u p)
 shiftAddH u p = do
   (view, result) <- wsForm addShiftForm
   case result of
-      Just (ShiftTime uid start stop color units)-> do
+      Just (ShiftTime uid start stop color units description)-> do
         -- if they are a facilitator, then accept whatever id they gave, otherwise, enforce it being theirs
         let suser = if pFac p then uid else (uId u)
         isDeadline <- fmap (maybe False (const True)) $ getParam "ws.deadline"
         insertShift (emptyShift { sUser = suser, sPlace = (pId p), sStart = start, sStop = stop, 
                                   sRecorder = (uId u), sColor = color, sUnits = units, 
-                                  sDeadline = isDeadline})
+                                  sDeadline = isDeadline, sDescription = description})
         (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
         heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
       Nothing -> do
@@ -55,7 +55,7 @@ shiftEditH u p = do
     case result of
         Nothing -> do
           heistLocal (bindSplices [("disp", textSplice "block"), ("id", textSplice id')]) $ heistLocal (bindDigestiveSplices view) $ renderWS "work/shift/edit"
-        Just (id', ShiftTime user start stop color units) -> do
+        Just (id', ShiftTime user start stop color units description) -> do
           let suser = if pFac p then user else (uId u)
           -- this is guaranteed to fail for non-facilitators editing other people's shifts
           s <- getUserShift suser id'
@@ -67,7 +67,7 @@ shiftEditH u p = do
                                        ("message", textSplice "Could not find shift."),
                                        ("dayNum", textSplice $ TE.decodeUtf8 dayNum)]) $ renderWS "work/shift/edit_error"
             Just shift -> do
-              changeShift u shift start stop color units
+              changeShift u shift start stop color units description
               (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay start))
               heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
    where trd (_,_,a) = a

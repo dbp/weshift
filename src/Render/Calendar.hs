@@ -78,7 +78,8 @@ monthView :: UserPlace -> User -> Integer -> Int -> Maybe Int -> Splice AppHandl
 monthView place user year month day' = do 
   let start = fromGregorian year month 1
   let end = addDays (toInteger $ gregorianMonthLength year month) start
-  shifts <- lift $ getShifts start end place
+  shifts' <- lift $ getShifts start end place
+  let shifts = filter (\s -> if sDeadline s then not (sDeadlineDone s) else True) shifts'
   uncoveredShifts <- lift $ getUncoveredShifts start end place
   renderMonth user day' shifts $ concat $ formatMonth year month shifts uncoveredShifts user $ buildMonth year month
 

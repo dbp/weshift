@@ -75,26 +75,27 @@ data Shift = Shift { sId :: BS.ByteString
                    , sRecorder :: BS.ByteString
                    , sDeadline :: Bool
                    , sDeadlineDone :: Bool
+                   , sDescription :: BS.ByteString
                    }
                    deriving (Eq, Show, Read)
-emptyShift = Shift "" "" "" emptyLocalTime emptyLocalTime Transparent 0 emptyLocalTime "" False False
+emptyShift = Shift "" "" "" emptyLocalTime emptyLocalTime Transparent 0 emptyLocalTime "" False False ""
 
 data Modification = Delete User LocalTime -- who deleted it, and when
-                  | Change LocalTime LocalTime Color Double User LocalTime
-                  -- new start, new end, new color, new units who did it, when it was changed
+                  | Change LocalTime LocalTime Color Double User LocalTime BS.ByteString
+                  -- new start, new end, new color, new units who did it, when it was changed, new desc
                   | Cover User LocalTime -- who covered it, and when
                   deriving (Eq, Show)
 mTime (Delete _ t) = t
-mTime (Change _ _ _ _ _ t) = t
+mTime (Change _ _ _ _ _ t _) = t
 mTime (Cover _ t) = t
 
 buildPlace (pi:pn:pt:po:[]) = Just $ UserPlace (fromSql pi) (fromSql pn) (fromSql po) False (fromSql pt) 
 buildPlace _ = Nothing
 
-buildShift (si:su:sp:ss:st:sr:sb:sc:sun:sd:sdd:[]) = 
+buildShift (si:su:sp:ss:st:sr:sb:sc:sun:sd:sdd:sdesc:[]) = 
   Just $ Shift (fromSql si) (fromSql su) (fromSql sp) (fromSql ss) (fromSql st) 
                (colorFromInt (fromSql sc)) (fromSql sun)
-               (fromSql sr) (fromSql sb) (fromSql sd) (fromSql sdd)
+               (fromSql sr) (fromSql sb) (fromSql sd) (fromSql sdd) (fromSql sdesc)
 
 buildShift _ = Nothing
 

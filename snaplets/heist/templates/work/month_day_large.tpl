@@ -10,7 +10,8 @@
         <notDeadlineDone>
         <div class="shift ${color}">
           <div class="time">
-            <isDeadline>due by</isDeadline>
+            <description/>
+            <isDeadline>by</isDeadline>
             <start/><notDeadline>-<stop/></notDeadline>
             (<units/>)
             <isDeadline>
@@ -69,7 +70,7 @@
         <ifRequested>
           <button class="cover toggle" data-toggle-target=".cover-form-${id}"/>               
         </ifRequested>
-        <user-lookup id="${user}"><name/></user-lookup> - <isDeadline>due by</isDeadline> <start/><notDeadline>-<stop/></notDeadline> (<units/>)<br>
+        <user-lookup id="${user}"><name/></user-lookup> - <description/> <isDeadline>by</isDeadline> <start/><notDeadline>-<stop/></notDeadline> (<units/>)<br>
         <isFacilitator>
           <button class="delete toggle" data-toggle-target=".delete-form-${id}"></button> 
         </isFacilitator>

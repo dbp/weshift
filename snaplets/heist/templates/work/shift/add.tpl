@@ -14,7 +14,7 @@
     <dfInputHidden ref="month" data-default="${currMonth}"/>
     <dfInputHidden ref="year" data-default="${currYear}"/>
 
-    <label for="ws.deadline">Deadline</label>
+    <label for="ws.deadline">deadline</label>
     <input type="checkbox" name="ws.deadline" class="deadline-toggle"/>
 
     <dfInputText ref="start" data-default="9:00am"/> to <dfInputText ref="stop" data-default="5:00pm"/>
@@ -27,6 +27,8 @@
         <option value="Red">Red</option>
         <option value="Green">Green</option>
     </wsSelect>
+    <dfLabel ref="description">description</dfLabel>
+    <dfInputText ref="description" data-default=""/>
     <dfChildErrorList class="errors"/>
     <button type="submit"/>
   </dfForm>

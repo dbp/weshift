@@ -16,6 +16,8 @@
                 <option value="Red">Red</option>
                 <option value="Green">Green</option>
             </wsSelect>
+            <dfLabel ref="description">description</dfLabel>
+            <dfInputText ref="description" data-default="${description}"/>
             <dfChildErrorList class="errors" />
             
 			<button type="submit"/>

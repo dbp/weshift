@@ -22,12 +22,13 @@ renderTSCoworker self u = runChildrenWithText [ ("userId",   TE.decodeUtf8 $ uId
                                               ]
 
 
-data Entry = Entry Double Double LocalTime LocalTime [Modification] Bool Bool deriving Show -- hours worked, units, orig. start, orig. end, list of modifications, is deadline, is deadline done
+data Entry = Entry Double Double LocalTime LocalTime [Modification] Bool Bool BS.ByteString deriving Show -- hours worked, units, orig. start, orig. end, list of modifications, is deadline, is deadline done, description
 
-entryHours (Entry h _ _ _ _ _ _) = h
-entryUnits (Entry _ u _ _ _ _ _) = u
-entryDeadline (Entry _ _ _ _ _ d _) = d
-entryDone (Entry _ _ _ _ _ _ d) = d
+entryHours (Entry h _ _ _ _ _ _ _) = h
+entryUnits (Entry _ u _ _ _ _ _ _) = u
+entryDeadline (Entry _ _ _ _ _ d _ _) = d
+entryDone (Entry _ _ _ _ _ _ d _) = d
+entryDescription (Entry _ _ _ _ _ _ _ d) = d
 
 renderChange d (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
                                                   , ("changeDescription", "Deleted")
@@ -37,9 +38,9 @@ renderChange d (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
                                                   ]
 
 
-renderChange d (Change s e c un u t) = 
+renderChange d (Change s e c un u t desc) = 
   runChildrenWithText [ ("changeClasses", "change")
-                      , ("changeDescription", T.concat (["To ",(renderTime s)] ++ (if d then [] else ["-",(renderTime e)])))
+                      , ("changeDescription", T.concat ((if BS.length desc /= 0 then ["'", TE.decodeUtf8 desc,"', "] else []) ++ [renderTime s] ++ (if d then [] else ["-",(renderTime e)])))
                       , ("changePerson", TE.decodeUtf8 $ uName u)
                       , ("changeTime", renderTime t)
                       , ("changeDate", renderDate t)
@@ -53,7 +54,7 @@ renderChange d (Cover u t) = runChildrenWithText [ ("changeClasses", "cover")
                                                  , ("changeDate", renderDate t)
                                                  ]
                                                
-renderEntry (Entry hours units start end changes deadline deadlineDone) =
+renderEntry (Entry hours units start end changes deadline deadlineDone description) =
   runChildrenWith [ ("hoursWorked", textSplice $ T.pack $ show hours)
                   , ("units", textSplice $ T.pack $ show units)
                   , ("startTime", textSplice $ renderTime start)
@@ -62,7 +63,8 @@ renderEntry (Entry hours units start end changes deadline deadlineDone) =
                   , ("changes", mapSplices (renderChange deadline) changes)
                   , ("isDeadline", booleanSplice deadline)
                   , ("notDeadline", booleanSplice (not deadline))
-                  ,("isDeadlineDone", booleanSplice (deadlineDone || (not deadline)))
-                  ,("notDeadlineDone", booleanSplice ((not deadlineDone) || (not deadline)))
+                  , ("isDeadlineDone", booleanSplice (deadlineDone || (not deadline)))
+                  , ("notDeadlineDone", booleanSplice ((not deadlineDone) || (not deadline)))
+                  , ("description", textSplice $ TE.decodeUtf8 description)
                   ]
                   
