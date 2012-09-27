@@ -40,7 +40,7 @@ renderChange d (Delete u t) = runChildrenWithText [ ("changeClasses", "delete")
 
 renderChange d (Change s e c un u t desc) = 
   runChildrenWithText [ ("changeClasses", "change")
-                      , ("changeDescription", T.concat ((if BS.length desc /= 0 then ["'", TE.decodeUtf8 desc,"', "] else []) ++ [renderTime s] ++ (if d then [] else ["-",(renderTime e)])))
+                      , ("changeDescription", T.concat ((if BS.length desc /= 0 then ["'", TE.decodeUtf8 desc,"', "] else []) ++ [renderTime s] ++ (if d then [] else ["-",(renderTime e)]) ++ [" (", T.pack $ show un, ")"]))
                       , ("changePerson", TE.decodeUtf8 $ uName u)
                       , ("changeTime", renderTime t)
                       , ("changeDate", renderDate t)

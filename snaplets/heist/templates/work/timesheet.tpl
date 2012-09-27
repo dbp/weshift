@@ -38,7 +38,7 @@
             <notDeadlineDone>&#10007;</notDeadlineDone>
           </isDeadline>
           (<units/>)</td>
-        <td class="entry-shift"><description/> <startTime/><notDeadline>-<endTime/></notDeadline><br><shiftDate/></td>
+        <td class="entry-shift"><description/> <startTime/><notDeadline>-<endTime/></notDeadline> (<units/>)<br><shiftDate/></td>
         <td class="entry-changes">
           <changes>
             <div class="${changeClasses}"><changeDescription/> by <changePerson/><br>(<changeTime/>, <changeDate/>)</div>
