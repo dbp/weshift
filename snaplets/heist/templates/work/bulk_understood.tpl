@@ -8,7 +8,7 @@
    <form-async method="POST" action="${placeRoot}/bulk/confirm">
       Understood:<br>
       <understood>
-       <user-lookup id="${user}"><name/></user-lookup> - <date/> - <start/>-<stop/><br>
+       <user-lookup id="${user}"><name/></user-lookup> - <description/> <date/> - <start/>-<stop/> (<units/>)<br>
       </understood>
       <input type="hidden" name="understood" value="${understood-serialized}"/>
       <br>

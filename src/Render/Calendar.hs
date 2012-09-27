@@ -106,7 +106,8 @@ monthSplices u p curday day' = [("monthName", textSplice $ T.pack (formatTime de
  
 dayLargeSplices place user (year, month, day) = do
    let d = (fromGregorian year month day)
-   shifts <- getShifts d (addDays 1 d) place
+   shifts' <- getShifts d (addDays 1 d) place
+   let shifts = filter (\s -> if sDeadline s then not (sDeadlineDone s) else True) shifts'
    let selfShifts = filter ((== (uId user)) . sUser) shifts
    let otherShifts = filter ((/= (uId user)) . sUser) shifts
    let selfClasses = if null selfShifts then "" else "shift"
