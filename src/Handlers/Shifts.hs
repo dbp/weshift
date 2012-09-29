@@ -196,6 +196,7 @@ deadlineDoneH u p = do
        
 requestOffH u p = do
   mid <- getParam "shift"
+  notify <- fmap (maybe False (const True)) $ getParam "notify"
   case mid of
     Nothing -> redirPlaceHomeAsync
     Just id' -> do
@@ -206,10 +207,13 @@ requestOffH u p = do
           mreqid <- requestShift u shift
           case mreqid of
             (Just reqid) -> do
-              -- now email anyone who can cover the shift
-              aus <- getAvailableUsers shift p -- ie, people who don't have another shift at that time
-              tokensEmails <- mapM (\u -> getUserEmails u >>= (\ems -> return (uToken u, map emAddress $ filter emConfirmed ems))) aus
-              mailRequestOff shift reqid (uName u) p tokensEmails
+              case notify of
+                False -> return ()
+                True -> do
+                  -- now email anyone who can cover the shift
+                  aus <- getAvailableUsers shift p -- ie, people who don't have another shift at that time
+                  tokensEmails <- mapM (\u -> getUserEmails u >>= (\ems -> return (uToken u, map emAddress $ filter emConfirmed ems))) aus
+                  mailRequestOff shift reqid (uName u) p tokensEmails
               (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
               heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
             Nothing -> err id' "Couldn't request off, try again or contact help@weshift.org"

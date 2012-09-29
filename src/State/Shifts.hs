@@ -56,7 +56,7 @@ getShiftRequest :: BS.ByteString -> BS.ByteString -> AppHandler (Maybe BS.ByteSt
 getShiftRequest uid shiftid = fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "SELECT R.id FROM shiftrequests AS R JOIN shifts_current AS C ON R.shift_id = C.id WHERE R.shift_id = ? AND C.user_id = ?;" [toSql shiftid, toSql uid]
 
 getShiftByRequest :: BS.ByteString -> AppHandler (Maybe Shift)
-getShiftByRequest rid = fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder, S.color, S.units, S.deadline, S.deadline_done, S.description FROM shifts_current AS S JOIN shiftrequests as R ON S.id = R.shift_id WHERE R.id = ?;" [toSql rid]
+getShiftByRequest rid = fmap ((>>= buildShift).listToMaybe) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder, S.color, S.units, S.deadline, S.deadline_done, S.description, S.has_claims FROM shifts_current AS S JOIN shiftrequests as R ON S.id = R.shift_id WHERE R.id = ?;" [toSql rid]
 
 coverShift :: BS.ByteString -> Shift -> BS.ByteString -> AppHandler Bool
 coverShift uid shift reqid = fmap (not.null) $ withPGDB "INSERT INTO shiftcovers (shift_id, coverer) (SELECT ? as shift_id, ? as coverer WHERE NOT EXISTS (SELECT id, user_id, start, stop FROM shifts_current WHERE user_id = ? AND (? < stop AND ? > start) UNION ALL select id, user_id, start, stop FROM obligations WHERE user_id = ? AND (? < stop AND ? > start)) AND EXISTS (SELECT id FROM shiftrequests WHERE id = ?)) RETURNING id;" [toSql (sId shift), toSql uid, toSql uid, toSql (sStart shift), toSql (sStop shift), toSql uid, toSql (sStart shift), toSql (sStop shift), toSql reqid]
