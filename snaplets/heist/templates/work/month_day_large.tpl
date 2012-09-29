@@ -21,43 +21,9 @@
           <apply template="shift/deadline_done">
             <bind tag="disp">none</bind>
           </apply>
-          <div class="buttons">
-            <ifRequested>
-              <button class="unrequest toggle" data-toggle-target=".unrequest-form-${id}">Stop Request</button>               
-            </ifRequested>
-            <notRequested>
-              <button class="request toggle" data-toggle-target=".request-form-${id}">Request Off</button> 
-            </notRequested>
-            <button class="delete toggle" data-toggle-target=".delete-form-${id}">Delete Shift</button>
-          </div>
-          <ifRequested>
-            <apply template="shift/unrequest">
-              <bind tag="disp">none</bind>
-            </apply>
-          </ifRequested>
-          <notRequested>
-            <apply template="shift/request">
-              <bind tag="disp">none</bind>
-            </apply>  
-          </notRequested>        
-          <apply template="shift/delete">
-            <bind tag="disp">none</bind>
-          </apply>
-          <div class="buttons">
-            <button class="change toggle" data-toggle-target=".change-form-${id}">Change Shift</button>
-            <notDeadline>
-              <button class="split toggle" data-toggle-target=".split-form-${id}">Split Shift</button>
-            </notDeadline>
-          </div>
-          <apply template="shift/edit">
-            <bind tag="disp">none</bind>
-            <bind tag="start-value"><start/></bind>
-            <bind tag="stop-value"><stop/></bind>
-          </apply>
-          <apply template="shift/split">
-            <bind tag="disp">none</bind>
-            <bind tag="start-value"><start/></bind>
-            <bind tag="stop-value"><stop/></bind>
+          <apply template="shift/buttons"></apply>
+          <apply template="shift/claims">
+            <bind tag="claimee">true</bind>
           </apply>
         </div>
       </notDeadlineDone>
@@ -80,24 +46,18 @@
         </ifRequested>
         <user-lookup id="${user}"><name/></user-lookup> - <description/> <isDeadline>by</isDeadline> <start/><notDeadline>-<stop/></notDeadline> (<units/>)<br>
         <isFacilitator>
-          <button class="delete toggle" data-toggle-target=".delete-form-${id}"></button> 
+          <apply template="shift/buttons"></apply>
         </isFacilitator>
-        <br/>
-        <isFacilitator>
-          <apply template="shift/delete">
-            <bind tag="disp">none</bind>
-          </apply>
-        </isFacilitator>
-        <ifRequested>
-          <apply template="shift/cover">
-            <bind tag="disp">none</bind>
-          </apply>
-        </ifRequested>
+        <div class="buttons">
+          <button class="claim toggle" data-toggle-target=".claim-form-${id}">Claim Part</button>
         </div>
+        <apply template="shift/claim">
+          <bind tag="disp">none</bind>
+        </apply>
+        </div>
+        <apply template="shift/claims"></apply>
         </notDeadlineDone>
-      </otherShifts>
-
-      
+      </otherShifts>      
     </div>
   </div-async>
 </day>

@@ -69,3 +69,15 @@ splitShiftForm = withinRange $ mkS
     <$> "id" .: stringRead "Internal error SP. Email help@weshift.org" Nothing
     <*> newShiftForm
   where mkS i st = (B8.pack $ show (i :: Int), st)
+
+unitCheck = checkM "Cannot claim more units than in the shift" $ \(shift, _, units, _) -> do
+  s <- getShift' shift
+  -- if the shift doesn't exist, it means tampering, so we actually want to not give a good error message
+  return $ maybe False (\s' -> units <= (sUnits s')) s
+
+claimShiftForm = unitCheck $ mkS
+    <$> "id"     .: stringRead "Internal error SC. Email help@weshift.org" Nothing
+    <*> "user"   .: stringRead "Internal error UC. Email help@weshift.org" Nothing 
+    <*> "units"  .: nonNegative (stringRead "Must be a number like 1.5" Nothing)
+    <*> "reason" .: text Nothing
+  where mkS i user units r = (B8.pack $ show (i :: Int), B8.pack $ show (user :: Int), units :: Double, TE.encodeUtf8 r)

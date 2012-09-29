@@ -1,0 +1,8 @@
+Description: (Description here.)
+Created: 2012-09-29 17:52:17.422064 UTC
+Depends: add_claims
+Apply:
+  ALTER TABLE shiftclaims ADD COLUMN accepted boolean NOT NULL DEFAULT false;
+
+Revert:
+  ALTER TABLE shiftclaims DROP COLUMN accepted;

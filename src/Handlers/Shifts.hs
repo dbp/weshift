@@ -21,14 +21,17 @@ import            Mail (mailRequestOff, mailShiftCovered)
 import            Forms.Shifts
 
 shiftH :: User -> UserPlace -> AppHandler ()
-shiftH u p = route [ ("/add",             shiftAddH u p)
-                   , ("/edit",            shiftEditH u p)
-                   , ("/split",           shiftSplitH u p)
-                   , ("/delete",          method POST $ shiftDeleteH u p)
-                   , ("/requestoff",      method POST $ requestOffH u p)
-                   , ("/unrequestoff",    method POST $ unRequestOffH u p)
-                   , ("/cover",           method POST $ coverH u p)
-                   , ("/deadline_done",   method POST $ deadlineDoneH u p)
+shiftH u p = route [ ("/add",               shiftAddH u p)
+                   , ("/edit",              shiftEditH u p)
+                   , ("/split",             shiftSplitH u p)
+                   , ("/claim/:id/accept",  shiftClaimAcceptH u p)
+                   , ("/claim/:id/cancel",  shiftClaimCancelH u p)
+                   , ("/claim",             shiftClaimH u p)
+                   , ("/delete",            method POST $ shiftDeleteH u p)
+                   , ("/requestoff",        method POST $ requestOffH u p)
+                   , ("/unrequestoff",      method POST $ unRequestOffH u p)
+                   , ("/cover",             method POST $ coverH u p)
+                   , ("/deadline_done",     method POST $ deadlineDoneH u p)
                    ]
 
 shiftAddH u p = do
@@ -80,6 +83,58 @@ shiftEditH u p = do
                                        ("message", textSplice "Error E, Contact help@weshift.org"),
                                        ("dayNum", textSplice $ TE.decodeUtf8 dayNum)]) $ renderWS "work/shift/edit_error"
    where trd (_,_,a) = a
+
+shiftClaimH u p = do
+  id' <- fmap (TE.decodeUtf8.fromJust) $ getParam "ws.id" -- if this isn't present, it means tampering, so don't care.
+  (view, result) <- wsForm claimShiftForm
+  case result of
+    Nothing -> heistLocal (bindSplices [("disp", textSplice "block"), ("id", textSplice id')]) $ heistLocal (bindDigestiveSplices view) $ renderWS "work/shift/claim"
+    Just (id', user, units, reason) -> do
+      let suser = if pFac p then user else (uId u)
+      -- we want to guarantee that the shift is at this place, in case of tampering
+      shift' <- getShift id' p
+      case shift' of
+        Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/claim_error"
+        Just shift -> do
+          success <- claimShift (emptyClaim {cShift = (sId shift), cUser = suser, cUnits = units, cReason = reason})
+          -- SEND EMAIL
+          case success of
+            True -> do
+              (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
+              heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+            False -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Error C. Contact help@weshift.org")]) $ renderWS "work/shift/claim_error"
+
+shiftClaimCancelH u p = do
+  id' <- fmap fromJust $ getParam "id" -- if this isn't present, it means tampering, so don't care.
+  claim' <- getShiftClaim id'
+  case claim' of
+    Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("message", textSplice "Could not find claim.")]) $ renderWS "work/shift/claims_error"
+    Just claim -> do
+      -- postgres guarantees that while a claim exists, its corresponding shift exists
+      shift <- fmap fromJust $ getShift (cShift claim) p
+      resolveClaim (claim {cAccepted = False})
+      (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
+      heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+
+shiftClaimAcceptH u p = do
+  id' <- fmap fromJust $ getParam "id" -- if this isn't present, it means tampering, so don't care.
+  claim' <- getShiftClaim id'
+  case claim' of
+    Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("message", textSplice "Could not find claim.")]) $ renderWS "work/shift/claims_error"
+    Just claim -> do
+      -- postgres guarantees that while a claim exists, its corresponding shift exists
+      shift <- fmap fromJust $ getShift (cShift claim) p
+      -- we create a change to take away the units, and then create a deadline based
+      -- shift for the other person, to give them the units. we use deadlines so that
+      -- it can overlap
+      changeShift u shift (sStart shift) (sStop shift) (sColor shift) (sUnits shift - cUnits claim) (sDescription shift)
+      insertShift (emptyShift { sStart = (sStart shift), sStop = (sStop shift), 
+                                sDeadline = True, sDeadlineDone = True, 
+                                sDescription = (cReason claim), sUnits = (cUnits claim), 
+                                sUser = (cUser claim), sPlace = (pId p), sRecorder = (uId u)})
+      resolveClaim (claim {cAccepted = True})
+      (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
+      heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
 
 
 shiftSplitH u p = do

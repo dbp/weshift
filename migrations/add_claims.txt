@@ -1,0 +1,18 @@
+Description: (Description here.)
+Created: 2012-09-29 15:35:50.889862 UTC
+Depends: add_description_to_shift
+Apply:
+  CREATE TABLE shiftclaims (
+    id serial PRIMARY KEY,
+    shift_id integer NOT NULL references shifts on delete cascade,
+    user_id integer NOT NULL references users on delete cascade,
+    units DECIMAL(5,2) NOT NULL,
+    reason TEXT NOT NULL,
+    resolved boolean NOT NULL DEFAULT false
+  );
+  DROP VIEW shifts_current;
+  CREATE VIEW shifts_current AS SELECT DISTINCT ON (S.id) S.id as id, COALESCE(CO.coverer,S.user_id) as user_id, S.place as place, COALESCE(SC.recorder,S.recorder) as recorder, COALESCE(SC.recorded, S.recorded) as recorded, COALESCE(SC.start, S.start) AS start, COALESCE(SC.stop,S.stop) AS stop, COALESCE(SC.units, S.units) as units, COALESCE(SC.color, S.color) as color, S.deadline as deadline, S.deadline_done as deadline_done, COALESCE(SC.description, S.description) as description, (select case when exists (select id from shiftclaims where shift_id = S.id) then true else false end) as has_claims FROM shifts AS S LEFT OUTER JOIN shiftchanges AS SC ON S.id = SC.old_shift LEFT OUTER JOIN shiftdeletes AS SD ON S.id = SD.old_shift JOIN users AS U ON U.id = S.user_id LEFT OUTER JOIN shiftcovers AS CO ON CO.shift_id = S.id WHERE SD.old_shift IS NULL ORDER BY S.id, SC.recorded desc, CO.recorded desc;
+
+Revert:
+  DROP TABLE shiftclaims cascade;
+  CREATE VIEW shifts_current AS SELECT DISTINCT ON (S.id) S.id as id, COALESCE(CO.coverer,S.user_id) as user_id, S.place as place, COALESCE(SC.recorder,S.recorder) as recorder, COALESCE(SC.recorded, S.recorded) as recorded, COALESCE(SC.start, S.start) AS start, COALESCE(SC.stop,S.stop) AS stop, COALESCE(SC.units, S.units) as units, COALESCE(SC.color, S.color) as color, S.deadline as deadline, S.deadline_done as deadline_done, COALESCE(SC.description, S.description) as description FROM shifts AS S LEFT OUTER JOIN shiftchanges AS SC ON S.id = SC.old_shift LEFT OUTER JOIN shiftdeletes AS SD ON S.id = SD.old_shift JOIN users AS U ON U.id = S.user_id LEFT OUTER JOIN shiftcovers AS CO ON CO.shift_id = S.id WHERE SD.old_shift IS NULL ORDER BY S.id, SC.recorded desc, CO.recorded desc;

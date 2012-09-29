@@ -36,6 +36,7 @@ import State.Types
 import State.Account
 import State.Place
 import State.Coworkers
+import State.Shifts
 
 
 -- | this function is a helper for our use of digestive functors - we always use same prefix
@@ -189,6 +190,27 @@ userLookup users = do node <- getParamNode
                                                      ,("super",  if uSuper user then identitySplice else blackHoleSplice)
                                                      ]  
 
+shiftClaims :: User -> Splice AppHandler
+shiftClaims u = do node <- getParamNode
+                   case X.getAttribute "id" node >>= (return . TE.encodeUtf8) of
+                      Nothing -> return []
+                      Just shiftId -> do
+                        claims <- lift $ getShiftClaims shiftId
+                        mapSplices 
+                          (\(Claim id' shift user units reason resolved accepted) -> 
+                            runChildrenWith [("id", textSplice $ TE.decodeUtf8 id')
+                                            ,("shift", textSplice $ TE.decodeUtf8 shift)
+                                            ,("user", textSplice $ TE.decodeUtf8 user)
+                                            ,("units", textSplice $ T.pack $ show units)
+                                            ,("reason", textSplice $ TE.decodeUtf8 reason)
+                                            ,("resolved", booleanSplice resolved)
+                                            ,("notResolved", booleanSplice $ not resolved)
+                                            ,("accepted", booleanSplice accepted)
+                                            ,("notAccepted", booleanSplice $ not accepted)
+                                            ,("userClaim", booleanSplice $ user == (uId u))
+                                            ])
+                          claims
+
 -- | this splice shows it's children if the blank attribute is blank, or if it's notblank attribute is not blank, 
 --   or another attribute is equal to it's name
 showContent :: Monad m => Splice m
@@ -229,6 +251,7 @@ renderWS t = do mup <- getCurrentUserAndPlace
                                             ,("userId", bTS $ uId u)
                                             ,("view", viewSplice (uView u))
                                             ,("userPlaces", renderPlaces (Just p) (uPlaces u))
+                                            ,("claims", shiftClaims u)
                                             ]
                 let permissionSplices = [("isFacilitator", facilitatorSplice $ fmap snd mup)
                                         ,("isNormalUser", normalUserSplice $ fmap snd mup)

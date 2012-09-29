@@ -76,9 +76,21 @@ data Shift = Shift { sId :: BS.ByteString
                    , sDeadline :: Bool
                    , sDeadlineDone :: Bool
                    , sDescription :: BS.ByteString
+                   , sClaims :: Bool
                    }
                    deriving (Eq, Show, Read)
-emptyShift = Shift "" "" "" emptyLocalTime emptyLocalTime Transparent 0 emptyLocalTime "" False False ""
+emptyShift = Shift "" "" "" emptyLocalTime emptyLocalTime Transparent 0 emptyLocalTime "" False False "" False
+
+data Claim = Claim { cId :: BS.ByteString
+                   , cShift :: BS.ByteString
+                   , cUser :: BS.ByteString
+                   , cUnits :: Double
+                   , cReason :: BS.ByteString
+                   , cResolved :: Bool
+                   , cAccepted :: Bool
+                   }
+                   deriving (Eq, Show)
+emptyClaim = Claim "" "" "" 0 "" False False
 
 data Modification = Delete User LocalTime -- who deleted it, and when
                   | Change LocalTime LocalTime Color Double User LocalTime BS.ByteString
@@ -92,12 +104,16 @@ mTime (Cover _ t) = t
 buildPlace (pi:pn:pt:po:[]) = Just $ UserPlace (fromSql pi) (fromSql pn) (fromSql po) False (fromSql pt) 
 buildPlace _ = Nothing
 
-buildShift (si:su:sp:ss:st:sr:sb:sc:sun:sd:sdd:sdesc:[]) = 
+buildShift (si:su:sp:ss:st:sr:sb:sc:sun:sd:sdd:sdesc:scls:[]) = 
   Just $ Shift (fromSql si) (fromSql su) (fromSql sp) (fromSql ss) (fromSql st) 
                (colorFromInt (fromSql sc)) (fromSql sun)
                (fromSql sr) (fromSql sb) (fromSql sd) (fromSql sdd) (fromSql sdesc)
+               (fromSql scls)
 
 buildShift _ = Nothing
+
+buildClaim (ci:cs:cus:cun:cr1:cr2:ac:[]) = Just $ Claim (fromSql ci) (fromSql cs) (fromSql cus) (fromSql cun) (fromSql cr1) (fromSql cr2) (fromSql ac)
+buildClaim _ = Nothing
 
 data Message = Message { mId :: BS.ByteString
                        , mContents :: BS.ByteString
