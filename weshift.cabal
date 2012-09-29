@@ -40,7 +40,7 @@ Executable weshift
     bson,
     digestive-functors >= 0.5,
     digestive-functors-snap >= 0.5,
-    digestive-functors-heist >= 0.5,
+    digestive-functors-heist == 0.5.0.0,
     QuickCheck >= 2 && < 3,
     split,
     random,
