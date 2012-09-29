@@ -71,6 +71,9 @@
        <view is="work.bulk">
          <apply template="work/bulk"/>
        </view>
+       <view is="work.review">
+         <apply template="work/review"/>
+       </view>
        
     </bind>
     

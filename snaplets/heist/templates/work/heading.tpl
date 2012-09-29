@@ -6,4 +6,8 @@
   <a-async href="${placeRoot}/timesheet" class="icon ${timesheet_sel}" id="timesheet" data-loading-div="#center .main" title="Timesheet"></a-async>
   <div class="icon-separator"></div>
   <a-async href="${placeRoot}/bulk" class="icon ${bulk_sel}" id="bulk" data-loading-div="#center .main" title="Input Shifts From Spreadsheet"></a-async>
+  <isFacilitator>
+    <div class="icon-separator"></div>
+    <a-async href="${placeRoot}/review" class="icon ${review_sel}" id="review" data-loading-div="#center .main" title="Review Shifts and Disputes"></a-async>
+  </isFacilitator>
 </div-async> <!-- .subheading -->

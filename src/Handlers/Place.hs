@@ -30,6 +30,7 @@ import Handlers.Messages
 import Render.Calendar
 import Render.Timesheet
 import Render.Coworkers
+import Render.Shifts
 
 placeSite :: AppHandler ()
 placeSite = do
@@ -45,6 +46,7 @@ placeSite = do
             , ("/day/:year/:month/:day",         dayH)
             , ("/timesheet",                     timesheetH)
             , ("/bulk",                          bulkInputH)
+            , ("/review",                        reviewH)
             , ("/coworkers",                     coworkersH)
             , ("/help",                          helpH)
             , ("/settings",                      settingsH)
@@ -63,6 +65,7 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     let dayday = maybe today (\(y,m,d) -> fromGregorian y m d) savedDay
                     shifts <- getShifts dayday (addDays 1 dayday) p
                     timesheetSplice <- getTimesheet p u (addDays (-14) today) today
+                    reviewSplice <- if pFac p then getReview p (addDays (-14) today) today else return []
                     emails <- getUserEmails u
                     let showDay = case savedMonth of
                                     Just (_,_,Just d) -> Just d
@@ -71,7 +74,7 @@ placeHomeH u p = do today <- liftM utctDay $ liftIO getCurrentTime
                     messagesSplice <- messagesPageSplices p 1
                     heistLocal (bindSplices (nextShiftSplice ++ nextDeadlineSplice ++ (commonSplices today) ++ (monthSplices u p monthday showDay) ++ 
                                              (coworkersSplice coworkers) ++ (daySplices u p workers shifts dayday) ++ 
-                                             timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)] ++ 
+                                             timesheetSplice ++ [("timesheetCoworkers", renderTSCoworkers u coworkers)] ++ reviewSplice ++
                                              emailsSplice ++ messagesSplice)) $ renderWS "place"
       where mList Nothing = []
             mList (Just xs) = xs
@@ -161,3 +164,44 @@ dayH u p = do
   heistLocal (bindSplices ((commonSplices curday) ++ 
                            (daySplices u p workers shifts curday))) $ renderWS "work/day_calendar"
 
+
+reviewH user place = case pFac place of
+  False -> mzero
+  True -> do
+    mstart <- getParam "start"
+    mstop <- getParam "stop"
+  
+    --workers <- getWorkers place
+    --let workersSplice = [("reviewCoworkers", renderTSCoworkers user' coworkers)]
+    today <- liftM utctDay $ liftIO getCurrentTime
+
+    reviewSplice <- case (mstart >>= parseWSDate,mstop >>= parseWSDate) of
+          (Just start, Just stop) -> getReview place start stop
+          _ -> getReview place (addDays (-14) today) today
+  
+    setView user "work" "work.review"
+  
+    heistLocal (bindSplices (commonSplices today ++ reviewSplice)) $ renderWS "work/review"
+
+getReview place start stop = do
+  claims <- getUnresolvedClaims place start stop
+  shifts <- getUserModifiedShifts place start stop
+  return [("unresolvedClaims", mapSplices (\(shift, (Claim id' sid user units reason resolved accepted)) -> 
+                                runChildrenWith [("id", textSplice $ TE.decodeUtf8 id')
+                                                ,("shift", renderShift shift)
+                                                ,("user", textSplice $ TE.decodeUtf8 user)
+                                                ,("units", textSplice $ T.pack $ show units)
+                                                ,("reason", textSplice $ TE.decodeUtf8 reason)
+                                                ,("resolved", booleanSplice resolved)
+                                                ,("notResolved", booleanSplice $ not resolved)
+                                                ,("accepted", booleanSplice accepted)
+                                                ,("notAccepted", booleanSplice $ not accepted)
+                                                ])
+                                claims)
+          ,("userModifiedShifts", mapSplices (\(shift, mods) ->
+                                    runChildrenWith [("shift", renderShift shift)
+                                                    ,("changes", mapSplices (renderChange (sDeadline shift)) mods)
+                                                    ])
+                                    shifts)
+          , ("reviewStart", textSplice $ renderDate start)
+          , ("reviewStop", textSplice $ renderDate stop)]

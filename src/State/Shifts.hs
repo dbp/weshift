@@ -84,7 +84,7 @@ getUncoveredShifts start end p = fmap (catMaybes . (map buildShift)) $ withPGDB 
 
 
 getOriginalShifts :: UserPlace -> Day -> Day -> AppHandler [Shift]
-getOriginalShifts place start stop = fmap (catMaybes . (map buildShift)) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder, S.color, S.units, S.deadline, S.deadline_done, S.description FROM shifts AS S WHERE S.place = ? AND S.start > ? AND S.stop < ?;" [toSql $ pId place, toSql start, toSql stop]
+getOriginalShifts place start stop = fmap (catMaybes . (map buildShift) . (map (\s -> s ++ [toSql False]))) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder, S.color, S.units, S.deadline, S.deadline_done, S.description FROM shifts AS S WHERE S.place = ? AND S.start > ? AND S.stop < ?;" [toSql $ pId place, toSql start, toSql stop]
   
 getUserCurrentShifts :: UserPlace -> User -> Day -> Day -> AppHandler [Shift]
 getUserCurrentShifts place user start stop = fmap (catMaybes . (map buildShift)) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder, S.color, S.units, S.deadline, S.deadline_done, S.description, S.has_claims FROM shifts_current AS S WHERE S.place = ? AND S.user_id = ? AND S.start > ? AND S.stop < ?;" [toSql $ pId place, toSql $ uId user, toSql start, toSql stop]
@@ -104,6 +104,22 @@ getShiftClaim id' = fmap ((>>= buildClaim).listToMaybe) $ withPGDB "SELECT id, s
 
 getShiftClaims :: BS.ByteString -> AppHandler [Claim]
 getShiftClaims id' = fmap (catMaybes . (map buildClaim)) $ withPGDB "SELECT id, shift_id, user_id, units, reason, resolved, accepted FROM shiftclaims WHERE shift_id = ?;" [toSql id']
+
+getUnresolvedClaims :: UserPlace -> Day -> Day -> AppHandler [(Shift, Claim)]
+getUnresolvedClaims place start stop = fmap (catMaybes . (map buildShiftClaim)) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder, S.color, S.units, S.deadline, S.deadline_done, S.description, S.has_claims, C.id, C.shift_id, C.user_id, C.units, C.reason, C.resolved, C.accepted FROM shiftclaims AS C JOIN shifts_current AS S ON S.id = C.shift_id WHERE place = ? AND S.start > ? AND S.stop < ? AND C.resolved = false;" [toSql (pId place), toSql start, toSql stop]
+    where buildShiftClaim (si:su:sp:ss:st:sr:sb:sc:sun:sd:sdd:sdesc:scls:ci:cs:cus:cun:cr1:cr2:ac:[])
+            = do s <- buildShift (si:su:sp:ss:st:sr:sb:sc:sun:sd:sdd:sdesc:scls:[])
+                 c <- buildClaim (ci:cs:cus:cun:cr1:cr2:ac:[])
+                 Just (s, c)
+          buildShiftClaim _ = Nothing
+
+getUserModifiedShifts :: UserPlace -> Day -> Day -> AppHandler [(Shift, [Modification])]
+getUserModifiedShifts place start stop = do
+  userCreated <- fmap (catMaybes . (map buildShift)) $ withPGDB "SELECT S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder, S.color, S.units, S.deadline, S.deadline_done, S.description, S.has_claims FROM shifts_current AS S JOIN users AS U ON S.recorder = U.id JOIN placeusers AS PU ON PU.user_id = U.id WHERE PU.place = ? AND PU.facilitator = false;" [toSql (pId place)]
+  userChanges <- fmap (catMaybes . (map buildChange)) $ withPGDB "SELECT U.name, S.id, S.user_id, S.place, S.start, S.stop, S.recorded, S.recorder, S.color, S.units, S.deadline, S.deadline_done, S.description, C.old_shift, C.start, C.stop, C.recorder, C.recorded, C.color, C.units, C.description FROM shiftchanges AS C JOIN users AS U ON recorder = U.id JOIN placeusers AS PU on PU.user_id = U.id JOIN shifts AS S on S.id = C.old_shift WHERE PU.place = ? AND PU.facilitator = false AND C.start > ? AND C.stop < ?;" [toSql (pId place), toSql start, toSql stop]
+  return $ (map (\s -> (s,[])) userCreated) ++ userChanges
+    where buildChange (n:si:su:sp:ss:st:sr:sb:sc:sun:sd:sdd:sdesc:sid:srt:stp:rer:red:co:un:d:[]) = buildShift (si:su:sp:ss:st:sr:sb:sc:sun:sd:sdd:sdesc:[]) >>= (\shift -> return (shift, [Change (fromSql srt) (fromSql stp) (colorFromInt (fromSql co)) (fromSql un) (emptyUser {uId = (fromSql rer), uName = (fromSql n)}) (fromSql red) (fromSql d)]))
+          buildChange _ = Nothing
 
 getShiftChanges :: Shift -> AppHandler [Modification]
 getShiftChanges shift = fmap (catMaybes . (map buildChange)) $ withPGDB "SELECT U.name, start, stop, recorder, recorded, color, units, description FROM shiftchanges JOIN users AS U ON recorder = U.id WHERE old_shift = ?;" [toSql $ sId shift]
