@@ -137,4 +137,20 @@ mailShiftCovered coverer shift emails = do
                         ]
  
 
+mailOverdueDeadline name email desc time = do
+  liftIO $ postmark (B8.unpack postmarkToken) "messages@weshift.org" (BS.concat ["Weshift: You missed a deadline, ",name,"."]) "deadline" (BS.concat $ msg name desc time) email
+    where msg n d t = [ "Hi "
+                      , n
+                      ,",\n\n"
+                      , "You had a deadline due at "
+                      , t
+                      , " on WeShift."
+                      , " It had a description '"
+                      , d
+                      , "'.\n\n"
+                      ,"If you've done it, please mark it as done so it will show up on your timesheet."
+                      , "\n\nThanks! - The WeShift Team"
+                      ]
+
+
 resetPassword email token = undefined

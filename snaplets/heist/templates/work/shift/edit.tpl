@@ -12,9 +12,13 @@
             <dfInputText ref="units" data-default="${units}"/>
             <wsSelect name="color" data-default="${color}">
                 <option value="Transparent">None</option>
-                <option value="Blue">Blue</option>
                 <option value="Red">Red</option>
                 <option value="Green">Green</option>
+                <option value="Orange">Orange</option>
+                <option value="Purple">Purple</option>
+                <option value="Tan">Tan</option>
+                <option value="Lime">Lime</option>
+                <option value="Blue">Blue</option>
             </wsSelect>
             <dfLabel ref="description">description</dfLabel>
             <dfInputText ref="description" data-default="${description}"/>

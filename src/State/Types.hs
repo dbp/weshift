@@ -51,17 +51,26 @@ data Attrs = Attrs Bool Bool [UserPlace] BS.ByteString BS.ByteString
 
 emptyLocalTime = utcToLocalTime utc (UTCTime (fromGregorian 0 0 0) (fromInteger 0))      
 
-data Color = Blue | Red | Green | Transparent deriving (Eq, Show, Read)
+data Color = Red | Green | Orange | Purple | Tan | Lime | Blue | Transparent deriving (Eq, Show, Read)
 
 colorToInt :: Color -> Int
 colorToInt Transparent = 0
-colorToInt Blue = 1
-colorToInt Red = 2
-colorToInt Green = 3
+colorToInt Red = 1
+colorToInt Green = 2
+colorToInt Orange = 3
+colorToInt Purple = 4
+colorToInt Tan = 5
+colorToInt Lime = 6
+colorToInt Blue = 7
+
 colorFromInt :: Int -> Color
-colorFromInt 1 = Blue
-colorFromInt 2 = Red
-colorFromInt 3 = Green
+colorFromInt 1 = Red
+colorFromInt 2 = Green
+colorFromInt 3 = Orange
+colorFromInt 4 = Purple
+colorFromInt 5 = Tan
+colorFromInt 6 = Lime
+colorFromInt 7 = Blue
 colorFromInt _ = Transparent
 
 data Shift = Shift { sId :: BS.ByteString

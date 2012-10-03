@@ -13,7 +13,7 @@ import            Data.Time.Calendar
 
 import            Application
 import            State.Types
-import            State.Account (buildUser)
+import            State.Account (buildUser,buildEmail)
 
 
 
