@@ -79,8 +79,12 @@ enableAccount u n pw =
 
 activateAccount u p =
   fmap (not.null) $ withPGDB "UPDATE users SET password = crypt(?, gen_salt('bf')), active = true WHERE id = ? RETURNING id;" [toSql p, toSql (uId u)]
-  
-  
+
+getActivationLink :: User -> AppHandler (Maybe BS.ByteString)
+getActivationLink u =
+  fmap ((fmap fromSql) . (>>= listToMaybe) . listToMaybe) $ withPGDB "SELECT password FROM users WHERE id = ? AND active = false;" [toSql (uId u)]
+
+
 
 buildEmail (i:u:e:c:[]) = Just (Email (fromSql i) (fromSql u) (fromSql e) (fromSql c))
 buildEmail _ = Nothing

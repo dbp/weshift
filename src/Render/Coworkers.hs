@@ -14,18 +14,28 @@ import qualified  Text.XmlHtml as X
 import qualified  Utils as U
 
 -- | Module Specific imports
+import State.Account (getActivationLink)
 
 -- | important: the place that is passed is the place of the logged in user, so it's "pFac" will not be relevant.
 renderCoworker :: User -> Splice AppHandler
-renderCoworker (User uid uname uact usuper uplaces uview utoken) = do
+renderCoworker u@(User uid uname uact usuper uplaces uview utoken) = do
   let place = head uplaces
   runChildrenWith [("id",         textSplice $ TE.decodeUtf8 uid)
                   ,("name",       textSplice $ TE.decodeUtf8 uname)
+                  ,("inActive",   booleanSplice $ not uact)
+                  ,("activationLink", activationLink u)
                   ,("classes",    textSplice $ T.concat (["member"] ++ if pFac place then [" facilitator"] else []))
                   ,("places",     renderPlaces Nothing uplaces)
                   ,("fac",        if pFac place then identitySplice else blackHoleSplice)
                   ,("notfac",     if pFac place then blackHoleSplice else identitySplice)
                   ]
+
+activationLink :: User -> Splice AppHandler
+activationLink u = do
+    lnk <- lift $ getActivationLink u
+    case lnk of
+      Nothing -> return []
+      Just link -> return [X.TextNode (TE.decodeUtf8 link)]
                        
 renderCoworkers :: [User] -> Splice AppHandler
 renderCoworkers coworkers = mapSplices renderCoworker coworkers

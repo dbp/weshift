@@ -247,6 +247,7 @@ renderWS t = do mup <- getCurrentUserAndPlace
                 let userSplices = do (u,p) <- mup
                                      return [("placeRoot", bTS $ placeRoot p)
                                             ,("placeName", bTS $ placeName p)
+                                            ,("placeId", bTS $ pId p)
                                             ,("userName", bTS $ uName u)
                                             ,("userId", bTS $ uId u)
                                             ,("view", viewSplice (uView u))
