@@ -10,13 +10,13 @@
         <notDeadlineDone>
         <div class="shift ${color}">
           <div class="time">
+            <isDeadline>
+              <button class="done toggle" data-toggle-target=".done-form-${id}"></button>
+            </isDeadline>
             <description/>
             <isDeadline>by</isDeadline>
             <start/><notDeadline>-<stop/></notDeadline>
             (<units/>)
-            <isDeadline>
-              <button class="done toggle" data-toggle-target=".done-form-${id}">Done</button>
-            </isDeadline>
           </div> 
           <apply template="shift/deadline_done">
             <bind tag="disp">none</bind>

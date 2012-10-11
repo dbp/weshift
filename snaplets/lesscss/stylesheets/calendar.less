@@ -107,9 +107,11 @@
         }
       }
       button.done {
-          background: none;
-          width: 30px;
+          background: transparent url("/img/workschedule/icons/done.png") no-repeat center left;
+          &:hover { background-image: url("/img/workschedule/icons/done_sel.png") }
+          width: 100px;
           &.toggled {
+            background-image: url("/img/workschedule/icons/done_sel.png");
             color: #44B9DE;
           }
         }
@@ -136,20 +138,20 @@
           }
         }
         &.split {
-          background: transparent url("/img/workschedule/icons/change.png") no-repeat center left;
-            &:hover { background-image: url("/img/workschedule/icons/change_sel.png") }
+          background: transparent url("/img/workschedule/icons/split.png") no-repeat center left;
+            &:hover { background-image: url("/img/workschedule/icons/split_sel.png") }
           width: 100px;
           &.toggled {
-            background-image: url("/img/workschedule/icons/change_sel.png");
+            background-image: url("/img/workschedule/icons/split_sel.png");
             color: #44B9DE;
           }
         }
         &.claim {
-          background: transparent url("/img/workschedule/icons/change.png") no-repeat center left;
-            &:hover { background-image: url("/img/workschedule/icons/change_sel.png") }
+          background: transparent url("/img/workschedule/icons/claim.png") no-repeat center left;
+            &:hover { background-image: url("/img/workschedule/icons/claim_sel.png") }
           width: 100px;
           &.toggled {
-            background-image: url("/img/workschedule/icons/change_sel.png");
+            background-image: url("/img/workschedule/icons/claim_sel.png");
             color: #44B9DE;
           }
         }
