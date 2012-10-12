@@ -1,6 +1,7 @@
 <apply template="base">
 
 <coworkers>
+  <notSuper>
   <div class="${classes}">
     <name/>
     <notfac>
@@ -30,6 +31,7 @@
     	</isFacilitator>
     </notfac>
   </div>
+  </notSuper>
 </coworkers>
 
 <isFacilitator>

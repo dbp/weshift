@@ -31,7 +31,7 @@ main = do
     c <- connectPostgreSQL ("hostaddr=127.0.0.1 dbname=" ++ dbName ++ " user=" ++ 
                             pgUser ++ " password=" ++ pgPassword)
     dus <- getOverdueDeadlines c
-    --putStrLn $ show dus
+    putStrLn $ show dus
     mapM_ handleOverdue dus
 
 

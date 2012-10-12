@@ -22,6 +22,8 @@ renderCoworker u@(User uid uname uact usuper uplaces uview utoken) = do
   let place = head uplaces
   runChildrenWith [("id",         textSplice $ TE.decodeUtf8 uid)
                   ,("name",       textSplice $ TE.decodeUtf8 uname)
+                  ,("isSuper",   booleanSplice  usuper)
+                  ,("notSuper",   booleanSplice $ not usuper)
                   ,("inActive",   booleanSplice $ not uact)
                   ,("activationLink", activationLink u)
                   ,("classes",    textSplice $ T.concat (["member"] ++ if pFac place then [" facilitator"] else []))
