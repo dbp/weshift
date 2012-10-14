@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Utils where
 
 import Data.List (null, elemIndex)
@@ -9,6 +11,7 @@ import Data.Time.Calendar
 import Data.Time.LocalTime
 import System.Locale (defaultTimeLocale)
 import qualified Data.ByteString.Char8 as B8
+import qualified Data.ByteString as BS
 import Data.ByteString (ByteString)
 
 eitherToMaybe = either (const Nothing) Just
@@ -34,6 +37,9 @@ wsFormatDay = B8.pack . (formatTime defaultTimeLocale "%D")
 
 wsFormatTime :: LocalTime -> ByteString
 wsFormatTime  =  B8.pack . (formatTime defaultTimeLocale "%-I:%M%P")
+
+wsTimeStamp :: LocalTime -> ByteString
+wsTimeStamp t = BS.concat [wsFormatDay t, " ", wsFormatTime t]
 
 bind2 :: Monad m => (a -> b -> m c) -> m a -> m b -> m c
 bind2 = ((join .) .) . liftM2

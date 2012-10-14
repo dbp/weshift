@@ -17,7 +17,7 @@ import qualified  Utils as U
 import            State.Shifts
 import            State.Account
 import            Render.Calendar
-import            Mail (mailRequestOff, mailShiftCovered)
+import            Mail (mailRequestOff, mailShiftCovered, mailClaim)
 import            Forms.Shifts
 
 shiftH :: User -> UserPlace -> AppHandler ()
@@ -89,20 +89,26 @@ shiftClaimH u p = do
   (view, result) <- wsForm claimShiftForm
   case result of
     Nothing -> heistLocal (bindSplices [("disp", textSplice "block"), ("id", textSplice id')]) $ heistLocal (bindDigestiveSplices view) $ renderWS "work/shift/claim"
-    Just (id', user, units, reason) -> do
-      let suser = if pFac p then user else (uId u)
+    Just (id', userid, units, reason) -> do
+      let suser = if pFac p then userid else (uId u)
       -- we want to guarantee that the shift is at this place, in case of tampering
       shift' <- getShift id' p
-      case shift' of
-        Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/claim_error"
-        Just shift -> do
+      user' <- getUser userid
+      case (shift', user') of
+        (Just shift, Just user) -> do
           success <- claimShift (emptyClaim {cShift = (sId shift), cUser = suser, cUnits = units, cReason = reason})
-          -- SEND EMAIL
           case success of
             True -> do
-              (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
-              heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
-            False -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Error C. Contact help@weshift.org")]) $ renderWS "work/shift/claim_error"
+              target' <- getUser (sUser shift)
+              case target' of
+                Nothing -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Error U. Contact help@weshift.org")]) $ renderWS "work/shift/claim_error"
+                Just target -> do
+                  emails <- getUserEmails target
+                  mapM (\email -> mailClaim (uName target) (uName user) (emAddress email) (B8.pack $ show units) reason (U.wsTimeStamp $ sStart shift)) emails
+                  (day,daySplice) <- dayLargeSplices p u (toGregorian (localDay (sStart shift)))
+                  heistLocal (bindSplices (daySplice ++ (commonSplices day))) $ renderWS "work/month_day_large"
+            False -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Error C. Contact help@weshift.org")]) $renderWS "work/shift/claim_error"
+        _ -> heistLocal (bindSplices [("id", textSplice $ TE.decodeUtf8 id'), ("disp", textSplice "block"), ("message", textSplice "Could not find shift.")]) $ renderWS "work/shift/claim_error"
 
 shiftClaimCancelH u p = do
   id' <- fmap fromJust $ getParam "id" -- if this isn't present, it means tampering, so don't care.

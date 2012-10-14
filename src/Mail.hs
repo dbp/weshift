@@ -152,5 +152,23 @@ mailOverdueDeadline name email desc time = do
                       , "\n\nThanks! - The WeShift Team"
                       ]
 
+mailClaim name otherName email amount desc time = do
+  liftIO $ postmark (B8.unpack postmarkToken) "messages@weshift.org" (BS.concat ["Weshift: Claim on your shift, ",name,"."]) "deadline" 
+          (BS.concat $ msg name otherName amount desc time) email
+    where msg n o a d t = [ "Hi "
+                      , n
+                      ,",\n\n"
+                      , o
+                      , " said that they did part of the work for your shift on "
+                      , t
+                      , " and has asked for "
+                      , a
+                      , " units. They gave '"
+                      , d
+                      , "' as a reason.\n\nTo accept this, go to the shift on the monthly calendar. If you disagree, talk to them or a facilitator to cancel the claim."
+                      , "\n\nThanks! - The WeShift Team"
+                      ]
+
+
 
 resetPassword email token = undefined
