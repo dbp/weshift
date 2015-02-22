@@ -6,44 +6,41 @@
 module Application where
 
 ------------------------------------------------------------------------------
-import Data.Lens.Template
-import Data.Lens.Common
-import Snap.Snaplet
-import Snap.Snaplet.Heist
-import Snap.Snaplet.Session hiding (commit)
-import Database.HDBC.PostgreSQL
-import Database.HDBC
-import Data.Pool
-import Control.Monad.State
-import Control.Monad.Reader
-import Control.Monad.Trans
-import Snap.Less
+import           Control.Lens
+import           Control.Monad.Reader
+import           Control.Monad.State
+import           Control.Monad.Trans
+import           Data.Pool
+import           Database.HDBC
+import           Database.HDBC.PostgreSQL
+import           Snap.Less
+import           Snap.Snaplet
+import           Snap.Snaplet.Heist
+import           Snap.Snaplet.Session     hiding (commit)
 
 ------------------------------------------------------------------------------
 data App = App
     { _heist :: Snaplet (Heist App)
-    , _sess :: Snaplet SessionManager
-    , _db :: Pool Connection
-    , _less :: LessDirectory
+    , _sess  :: Snaplet SessionManager
+    , _db    :: Pool Connection
+    , _less  :: LessDirectory
     }
 
-makeLens ''App
+makeLenses ''App
 
 instance HasHeist App where
     heistLens = subSnaplet heist
 
 
 withPGDB :: String -> [SqlValue] -> AppHandler [[SqlValue]]
-withPGDB r ps = do c <- get
-                   liftIO $ withResource (getL db c) (\conn -> do r <- quickQuery' conn r ps
-                                                                  commit conn
-                                                                  return r)
+withPGDB r ps = do c <- use db
+                   liftIO $ withResource c (\conn -> do r <- quickQuery' conn r ps
+                                                        commit conn
+                                                        return r)
 withLess :: (LessState -> AppHandler ()) -> AppHandler ()
-withLess f = do c <- get
-                ls <- getDirectoryLS (getL less c)
+withLess f = do c <- use less
+                ls <- getDirectoryLS c
                 f ls
 
 ------------------------------------------------------------------------------
 type AppHandler = Handler App App
-
-

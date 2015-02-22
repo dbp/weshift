@@ -1,36 +1,42 @@
-{-# LANGUAGE OverloadedStrings, FlexibleContexts, TypeSynonymInstances, MultiParamTypeClasses, PackageImports #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE PackageImports        #-}
+{-# LANGUAGE TypeSynonymInstances  #-}
 
 module Auth where
 
-import qualified  Data.ByteString as BS
-import qualified  Data.ByteString.Char8 as B8
-import qualified  Data.Text.Encoding as TE
+import qualified Data.ByteString             as BS
+import qualified Data.ByteString.Char8       as B8
+import qualified Data.Text                   as T
+import qualified Data.Text.Encoding          as TE
 
-import            Text.Templating.Heist
-import            Text.XmlHtml (childNodes)
+import           Heist
+import           Text.XmlHtml                (childNodes)
 
-import            Data.Maybe (fromMaybe, fromJust, isJust, listToMaybe, catMaybes)
-import qualified  Data.Bson as B
-import            System.Random
-import qualified  Data.Map as M
+import qualified Data.Bson                   as B
+import qualified Data.Map                    as M
+import           Data.Maybe                  (catMaybes, fromJust, fromMaybe,
+                                              isJust, listToMaybe)
+import           System.Random
 
-import            Database.HDBC
-import            Snap.Snaplet
-import            Snap.Snaplet.Session
-import            Snap.Snaplet.Session.Common
-import            Snap.Core
+import           Database.HDBC
+import           Snap.Core
+import           Snap.Snaplet
+import           Snap.Snaplet.Session
+import           Snap.Snaplet.Session.Common
 
-import            Control.Monad
-import            Control.Monad.Trans (liftIO)
+import           Control.Monad
+import           Control.Monad.Trans         (liftIO)
 
-import            Application
-import            State.Types
-import            State.Place
-import            State.Account
-import qualified  Utils as U
+import           Application
+import           State.Account
+import           State.Place
+import           State.Types
+import qualified Utils                       as U
 
-repSpaces = B8.map (\c -> if c == '_' then ' ' else c)
-repUnders = B8.map (\c -> if c == ' ' then '_' else c)
+repSpaces = T.map (\c -> if c == '_' then ' ' else c)
+repUnders = T.map (\c -> if c == ' ' then '_' else c)
 
 
 requireUserBounce :: AppHandler () -> AppHandler ()
@@ -54,9 +60,9 @@ requireUserBounce' good = do
 ------------------------------------------------------------------------------
 -- | Set the current user's 'UserId' in the active session
 --
-setSessionUserId :: BS.ByteString -> AppHandler ()
+setSessionUserId :: T.Text -> AppHandler ()
 setSessionUserId t = do
-  with sess $ setInSession "__user_id" (TE.decodeUtf8 t)
+  with sess $ setInSession "__user_id" t
   with sess commitSession
 
 ------------------------------------------------------------------------------
@@ -69,8 +75,8 @@ removeSessionUserId = do
 ------------------------------------------------------------------------------
 -- | Get the current user's 'UserId' from the active session
 --
-getSessionUserId :: AppHandler (Maybe BS.ByteString)
-getSessionUserId = fmap (fmap TE.encodeUtf8) $ with sess $ getFromSession "__user_id"
+getSessionUserId :: AppHandler (Maybe T.Text)
+getSessionUserId = with sess $ getFromSession "__user_id"
 
 authenticatedUserId = do
   muid <- getSessionUserId
@@ -80,11 +86,11 @@ authenticatedUserId = do
 performLogin :: Params -> AppHandler (Either String User)
 performLogin params = do
     getUserFromCreds params >>= maybe (return $ Left "Auth Failure") login
-  where 
+  where
     getUserFromCreds params = do
       let ps = fmap (map (toSql . B8.concat)) $ sequence [M.lookup "name" params, M.lookup "pl" params, M.lookup "password" params]
       resp <- maybe (return [])
-                    (withPGDB "SELECT id, name, active, super, view, token FROM users JOIN placeusers ON placeusers.user_id = users.id WHERE users.name = ? AND placeusers.place = ? AND password = crypt(?, password) LIMIT 1;") 
+                    (withPGDB "SELECT id, name, active, super, view, token FROM users JOIN placeusers ON placeusers.user_id = users.id WHERE users.name = ? AND placeusers.place = ? AND password = crypt(?, password) LIMIT 1;")
                     ps
       places <- maybe (return []) (getUserPlaces . fromSql . head) (listToMaybe resp)
       return $ U.bind2 buildUser (listToMaybe resp) (Just places)
@@ -99,11 +105,8 @@ wsPerformLogout = do
   removeSessionUserId
 
 getCurrentUser :: AppHandler (Maybe User)
-getCurrentUser = do 
+getCurrentUser = do
   muid <- getSessionUserId
   case muid of
     Nothing -> return Nothing
     Just uid -> getUser uid
-                 
-
-  

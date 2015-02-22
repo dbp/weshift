@@ -1,42 +1,43 @@
-{-# LANGUAGE OverloadedStrings, PackageImports #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PackageImports    #-}
 
 module Handlers.Bulk where
-  
+
 -- | Boilerplate imports
-import            Imports
-import qualified  Data.Text as T
-import qualified  Data.Text.Encoding as TE
-import qualified  Data.Bson as B
-import qualified  Data.Map as M
-import qualified  Data.ByteString as BS
-import qualified  Data.ByteString.Char8 as B8
-import qualified  Text.XmlHtml as X
-import qualified  Utils as U
+import qualified Data.Bson             as B
+import qualified Data.ByteString       as BS
+import qualified Data.ByteString.Char8 as B8
+import qualified Data.Map              as M
+import qualified Data.Text             as T
+import qualified Data.Text.Encoding    as TE
+import           Imports
+import qualified Text.XmlHtml          as X
+import qualified Utils                 as U
 
 -- | Module specific imports
-import Text.SSV
-import Text.Parsec
-import Data.Char (digitToInt, isSpace)
-import Data.Either (lefts,rights)
+import           Data.Char             (digitToInt, isSpace)
+import           Data.Either           (lefts, rights)
+import           Text.Parsec
+import           Text.SSV
 
-import State.Coworkers
-import State.Shifts
+import           State.Coworkers
+import           State.Shifts
 
-import Render.Shifts
-import Render.Bulk
+import           Render.Bulk
+import           Render.Shifts
 
 bulkInputH :: User -> UserPlace -> AppHandler ()
-bulkInputH user place = 
+bulkInputH user place =
   route [("/", ifTop $ method GET $ inputForm user)
         ,("/upload", method POST $ upload user place)
         ,("/confirm", method POST $ confirm user place)
         ]
-        
+
 inputForm u = do
     today <- fmap utctDay $ liftIO getCurrentTime
     setView u "work" "work.bulk"
     heistLocal (bindSplices (commonSplices today)) $ renderWS "work/bulk"
-    
+
 upload u p = do
   md <- getParam "data"
   case md of
@@ -45,17 +46,17 @@ upload u p = do
       workers <- if pFac p then getWorkers p else return [u] -- if they are not a facilitator, they can only load their own shifts
       let (understood, notUnderstood) = parseShifts workers $ transformCSV $ readCSV (B8.unpack d)
       today <- liftM utctDay $ liftIO getCurrentTime
-      heistLocal (bindSplices ([("understood", renderShifts understood)
-                              ,("understood-serialized", textSplice $ TE.decodeUtf8 $ urlEncode $ B8.pack $ show understood)
-                              ,("not-understood", renderNotUnderstood notUnderstood)
-                              ,("not-understood-serialized", textSplice $ TE.decodeUtf8 $ urlEncode $ B8.pack $ show notUnderstood)
-                              ] ++ (commonSplices today)))
+      heistLocal (bindSplices $ do "understood" ## renderShifts understood
+                                   "understood-serialized" ## textSplice $ TE.decodeUtf8 $ urlEncode $ B8.pack $ show understood
+                                   "not-understood" ## renderNotUnderstood notUnderstood
+                                   "not-understood-serialized" ## textSplice $ TE.decodeUtf8 $ urlEncode $ B8.pack $ show notUnderstood
+                                   commonSplices today)
                 $ renderWS "work/bulk_understood"
 
 confirm u p = do
   mshifts <- getParam "understood"
   n <- getParam "notunderstood"
-  case (mshifts >>= urlDecode >>= maybeRead, n >>= urlDecode >>= maybeRead) of
+  case (mshifts >>= urlDecode >>= (maybeRead . TE.decodeUtf8), n >>= urlDecode >>= (maybeRead . TE.decodeUtf8)) of
     (Just shifts, Just notUnderstood) -> do
       today <- liftM utctDay $ liftIO getCurrentTime
       workers <- getWorkers p
@@ -65,15 +66,15 @@ confirm u p = do
       let unparsed = renderNotUnderStoodCSV ((mapMaybe (formatNU workers) $ lefts res) ++ notUnderstood)
       let status = if numFailed == 0 then "Inserted all " ++ (show numSuccess) ++ " shifts. Any not understood shifts are below"
                    else "Inserted " ++ (show numSuccess) ++ "/" ++ (show $ numSuccess + numFailed) ++ " shifts. Those that could not be inserted (due to overlapping with existing shifts), as well as those that could not be understood, are below:"
-      heistLocal (bindSplices ([("status", textSplice $ T.pack status)
-                                    ,("data", textSplice $ T.pack unparsed)
-                                    ] ++ (commonSplices today))) $ renderWS "work/bulk"
+      heistLocal (bindSplices (do "status" ## textSplice $ T.pack status
+                                  "data" ## textSplice $ T.pack unparsed
+                                  (commonSplices today))) $ renderWS "work/bulk"
     _ -> renderWS "work/bulk_error"
 
- where filterFac ss = if pFac p then ss else filter (\s -> sUser s == uId u) ss   
-       formatNU workers (Shift _ user _ start stop _ _ _ _ _ _ _ _) = 
+ where filterFac ss = if pFac p then ss else filter (\s -> sUser s == uId u) ss
+       formatNU workers (Shift _ user _ start stop _ _ _ _ _ _ _ _) =
           do u <- find ((== user).uId) workers
-             return (B8.unpack $ uName u, localDay start, showTimeRange start stop)
+             return (T.unpack $ uName u, localDay start, showTimeRange start stop)
        showTimeRange start stop = (ftime start) ++ "-" ++ (ftime stop)
        ftime t = if ftime' "%M" t == "00" then ftime' "%H" t else ftime' "%R" t
        ftime' = formatTime defaultTimeLocale
@@ -87,7 +88,7 @@ transformCSV csv@(_:_:_) | length headings >= maximum (map length fields) = conc
         transformFields [] = []
         transformFields (name:shifts) = map (\(s,index) -> (name,headings !! (index + 1), s)) $ zip shifts (iterate (+1) 0)
 transformCSV _ = []
-           
+
 parseShifts :: [User] -> [(String,Day,String)] -> ([Shift],[(String,Day,String)])
 parseShifts workers fields = (parsed,unparseable)
   where ps = map parseShift fields
@@ -95,8 +96,8 @@ parseShifts workers fields = (parsed,unparseable)
           let timerange = takeWhile (/= '(') datafield
               (D color units desc) = parseMeta (dropWhile (/= '(') datafield)
               rp = do r <- mbRange timerange
-                      p <- find ((== person) . B8.unpack . uName) workers
-                      return (r,p) 
+                      p <- find ((== person) . T.unpack . uName) workers
+                      return (r,p)
           in
           case rp of
             Nothing -> Left (person,day,datafield)
@@ -107,8 +108,8 @@ parseShifts workers fields = (parsed,unparseable)
         parsed = rights ps
 
 
-data GD = GC Color | GU Double | GS BS.ByteString
-data D = D Color Double BS.ByteString
+data GD = GC Color | GU Double | GS T.Text
+data D = D Color Double T.Text
 defaultD = D Transparent 0 ""
 
 -- | parseMeta is looking for (1,C,something) or (1) or (C,something), etc.
@@ -123,7 +124,7 @@ guess "R" = GC Red
 guess "B" = GC Blue
 guess "G" = GC Green
 guess u | isJust (maybeReadS u :: Maybe Double) = GU (fromJust (maybeReadS u))
-guess s = GS (B8.pack s)
+guess s = GS (T.pack s)
 
 -- | this is a reasonably tollerant way of accepting data. it allows multiple of the same type,
 --   and just drops the first ones, but it will limit 3 fields.

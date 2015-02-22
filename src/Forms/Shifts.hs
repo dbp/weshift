@@ -3,33 +3,33 @@
 module Forms.Shifts where
 
 -- | Boilerplate imports
-import            Imports
-import qualified  Data.Text as T
-import qualified  Data.Text.Encoding as TE
-import qualified  Data.Bson as B
-import qualified  Data.Map as M
-import qualified  Data.ByteString as BS
-import qualified  Data.ByteString.Char8 as B8
-import qualified  Text.XmlHtml as X
-import qualified  Utils as U
+import qualified Data.Bson             as B
+import qualified Data.ByteString       as BS
+import qualified Data.ByteString.Char8 as B8
+import qualified Data.Map              as M
+import qualified Data.Text             as T
+import qualified Data.Text.Encoding    as TE
+import           Imports
+import qualified Text.XmlHtml          as X
+import qualified Utils                 as U
 
 -- | Module specific imports
-import Text.Parsec hiding (Error, choice)
-import State.Shifts
+import           State.Shifts
+import           Text.Parsec           hiding (Error, choice)
 
-data ShiftTime = ShiftTime BS.ByteString LocalTime LocalTime Color Double BS.ByteString deriving Show
+data ShiftTime = ShiftTime T.Text LocalTime LocalTime Color Double T.Text deriving Show
 
 timeTransform = validate (\a -> either (const $ Error "Should be like 10:00am.") Success (parse parseHour "" (T.unpack a)))
 
-notOverlapping = checkM "Overlaps with another shift." $ \(ShiftTime user start end _ _ _) -> 
+notOverlapping = checkM "Overlaps with another shift." $ \(ShiftTime user start end _ _ _) ->
   do isDeadline <- fmap isJust $ getParam "ws.deadline"
      if isDeadline then return True else checkShiftTime user start end
 
-notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftTime user start end _ _ _)) -> 
+notOverlappingChange = checkM "Overlaps with another shift." $ \(skip, s@(ShiftTime user start end _ _ _)) ->
   do isDeadline <- fmap (maybe False sDeadline) $ getShift' skip
      if isDeadline then return True else checkShiftTimeExcept skip user start end
 
-withinRange = checkM "Stop and units must be within current shift." $ \(current, s@(ShiftTime user start end _ units _)) -> 
+withinRange = checkM "Stop and units must be within current shift." $ \(current, s@(ShiftTime user start end _ units _)) ->
   do shift <- getShift' current
      maybe (return False) (\s -> return (end > sStart s && end <= sStop s && units <= sUnits s)) shift
 
@@ -47,28 +47,28 @@ addShiftForm = notOverlapping $ newShiftForm
 
 newShiftForm = mkNS
     <$> timeRangeForm
-    <*> "user"        .: stringRead "Internal error U. Email help@weshift.org" Nothing 
+    <*> "user"        .: stringRead "Internal error U. Email help@weshift.org" Nothing
     <*> "color"       .: stringRead "Internal error C. Email help@weshift.org" Nothing
     <*> "units"       .: nonNegative (stringRead "Must be a number like 1.5" Nothing)
     <*> "day"         .: stringRead "Internal error D. Email help@weshift.org" Nothing
-    <*> "month"       .: stringRead "Internal error M. Email help@weshift.org" Nothing 
+    <*> "month"       .: stringRead "Internal error M. Email help@weshift.org" Nothing
     <*> "year"        .: stringRead "Internal error Y. Email help@weshift.org" Nothing
     <*> "description" .: descLength (text Nothing)
-  where mkNS (start,stop) user c u d m y desc  = ShiftTime (B8.pack $ show (user :: Int))
-                                                           (LocalTime day (timeToTimeOfDay start)) 
-                                                           (LocalTime day (timeToTimeOfDay stop)) c u 
-                                                           (TE.encodeUtf8 desc)
+  where mkNS (start,stop) user c u d m y desc  = ShiftTime (T.pack $ show (user :: Int))
+                                                           (LocalTime day (timeToTimeOfDay start))
+                                                           (LocalTime day (timeToTimeOfDay stop)) c u
+                                                           desc
           where day = fromGregorian y m d
 
 changeShiftForm = notOverlappingChange $ mkS
     <$> "id" .: stringRead "Internal error S. Email help@weshift.org" Nothing
     <*> newShiftForm
-  where mkS i st = (B8.pack $ show (i :: Int), st)
+  where mkS i st = (T.pack $ show (i :: Int), st)
 
 splitShiftForm = withinRange $ mkS
     <$> "id" .: stringRead "Internal error SP. Email help@weshift.org" Nothing
     <*> newShiftForm
-  where mkS i st = (B8.pack $ show (i :: Int), st)
+  where mkS i st = (T.pack $ show (i :: Int), st)
 
 unitCheck = checkM "Cannot claim more units than in the shift" $ \(shift, _, units, _) -> do
   s <- getShift' shift
@@ -77,7 +77,7 @@ unitCheck = checkM "Cannot claim more units than in the shift" $ \(shift, _, uni
 
 claimShiftForm = unitCheck $ mkS
     <$> "id"     .: stringRead "Internal error SC. Email help@weshift.org" Nothing
-    <*> "user"   .: stringRead "Internal error UC. Email help@weshift.org" Nothing 
+    <*> "user"   .: stringRead "Internal error UC. Email help@weshift.org" Nothing
     <*> "units"  .: nonNegative (stringRead "Must be a number like 1.5" Nothing)
     <*> "reason" .: text Nothing
-  where mkS i user units r = (B8.pack $ show (i :: Int), B8.pack $ show (user :: Int), units :: Double, TE.encodeUtf8 r)
+  where mkS i user units r = (T.pack $ show (i :: Int), T.pack $ show (user :: Int), units :: Double, r)

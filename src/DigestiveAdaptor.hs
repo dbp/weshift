@@ -2,42 +2,41 @@
 
 module DigestiveAdaptor where
 
--- this module defines default splices for the ones that digestive-functors-heist 
+-- this module defines default splices for the ones that digestive-functors-heist
 -- gives for a view. this is so that forms can be rendered without a call to
 -- digestiveSplices with the appropriate view.
 
-import Control.Monad (liftM, mplus)
-import Data.Function (on)
-import Data.List (unionBy)
-import Data.Maybe (fromMaybe, fromJust, maybeToList)
-import Data.Monoid (mappend)
-import Data.Text (Text)
-import qualified Data.Text as T
-import Text.Templating.Heist
-import qualified Text.XmlHtml as X
+import           Control.Monad      (liftM, mplus)
+import           Data.Function      (on)
+import           Data.List          (unionBy)
+import           Data.Maybe         (fromJust, fromMaybe, maybeToList)
+import           Data.Monoid        (mappend)
+import           Data.Text          (Text)
+import qualified Data.Text          as T
+import           Heist
+import           Heist.Interpreted
+import qualified Text.XmlHtml       as X
 
-import Snap.Snaplet.Heist (liftHeist, SnapletSplice)
-import Application (App)
+import           Application
+import           Snap.Snaplet.Heist
 
-import Debug.Trace (trace)
+import           Debug.Trace        (trace)
 
 --------------------------------------------------------------------------------
-digestiveAdaptorSplices :: [(Text, SnapletSplice App App)]
-digestiveAdaptorSplices = map (\(a,b) -> (a, liftHeist b))
-    [ ("dfInput", dfInput)
-    , ("dfInputText", dfInputText)
-    , ("dfInputTextArea", dfInputTextArea)
-    , ("dfInputPassword", dfInputPassword)
-    , ("dfInputHidden", dfInputHidden)
-    , ("dfInputCheckbox", dfInputCheckbox)
-    , ("dfInputFile", dfInputFile)
-    , ("dfInputSubmit", dfInputSubmit)
-    , ("dfLabel", dfLabel)
-    , ("wsSelect", wsSelect)
-    , ("dfForm", dfForm)
-    , ("dfErrorList", dfErrorList)
-    , ("dfChildErrorList", dfChildErrorList)
-    ]
+digestiveAdaptorSplices :: Splices (Splice AppHandler)
+digestiveAdaptorSplices = do "dfInput" ## dfInput
+                             "dfInputText" ## dfInputText
+                             "dfInputTextArea" ## dfInputTextArea
+                             "dfInputPassword" ## dfInputPassword
+                             "dfInputHidden" ## dfInputHidden
+                             "dfInputCheckbox" ## dfInputCheckbox
+                             "dfInputFile" ## dfInputFile
+                             "dfInputSubmit" ## dfInputSubmit
+                             "dfLabel" ## dfLabel
+                             "wsSelect" ## wsSelect
+                             "dfForm" ## dfForm
+                             "dfErrorList" ## dfErrorList
+                             "dfChildErrorList" ## dfChildErrorList
 
 
 --------------------------------------------------------------------------------
@@ -60,7 +59,7 @@ getDefaultValue as = maybeToList $ do
 --------------------------------------------------------------------------------
 getRefAttributes :: Monad m
                  => Maybe Text -- ^ Optional default ref
-                 -> HeistT m (Text, [(Text, Text)]) -- ^ (Ref, other attrs)
+                 -> HeistT m m (Text, [(Text, Text)]) -- ^ (Ref, other attrs)
 getRefAttributes defaultRef = do
     node <- getParamNode
     return $ case node of
@@ -72,7 +71,7 @@ getRefAttributes defaultRef = do
 
 
 --------------------------------------------------------------------------------
-getContent :: Monad m => HeistT m [X.Node]
+getContent :: Monad m => HeistT m m [X.Node]
 getContent = liftM X.childNodes getParamNode
 
 

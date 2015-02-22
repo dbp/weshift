@@ -1,17 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import State.Types
-import State.Account (buildUser,buildEmail)
-import Data.Pool
-import Database.HDBC.PostgreSQL
-import Database.HDBC
-import Data.Maybe (catMaybes)
-import Mail
-import Utils
+import           Data.Maybe               (catMaybes)
+import           Data.Pool
+import           Database.HDBC
+import           Database.HDBC.PostgreSQL
+import           Mail
+import           State.Account            (buildEmail, buildUser)
+import           State.Types
+import           Utils
 
-import qualified Data.ByteString as BS
+import qualified Data.Text                as T
 
-import Secrets
+import           Secrets
 
 withPGDB conn q ps = do r <- quickQuery' conn q ps
                         commit conn
@@ -28,7 +28,7 @@ getOverdueDeadlines conn = fmap (catMaybes . (map f)) $ withPGDB conn "SELECT S.
 
 
 main = do
-    c <- connectPostgreSQL ("hostaddr=127.0.0.1 dbname=" ++ dbName ++ " user=" ++ 
+    c <- connectPostgreSQL ("hostaddr=127.0.0.1 dbname=" ++ dbName ++ " user=" ++
                             pgUser ++ " password=" ++ pgPassword)
     dus <- getOverdueDeadlines c
     putStrLn $ show dus
@@ -36,7 +36,4 @@ main = do
 
 
 handleOverdue (user, shift, email) =
-    mailOverdueDeadline (uName user) (emAddress email) (sDescription shift) (BS.concat [wsFormatDay (sStart shift), ", ", wsFormatTime (sStart shift)])
-
-
-
+    mailOverdueDeadline (uName user) (emAddress email) (sDescription shift) (T.concat [wsFormatDay (sStart shift), ", ", wsFormatTime (sStart shift)])

@@ -1,10 +1,10 @@
 Name:                weshift
-Version:             0.2
+Version:             0.3
 Synopsis:            Tool for organizing time at workplaces
-Description:         
+Description:
 License:             BSD3
 Author:              Daniel Patterson
-Maintainer:          dbp@riseup.net
+Maintainer:          dbp@dbpmail.net
 Stability:           Experimental
 Category:            Web
 Build-type:          Simple
@@ -22,49 +22,47 @@ Executable weshift
   hs-source-dirs: src
   main-is: Main.hs
 
-  Build-depends:
-    base >= 4 && < 5,
-    bytestring >= 0.9.1 && < 0.10,
-    data-lens >= 2.0.1 && < 2.11,
-    data-lens-template >= 2.1 && < 2.2,
-    heist >= 0.8,
-    MonadCatchIO-transformers >= 0.2.1 && < 0.4,
-    mtl >= 2 && < 3,
-    snap == 0.9.*,
-    snap-core   == 0.9.*,
-    snap-server == 0.9.*,
-    snap-loader-static == 0.9.*,
-    text >= 0.11 && < 0.12,
-    time >= 1.2.0.5 && < 1.5,
-    xmlhtml >= 0.1,
-    blaze-html,
-    HDBC >= 2.2,
-    HDBC-postgresql >= 2.2,
-    containers,
-    bson,
-    digestive-functors >= 0.5,
-    digestive-functors-snap >= 0.5,
-    digestive-functors-heist == 0.5.0.0,
-    QuickCheck >= 2 && < 3,
-    split,
-    random,
-    aeson,
-    network,
-    HTTP,
-    attoparsec,
-    aeson,
-    heist-async >= 0.5,
-    email-postmark,
-    resource-pool >= 0.1,
-    --snap-less,
-    old-locale,
-    ssv >= 0.2,
-    parsec >= 3.1,
-    snap-less
+  Build-depends: base
+               , bytestring
+               , lens
+               , heist
+               , MonadCatchIO-transformers
+               , mtl
+               , snap
+               , snap-core
+               , snap-server
+               , snap-loader-static
+               , text
+               , time
+               , xmlhtml
+               , blaze-html
+               , HDBC
+               , HDBC-postgresql
+               , containers
+               , bson
+               , digestive-functors
+               , digestive-functors-snap
+               , digestive-functors-heist
+               , QuickCheck
+               , split
+               , random
+               , aeson
+               , network
+               , network-uri
+               , HTTP
+               , attoparsec
+               , aeson
+               , heist-async
+               , email-postmark
+               , resource-pool
+               , old-locale
+               , ssv
+               , parsec
+               , snap-less
 
   if flag(development)
     build-depends:
-      snap-loader-dynamic == 0.9.*
+      snap-loader-dynamic
     cpp-options: -DDEVELOPMENT
     -- In development mode, speed is already going to suffer, so skip
     -- the fancy optimization flags.  Additionally, disable all

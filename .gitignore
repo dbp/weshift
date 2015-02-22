@@ -1,0 +1,6 @@
+cabal.sandbox.config
+dist
+deps
+.shake
+.cabal-sandbox
+src/Secrets.hs
