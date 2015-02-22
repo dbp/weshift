@@ -8,6 +8,6 @@
 <div-async name="profile-main" class="main">
   <h2>Coworkers (<coworkersCount/>)</h2>
 
-  <content/>
-  
+  <apply-content/>
+
 </div-async> <!-- #main -->

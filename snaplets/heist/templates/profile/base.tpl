@@ -6,4 +6,4 @@
   </div> <!-- .content -->
 </div> <!-- .heading -->
 
-<content/>
+<apply-content/>

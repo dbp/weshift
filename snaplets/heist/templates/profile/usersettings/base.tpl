@@ -8,6 +8,6 @@
 <div-async name="profile-main" class="main">
   <h2>User Settings</h2>
 
-  <content/>
-  
+  <apply-content/>
+
 </div-async> <!-- #main -->
